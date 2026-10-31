@@ -1,0 +1,114 @@
+import type {UserPreferences} from '../types';
+import type {GooglePlace} from './google-places';
+import type {SearchArea} from './places';
+import type {TasteFeedback,TasteTag} from './vibe-dna';
+import {rankGooglePlaces,type PlaceMatch} from './place-intelligence';
+import {getDailyVenueMatchAdjustment} from './daily-venue-swipe';
+import {canonicalArea} from './attica-neighborhoods';
+import {distanceKm} from './places';
+
+export type ForYouCategory='all'|'cafe'|'restaurant'|'bar';
+export type ForYouMatch=PlaceMatch&{
+  areaLabel:string;nearbyKm:number;inBudget:boolean;preferredArea:boolean;
+  tasteReasons:string[];tasteTags:TasteTag[];isLiked:boolean;
+};
+
+const fold=(text:string)=>text.toLocaleLowerCase('el-GR')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+
+const VALUE_TAGS:Record<string,TasteTag[]>={
+ cozy:['cozy','intimate','low-light'],
+ romantic:['romantic','intimate','elegant'],
+ quiet:['quiet','specialty','minimal'],
+ lively:['lively','social','nightlife'],
+ creative:['creative','artsy','alternative'],
+ social:['social','groups','casual'],
+ 'coffee with friends':['coffee','social','casual'],
+ 'date night':['romantic','intimate','low-light'],
+ brunch:['brunch','daytime','coffee'],
+ 'night out':['nightlife','cocktails','lively'],
+ 'study session':['quiet','coffee','minimal'],
+ 'casual drinks':['cocktails','casual','social'],
+ indie:['indie','alternative','live-music'],
+ jazz:['jazz','intimate','live-music'],
+ warm:['cozy','intimate'],
+ chill:['quiet','casual'],
+ bright:['daytime','minimal'],
+ 'small group':['intimate','cozy'],
+ evening:['low-light','nightlife'],
+ morning:['daytime','coffee'],
+ outdoor:['outdoor','garden'],
+ garden:['garden','nature'],
+ modern:['minimal','industrial']
+};
+const LABELS:Partial<Record<TasteTag,string>>={
+ cozy:'cozy ατμόσφαιρα',romantic:'ρομαντικό vibe',quiet:'ήσυχο περιβάλλον',
+ lively:'ζωντανή ατμόσφαιρα',coffee:'καφές',brunch:'brunch',nightlife:'night out',
+ cocktails:'cocktails',minimal:'minimal αισθητική',outdoor:'εξωτερικός χώρος',
+ garden:'κήπος',social:'παρέες',creative:'creative αισθητική',
+ intimate:'χαλαρές συζητήσεις',elegant:'elegant διάθεση',indie:'indie μουσική',
+ jazz:'jazz',artsy:'artsy vibe',specialty:'specialty coffee',daytime:'daytime έξοδος'
+};
+const categoryNames={cafe:'Καφέ',restaurant:'Φαγητό',bar:'Ποτό'};
+export function venueCategoryLabel(category:GooglePlace['category']){return categoryNames[category];}
+export function venueAreaLabel(place:GooglePlace):string{
+ return place.address?.split('·').slice(-1)[0]?.trim()||'Demo περιοχή';
+}
+export function tastesFromSignup(preferences:UserPreferences):TasteTag[]{
+ const entries=[...preferences.moods,...preferences.outings,...preferences.atmosphere,
+   ...preferences.music,...preferences.social,...preferences.timeSlots];
+ return [...new Set(entries.flatMap(value=>VALUE_TAGS[fold(value)]??[]))];
+}
+
+export function getForYouMatches(
+ places:GooglePlace[],preferences:UserPreferences,area:SearchArea,
+ votes:TasteFeedback,savedIds:readonly string[]=[]
+):ForYouMatch[]{
+ const baseline=rankGooglePlaces(places,preferences,'',area,votes);
+ const wanted=new Set(tastesFromSignup(preferences));
+ const preferredAreas=new Set(preferences.neighborhoods.map(n=>fold(canonicalArea(n))));
+ const saved=new Set(savedIds);
+ return baseline.map(match=>{
+   const {place}=match;
+   const areaLabel=venueAreaLabel(place);
+   const preferredArea=preferredAreas.has(fold(areaLabel));
+   const tags=place.tasteTags??[];
+   const shared=[...new Set(tags.filter(tag=>wanted.has(tag)))];
+   const dna=getDailyVenueMatchAdjustment(tags,votes);
+   const nearbyKm=distanceKm(area,place);
+   const inBudget=preferences.budget>=60||place.demoBudget===undefined||place.demoBudget<=preferences.budget;
+   const isLiked=votes[place.id]==='like'||saved.has('google-'+place.id);
+   const reasons:string[]=[];
+   if(preferredArea)reasons.push('Στην περιοχή που επέλεξες');
+   if(shared.length)reasons.push('Ταιριάζει με '+(LABELS[shared[0]]??shared[0]));
+   if(dna.delta>0)reasons.push('Παρόμοιο με μαγαζιά που σου άρεσαν');
+   if(isLiked)reasons.push('Από τις αγαπημένες σου επιλογές');
+   if(inBudget)reasons.push('Στο budget σου');
+   if(nearbyKm<=3)reasons.push('Κοντά στην περιοχή αναζήτησης');
+   if(!reasons.length)reasons.push('Με βάση το προφίλ και τα ενδιαφέροντά σου');
+   // This is a relative, fictional recommendation estimate, not a measured fit.
+   const score=Math.max(22,Math.min(97,Math.round(
+     36+shared.length*6+Math.max(-12,Math.min(15,dna.delta))+
+     (preferredArea?15:0)+(inBudget?9:-15)+
+     Math.max(0,12-Math.round(nearbyKm*1.6))+(isLiked?7:0)
+   )));
+   return {
+     ...match,score,areaLabel,nearbyKm,inBudget,preferredArea,isLiked,
+     tasteReasons:reasons.slice(0,3),tasteTags:tags
+   };
+ }).filter(item=>votes[item.place.id]!=='dislike')
+   .sort((a,b)=>b.score-a.score||a.nearbyKm-b.nearbyKm||a.place.name.localeCompare(b.place.name));
+}
+
+export function filterForYouMatches(
+ matches:ForYouMatch[],
+ category:ForYouCategory,
+ withinBudget:boolean,
+ onlyMyAreas:boolean
+):ForYouMatch[]{
+ return matches.filter(match=>
+   (category==='all'||match.place.category===category)&&
+   (!withinBudget||match.inBudget)&&
+   (!onlyMyAreas||match.preferredArea)
+ );
+}
