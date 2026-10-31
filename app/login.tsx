@@ -1,32 +1,52 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { PrimaryButton, SecondaryButton } from '@/components/PrimaryButton';
 import { Colors, Gradients, Spacing } from '@/constants/theme';
-import { setUser } from '@/lib/storage';
+import { getDemoAccount, getPreferences, setUser } from '@/lib/storage';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('alex@vibe.app');
-  const [password, setPassword] = useState('vibe123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getDemoAccount().then(account => {
+      if (active && account) setEmail(account.email);
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   const handleLogin = async () => {
-    await setUser({
-      name: 'Alex',
-      email,
-      preferences: {
-        moods: ['cozy', 'romantic'],
-        outings: ['coffee with friends', 'date night'],
-        budget: 60,
-        music: ['jazz', 'lo-fi'],
-        neighborhoods: ['Kolonaki', 'Plaka'],
-        atmosphere: ['warm', 'chill'],
-        social: ['small group'],
-        timeSlots: ['evening'],
-      },
-    });
-    router.replace('/(tabs)');
+    if (submitting) return;
+    const enteredEmail = email.trim();
+    if (!enteredEmail.includes('@')) {
+      setError('Συμπλήρωσε ένα email για τη demo είσοδο.');
+      return;
+    }
+    setSubmitting(true); setError('');
+    try {
+      const [account, preferences] = await Promise.all([getDemoAccount(), getPreferences()]);
+      if (account && account.email.trim().toLowerCase() !== enteredEmail.toLowerCase()) {
+        setError('Υπάρχει άλλο demo προφίλ σε αυτή τη συσκευή. Χρησιμοποίησε το email του ή δημιούργησε νέο λογαριασμό.');
+        return;
+      }
+      // UI-only demo access: no passwords are sent, checked or persisted.
+      await setUser({
+        name: account?.name || enteredEmail.split('@')[0] || 'Vibe explorer',
+        email: account?.email || enteredEmail,
+        preferences
+      });
+      router.replace('/(tabs)');
+    } catch {
+      setError('Δεν ολοκληρώθηκε η demo είσοδος. Δοκίμασε ξανά.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -43,10 +63,11 @@ export default function LoginScreen() {
       <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="Email" placeholderTextColor="#796F89" autoCapitalize="none" />
       <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholder="Password" placeholderTextColor="#796F89" secureTextEntry />
 
-      <Text style={styles.demo}>Preview only: no real account or password verification yet.</Text>
-      <PrimaryButton label="Let's go ↗" onPress={handleLogin} />
+      <Text style={styles.demo}>Demo είσοδος μόνο σε αυτή τη συσκευή. Ο κωδικός δεν ελέγχεται ούτε αποθηκεύεται.</Text>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <PrimaryButton label={submitting ? 'Είσοδος…' : "Let's go ↗"} onPress={handleLogin} />
       <View style={{ height: 12 }} />
-      <SecondaryButton label="Create account" onPress={() => router.push('/register')} />
+      <SecondaryButton label="Create account" onPress={() => router.push('/onboarding')} />
     </View>
   );
 }
@@ -62,4 +83,5 @@ const styles=StyleSheet.create({
   subtitle:{color:Colors.muted,fontSize:14,lineHeight:22,marginBottom:24},
   input:{backgroundColor:Colors.card,borderWidth:1,borderColor:'rgba(190,150,255,0.22)',borderRadius:17,padding:16,color:Colors.text,marginBottom:12},
   demo:{color:Colors.purple,fontSize:11,lineHeight:18,marginBottom:16},
+  error:{color:Colors.danger,fontSize:12,lineHeight:18,marginBottom:12},
 });
