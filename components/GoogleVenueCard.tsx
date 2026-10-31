@@ -36,7 +36,7 @@ export function GoogleVenueCard({match,onPress,saved,onSave}:{
    <View style={styles.bottom}>
     <View style={styles.match}>
       <Ionicons name="sparkles" color={Colors.violet} size={15}/>
-      <Text style={styles.matchText}>{score}/100 match</Text>
+      <Text style={styles.matchText}>≈{score}% Vibe Match</Text>
     </View>
     <Text style={styles.reason} numberOfLines={1}>{reasons[0]??vibe.label}</Text>
     <View style={styles.arrow}><Ionicons name="arrow-forward" size={18} color="#fff"/></View>
