@@ -4,6 +4,8 @@ import type { SwipeFeedback, SwipeDecision } from './swipe-intelligence';
 import { isGooglePlaceId } from './google-places';
 import {sanitizeTasteFeedback} from './vibe-dna';
 import type {TasteFeedback} from './vibe-dna';
+import {normalizeDailyVenueSwipeState} from './daily-venue-swipe';
+import type {DailyVenueSwipeState} from './daily-venue-swipe';
 
 const USER_KEY = 'vibe:user';
 const PREFS_KEY = 'vibe:prefs';
@@ -11,6 +13,8 @@ const SAVED_KEY = 'vibe:saved';
 const ONBOARDED_KEY = 'vibe:completed-onboarding';
 const SWIPE_KEY = 'vibe:swipe-feedback:v1';
 const DNA_KEY = 'vibe:taste-feedback:v1';
+const DAILY_VENUES_KEY='vibe:daily-venue-swipe:v1';
+let venueDeckQueue:Promise<void>=Promise.resolve();
 let tasteWriteQueue:Promise<void>=Promise.resolve();
 let swipeWriteQueue: Promise<void> = Promise.resolve();
 let savedWriteQueue: Promise<void> = Promise.resolve();
@@ -126,4 +130,18 @@ export function clearTasteFeedback():Promise<void>{
  tasteWriteQueue=tasteWriteQueue.catch(()=>undefined).then(()=>
    AsyncStorage.removeItem(DNA_KEY));
  return tasteWriteQueue;
+}
+
+/** One local daily quota shared across openings of the Discover screen. */
+export async function getDailyVenueSwipeState():Promise<DailyVenueSwipeState>{
+ try{
+  const raw=await AsyncStorage.getItem(DAILY_VENUES_KEY);
+  return normalizeDailyVenueSwipeState(raw?JSON.parse(raw):null);
+ }catch{return normalizeDailyVenueSwipeState(null);}
+}
+export function saveDailyVenueSwipeState(state:DailyVenueSwipeState):Promise<void>{
+ const safe=normalizeDailyVenueSwipeState(state);
+ venueDeckQueue=venueDeckQueue.catch(()=>undefined).then(()=>
+   AsyncStorage.setItem(DAILY_VENUES_KEY,JSON.stringify(safe)));
+ return venueDeckQueue;
 }
