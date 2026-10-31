@@ -56,7 +56,7 @@ export function GooglePlacesResults({area,compact=false,prompt='',query='',filte
    <Text style={styles.total}>{loading?'…':ranked.length}</Text>
   </View>:null}
   {loading?<View style={styles.loading}><ActivityIndicator color={Colors.lime}/><Text style={styles.muted}>Φορτώνουμε τα demo spots…</Text></View>:null}
-  {error?<Text style={styles.error}>Δεν φορτώνουν τα demo δεδομένα: {error}. Επίλεξε άλλη περιοχή ή άνοιξε το Google Maps.</Text>:null}
+  {error?<Text style={styles.error}>Δεν φορτώνουν τα demo δεδομένα: {error}. Δοκίμασε άλλη περιοχή.</Text>:null}
   {!loading&&!error&&mapMode?<GooglePinsMap area={area} places={recommended.map(x=>x.place)} onSelect={open}/>:null}
   {!loading&&!error&&swipeMode?<SwipeDiscovery matches={personalized} feedback={feedback}
     onVote={vote} onReset={resetVotes} onOpen={open}/>:null}
