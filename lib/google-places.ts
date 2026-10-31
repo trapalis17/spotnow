@@ -31,6 +31,8 @@ export interface GooglePlace {
   tasteTags?: TasteTag[];
   /** Fictional approximate spend per person, for independent demo budget ranking. */
   demoBudget?: number;
+  /** Illustrative stock photo URL for a fictional venue, not a verified venue image. */
+  demoPhoto?: string;
   photoName?: string;
   photoAttributions?: { displayName: string; uri?: string }[];
 }
