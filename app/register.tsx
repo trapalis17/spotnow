@@ -4,30 +4,32 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { PrimaryButton, SecondaryButton } from '@/components/PrimaryButton';
 import { Colors, Gradients, Spacing } from '@/constants/theme';
-import { setUser } from '@/lib/storage';
+import { getPreferences, setOnboarded, setUser } from '@/lib/storage';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const [name, setName] = useState('Alex Rivera');
-  const [email, setEmail] = useState('hello@vibe.app');
-  const [password, setPassword] = useState('vibe123');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const handleCreate = async () => {
-    await setUser({
-      name,
-      email,
-      preferences: {
-        moods: ['cozy', 'social'],
-        outings: ['date night', 'coffee with friends'],
-        budget: 60,
-        music: ['indie', 'jazz'],
-        neighborhoods: ['Kolonaki', 'Plaka'],
-        atmosphere: ['warm', 'bright'],
-        social: ['small group'],
-        timeSlots: ['evening'],
-      },
-    });
-    router.replace('/(tabs)');
+    if (submitting) return;
+    if (!name.trim() || !email.trim().includes('@')) {
+      setError('Συμπλήρωσε όνομα και έγκυρο email.');
+      return;
+    }
+    setSubmitting(true);setError('');
+    try {
+      // Do not overwrite the moods, neighborhoods or budget chosen in onboarding.
+      const preferences = await getPreferences();
+      await setUser({ name: name.trim(), email: email.trim(), preferences });
+      await setOnboarded(true);
+      router.replace('/(tabs)');
+    } catch {
+      setError('Δεν αποθηκεύτηκε το demo προφίλ σου. Δοκίμασε ξανά.');
+    } finally {setSubmitting(false);}
   };
 
   return (
@@ -44,8 +46,9 @@ export default function RegisterScreen() {
       <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="Email" placeholderTextColor="#796F89" autoCapitalize="none" />
       <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholder="Password" placeholderTextColor="#796F89" secureTextEntry />
 
-      <Text style={styles.demo}>Preview only: your info is stored locally on this device.</Text>
-      <PrimaryButton label="Start exploring ↗" onPress={handleCreate} />
+      <Text style={styles.demo}>Demo λογαριασμός μόνο σε αυτή τη συσκευή. Δεν υπάρχει πραγματική εγγραφή ή έλεγχος κωδικού.</Text>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <PrimaryButton label={submitting ? 'Δημιουργία…' : 'Start exploring ↗'} onPress={handleCreate} />
       <View style={{ height: 12 }} />
       <SecondaryButton label="Back to login" onPress={() => router.push('/login')} />
     </View>
@@ -63,4 +66,5 @@ const styles=StyleSheet.create({
   subtitle:{color:Colors.muted,fontSize:14,lineHeight:22,marginBottom:24},
   input:{backgroundColor:Colors.card,borderWidth:1,borderColor:'rgba(190,150,255,0.22)',borderRadius:17,padding:16,color:Colors.text,marginBottom:12},
   demo:{color:Colors.purple,fontSize:11,lineHeight:18,marginBottom:16},
+  error:{color:Colors.danger,fontSize:12,lineHeight:18,marginBottom:12},
 });
