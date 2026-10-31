@@ -29,6 +29,8 @@ export interface GooglePlace {
   editorialSummary?: string;
   /** Locally-authored, fictional venue taste metadata for the frontend mock. */
   tasteTags?: TasteTag[];
+  /** Fictional approximate spend per person, for independent demo budget ranking. */
+  demoBudget?: number;
   photoName?: string;
   photoAttributions?: { displayName: string; uri?: string }[];
 }
