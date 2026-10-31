@@ -104,7 +104,7 @@ export function SwipeDiscovery({matches,feedback,onVote,onReset,onOpen}:Props){
         <Text style={styles.address} numberOfLines={2}>{active.place.address??'Περιοχή '+active.place.category}</Text>
         <View style={styles.details}>
           <View style={styles.match}><Ionicons name="sparkles" color={Colors.violet} size={17}/>
-            <Text style={styles.matchText}>{active.score}% match</Text></View>
+            <Text style={styles.matchText}>≈{active.score}% Vibe Match</Text></View>
           <Text style={styles.vibeText} numberOfLines={1}>{active.vibe.label}</Text>
         </View>
         <Text style={styles.explanation} numberOfLines={2}>{active.reasons[0]??'Με βάση την περιοχή και τις προτιμήσεις σου'}</Text>
@@ -126,7 +126,7 @@ export function SwipeDiscovery({matches,feedback,onVote,onReset,onOpen}:Props){
     </Pressable>
    </View>
    <Text style={styles.tip}>← Όχι για μένα   ·   Μου αρέσει →</Text>
-   <Text style={styles.foot}>Το ♥ αποθηκεύει το μαγαζί. Τα swipes βελτιώνουν τη σειρά προτάσεων από τα διαθέσιμα στοιχεία Google.</Text>
+   <Text style={styles.foot}>Το ♥ αποθηκεύει το demo spot. Το Vibe Swipe στην αρχή του Discover μαθαίνει τις προτιμήσεις σου σε αισθητική και εμπειρίες.</Text>
  </View>;
 }
 const styles=StyleSheet.create({
