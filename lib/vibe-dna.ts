@@ -137,8 +137,11 @@ export function getTasteMatchAdjustment(venueTags:readonly TasteTag[]|undefined,
  if(!matched.length)return {delta:0,reason:null as string|null};
  const strength=matched.reduce((sum,item)=>sum+item.weight,0)/Math.sqrt(venueTags.length);
  const delta=Math.max(-20,Math.min(20,Math.round(strength*12)));
- const strongest=matched.sort((a,b)=>Math.abs(b.weight)-Math.abs(a.weight))[0];
- const reason=strongest.weight>0
+ const direction=Math.sign(delta);
+ const strongest=matched
+   .filter(item=>Math.sign(item.weight)===direction)
+   .sort((a,b)=>Math.abs(b.weight)-Math.abs(a.weight))[0];
+ const reason=!strongest?null:direction>0
    ?'Από το Vibe DNA σου: σου αρέσει '+TASTE_LABELS[strongest.tag]
    :'Από το Vibe DNA σου: προτιμάς λιγότερο '+TASTE_LABELS[strongest.tag];
  return {delta,reason};
