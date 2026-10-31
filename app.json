@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Vibe Frontend Preview",
+    "slug": "vibe-frontend",
+    "scheme": "vibe",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "android": {
+      "package": "com.vibe.preview"
+    },
+    "ios": {
+      "bundleIdentifier": "com.vibe.preview"
+    }
+  }
+}
