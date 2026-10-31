@@ -25,7 +25,7 @@ export const defaultPreferences: UserPreferences = {
   outings: ['coffee with friends', 'date night'],
   budget: 60,
   music: ['indie', 'jazz'],
-  neighborhoods: ['Kolonaki', 'Plaka'],
+  neighborhoods: ['Κολωνάκι', 'Κουκάκι'],
   atmosphere: ['warm', 'chill'],
   social: ['small group'],
   timeSlots: ['evening'],
