@@ -110,6 +110,9 @@ export function getDemoPlaces(area:SearchArea):GooglePlace[]{
  }));
 }
 export function getDemoPlaceById(id:string):GooglePlace|null{
- for(const area of AREAS){const p=getDemoPlaces(area).find(x=>x.id===id);if(p)return p;}
- return null;
+ const match=/^demo_(\d+)_([a-z0-9-]+)$/.exec(id);
+ if(!match)return null;
+ const area=AREAS.find(a=>a.id===match[2]);
+ if(!area)return null;
+ return getDemoPlaces(area)[Number(match[1])]??null;
 }
