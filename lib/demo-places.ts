@@ -1,6 +1,7 @@
 import type {GooglePlace} from './google-places';
 import {AREAS} from './places';
 import type {SearchArea} from './places';
+import type {TasteTag} from './vibe-dna';
 /** All venues are fictional, for prototyping only. */
 const seeds=[
  {name:'Mellow Coffee',category:'cafe',type:'coffee_shop',types:['cafe','coffee_shop'],outdoor:true,groups:true,brunch:false,cocktails:false},
@@ -16,6 +17,21 @@ const seeds=[
  {name:'Side Quest Café',category:'cafe',type:'cafe',types:['cafe','dessert_shop'],outdoor:true,groups:true,brunch:false,cocktails:false},
  {name:'Good Mood Social',category:'bar',type:'pub',types:['bar','pub'],outdoor:true,groups:true,brunch:false,cocktails:true},
 ] as const;
+/** Fictional signals for the twelve demo venues. Never inferred from real people. */
+const venueTasteTags = [
+ ['cozy','intimate','quiet','coffee','low-light'],
+ ['brunch','daytime','garden','social','coffee'],
+ ['rooftop','sunset','outdoor','cocktails','romantic'],
+ ['dining','elegant','intimate','minimal'],
+ ['quiet','specialty','coffee','minimal','daytime'],
+ ['nightlife','cocktails','social','low-light'],
+ ['brunch','dining','garden','social'],
+ ['coffee','specialty','quiet','industrial'],
+ ['underground','nightlife','cocktails','alternative'],
+ ['dining','outdoor','garden','romantic'],
+ ['creative','artsy','coffee','casual'],
+ ['lively','groups','social','live-music','casual']
+] as const satisfies readonly (readonly TasteTag[])[];
 const offsets:[number,number][]=[
  [-.002,.003],[.004,-.004],[.008,.005],[-.006,-.003],[.003,.008],
  [-.008,.006],[.005,-.007],[-.003,-.008],[.01,-.004],[-.009,-.006],
@@ -38,6 +54,7 @@ export function getDemoPlaces(area:SearchArea):GooglePlace[]{
    servesCocktails:s.cocktails,
    servesCoffee:s.category==='cafe',
    reservable:false,
+   tasteTags:[...venueTasteTags[i]],
    editorialSummary:'Αυτό είναι ένα εικονικό κατάστημα για την προεπισκόπηση του Vibe. Όλα τα χαρακτηριστικά είναι ενδεικτικά.'
  }));
 }
