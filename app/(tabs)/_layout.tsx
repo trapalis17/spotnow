@@ -1,7 +1,24 @@
+import { Redirect } from 'expo-router';
 import { Tabs } from 'expo-router/tabs';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Colors } from '../../constants/theme';
+import { getUser } from '../../lib/storage';
+
 export default function TabLayout(){
+ const [session,setSession]=useState<'checking'|'active'|'signed-out'>('checking');
+ useEffect(()=>{
+  let mounted=true;
+  getUser().then(user=>{
+   if(mounted)setSession(user?'active':'signed-out');
+  }).catch(()=>{if(mounted)setSession('signed-out');});
+  return ()=>{mounted=false;};
+ },[]);
+ if(session==='checking')return <View style={{flex:1,alignItems:'center',justifyContent:'center',backgroundColor:Colors.background}}>
+  <ActivityIndicator color={Colors.violet}/>
+ </View>;
+ if(session==='signed-out')return <Redirect href="/"/>;
  return <Tabs screenOptions={{
    headerShown:false,tabBarActiveTintColor:Colors.violet,tabBarInactiveTintColor:'#827A90',
    tabBarLabelStyle:{fontWeight:'800',fontSize:11,marginTop:2},
