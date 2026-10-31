@@ -8,6 +8,7 @@ import {normalizeDailyVenueSwipeState} from './daily-venue-swipe';
 import type {DailyVenueSwipeState} from './daily-venue-swipe';
 
 const USER_KEY = 'vibe:user';
+const DEMO_ACCOUNT_KEY = 'vibe:demo-account';
 const PREFS_KEY = 'vibe:prefs';
 const SAVED_KEY = 'vibe:saved';
 const ONBOARDED_KEY = 'vibe:completed-onboarding';
@@ -35,11 +36,23 @@ export async function getUser(): Promise<UserProfile | null> {
   return value ? (JSON.parse(value) as UserProfile) : null;
 }
 
+/**
+ * The demo account is a local profile, not an authenticated online identity.
+ * Keep it through logout so returning to Login restores the same name/email.
+ */
+export async function getDemoAccount(): Promise<UserProfile | null> {
+  const raw = await AsyncStorage.getItem(DEMO_ACCOUNT_KEY);
+  return raw ? (JSON.parse(raw) as UserProfile) : null;
+}
+
 export async function setUser(profile: UserProfile): Promise<void> {
-  await AsyncStorage.setItem(USER_KEY, JSON.stringify(profile));
+  const serialized = JSON.stringify(profile);
+  await AsyncStorage.multiSet([[USER_KEY, serialized], [DEMO_ACCOUNT_KEY, serialized]]);
 }
 
 export async function clearUser(): Promise<void> {
+  // End only the demo session. Do not wipe the profile, selected areas, saved
+  // venues or accumulated swipe feedback on logout.
   await AsyncStorage.removeItem(USER_KEY);
 }
 
@@ -50,6 +63,19 @@ export async function getPreferences(): Promise<UserPreferences> {
 
 export async function setPreferences(pref: UserPreferences): Promise<void> {
   await AsyncStorage.setItem(PREFS_KEY, JSON.stringify(pref));
+  // Keep the optional profile snapshots consistent with the canonical
+  // onboarding preferences; this is not a session/login operation.
+  const [active, account] = await AsyncStorage.multiGet([USER_KEY, DEMO_ACCOUNT_KEY]);
+  const updates: [string, string][] = [];
+  if (active[1]) {
+    const profile = JSON.parse(active[1]) as UserProfile;
+    updates.push([USER_KEY, JSON.stringify({ ...profile, preferences: pref })]);
+  }
+  if (account[1]) {
+    const profile = JSON.parse(account[1]) as UserProfile;
+    updates.push([DEMO_ACCOUNT_KEY, JSON.stringify({ ...profile, preferences: pref })]);
+  }
+  if (updates.length) await AsyncStorage.multiSet(updates);
 }
 
 export async function getSavedVenueIds(): Promise<string[]> {
