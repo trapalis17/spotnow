@@ -12,11 +12,23 @@ export default function ProfileScreen(){
  const router=useRouter();
  const [user,setUser]=useState<UserProfile|null>(null);
  const [prefs,setPrefs]=useState<UserPreferences|null>(null);
+ const [signingOut,setSigningOut]=useState(false);
+ const [logoutError,setLogoutError]=useState('');
  useFocusEffect(useCallback(()=>{
   getUser().then(setUser).catch(()=>undefined);
   getPreferences().then(setPrefs).catch(()=>undefined);
  },[]));
  const display=user?.name||'Vibe explorer';
+ const logout=async()=>{
+  if(signingOut)return;
+  setSigningOut(true);setLogoutError('');
+  try{
+   // Clear the demo session, not the saved profile or swipe data.
+   await clearUser();
+   router.replace('/');
+  }catch{setLogoutError('Η αποσύνδεση δεν ολοκληρώθηκε. Δοκίμασε ξανά.');}
+  finally{setSigningOut(false);}
+ };
  return <ScrollView style={styles.page} contentContainerStyle={styles.content}>
   <Text style={styles.title}>Το προφίλ σου.</Text>
   <LinearGradient colors={Gradients.hero} style={styles.hero}>
@@ -34,7 +46,8 @@ export default function ProfileScreen(){
   </View>
   <PrimaryButton label="Άλλαξε τις προτιμήσεις σου" onPress={()=>router.push({pathname:'/onboarding',params:{mode:'edit',from:'profile'}})}/>
   <View style={{height:12}}/>
-  <SecondaryButton label="Αποσύνδεση" onPress={async()=>{await clearUser();router.replace('/');}}/>
+  <SecondaryButton label={signingOut?'Αποσύνδεση…':'Αποσύνδεση'} onPress={logout}/>
+  {logoutError?<Text style={styles.logoutError}>{logoutError}</Text>:null}
   <Text style={styles.foot}>Το προφίλ είναι demo και αποθηκεύεται τοπικά, όχι σε online λογαριασμό.</Text>
  </ScrollView>;
 }
@@ -54,5 +67,6 @@ const styles=StyleSheet.create({
  chip:{backgroundColor:'#EDF6E8',color:Colors.lime,fontSize:12,fontWeight:'800',borderRadius:999,paddingHorizontal:13,paddingVertical:10},
  divider:{height:1,backgroundColor:Colors.border,marginVertical:18},
  areas:{color:Colors.text,fontSize:13,flex:1,lineHeight:21},
- foot:{color:Colors.muted,fontSize:11,textAlign:'center',marginTop:19,lineHeight:17}
+ foot:{color:Colors.muted,fontSize:11,textAlign:'center',marginTop:19,lineHeight:17},
+ logoutError:{color:Colors.danger,fontSize:12,textAlign:'center',marginTop:12}
 });
