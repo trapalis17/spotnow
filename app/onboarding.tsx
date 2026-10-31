@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { PreferenceChip } from '@/components/PreferenceChip';
 import { OnboardingLocationPreferences } from '@/components/OnboardingLocationPreferences';
-import { canonicalArea } from '@/lib/attica-neighborhoods';
+import { canonicalArea, NEIGHBORHOODS } from '@/lib/attica-neighborhoods';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Colors, Spacing } from '@/constants/theme';
 import { defaultPreferences, getPreferences, setOnboarded, setPreferences } from '@/lib/storage';
@@ -12,7 +12,13 @@ import { useEffect } from 'react';
 
 const moods=['cozy','romantic','quiet','lively','creative','social'];
 const outings=['coffee with friends','date night','brunch','night out','study session','casual drinks'];
-const budget=[20,40,60,80,120];
+// 60 is the stored numeric value for the open-ended "60€+" category.
+const budget=[5,10,20,40,60] as const;
+const allowedAreas=new Set(NEIGHBORHOODS.map(area=>area.name));
+const validAreas=(values:string[]):string[]=>
+ [...new Set(values.map(canonicalArea).filter(name=>allowedAreas.has(name)))];
+const validBudget=(value:number):number=>
+ value>=60?60:value>=40?40:value>=20?20:value>=10?10:5;
 function Step({number,title,children}:{number:number;title:string;children:React.ReactNode}){
  return <View style={styles.step}>
   <View style={styles.stepRow}><View style={styles.num}><Text style={styles.numText}>{number}</Text></View>
@@ -23,12 +29,19 @@ function Step({number,title,children}:{number:number;title:string;children:React
 }
 export default function OnboardingScreen(){
  const router=useRouter();
- const [prefs,setPrefs]=useState(defaultPreferences);
+ const [prefs,setPrefs]=useState(()=>({...defaultPreferences,
+  neighborhoods:validAreas(defaultPreferences.neighborhoods),
+  budget:validBudget(defaultPreferences.budget)
+ }));
  const userEdited=useRef(false);
  useEffect(()=>{
   let active=true;
   getPreferences().then(saved=>{
-   if(active&&!userEdited.current)setPrefs(saved);
+   if(active&&!userEdited.current)setPrefs({
+    ...saved,
+    neighborhoods:validAreas(saved.neighborhoods??[]),
+    budget:validBudget(saved.budget),
+   });
   }).catch(()=>undefined);
   return ()=>{active=false;};
  },[]);
@@ -44,7 +57,7 @@ export default function OnboardingScreen(){
    return {...p,[key]:p[key].includes(value)?p[key].filter(v=>v!==value):[...p[key],value]};
   });
  };
- const save=async()=>{await setPreferences(prefs);await setOnboarded(true);router.replace('/login');};
+ const save=async()=>{await setPreferences({...prefs,neighborhoods:validAreas(prefs.neighborhoods),budget:validBudget(prefs.budget)});await setOnboarded(true);router.replace('/login');};
  return <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
   <Text style={styles.logo}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text>
   <Text style={styles.title}>Φτιάξε το δικό σου vibe.</Text>
@@ -59,7 +72,7 @@ export default function OnboardingScreen(){
    <OnboardingLocationPreferences selected={prefs.neighborhoods} onToggle={name=>toggle('neighborhoods',name)}/>
    <View style={styles.divider}/>
    <Text style={styles.budgetLabel}>Budget ανά έξοδο</Text>
-   {budget.map(m=><PreferenceChip key={m} label={`€${m}`} selected={prefs.budget===m} onPress={()=>{userEdited.current=true;setPrefs(p=>({...p,budget:m}));}}/>)}
+   {budget.map(m=><PreferenceChip key={m} label={m===60?'60€+':`${m}€`} selected={prefs.budget===m} onPress={()=>{userEdited.current=true;setPrefs(p=>({...p,budget:m}));}}/>)}
   </Step>
   <PrimaryButton label="Βρες το vibe σου  ↗" onPress={save}/>
   <Text style={styles.foot}>Προσωρινό demo προφίλ. Οι προτιμήσεις αποθηκεύονται στη συσκευή σου.</Text>
