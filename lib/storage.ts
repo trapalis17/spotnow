@@ -51,8 +51,13 @@ export async function setUser(profile: UserProfile): Promise<void> {
 }
 
 export async function clearUser(): Promise<void> {
-  // End only the demo session. Do not wipe the profile, selected areas, saved
-  // venues or accumulated swipe feedback on logout.
+  // Upgrade profiles saved before the dedicated demo-account key existed.
+  // Logout ends only the session; it never deletes the user's demo identity,
+  // selected preferences, favorites or swipe progress.
+  const [active, persisted] = await AsyncStorage.multiGet([USER_KEY, DEMO_ACCOUNT_KEY]);
+  if (active[1] && !persisted[1]) {
+    await AsyncStorage.setItem(DEMO_ACCOUNT_KEY, active[1]);
+  }
   await AsyncStorage.removeItem(USER_KEY);
 }
 
