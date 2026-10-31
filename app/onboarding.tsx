@@ -1,11 +1,11 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { PreferenceChip } from '@/components/PreferenceChip';
 import { OnboardingLocationPreferences } from '@/components/OnboardingLocationPreferences';
 import { canonicalArea, NEIGHBORHOODS } from '@/lib/attica-neighborhoods';
-import { PrimaryButton } from '@/components/PrimaryButton';
+import { PrimaryButton, SecondaryButton } from '@/components/PrimaryButton';
 import { Colors, Spacing } from '@/constants/theme';
 import { defaultPreferences, getPreferences, setOnboarded, setPreferences } from '@/lib/storage';
 import { useEffect } from 'react';
@@ -29,6 +29,11 @@ function Step({number,title,children}:{number:number;title:string;children:React
 }
 export default function OnboardingScreen(){
  const router=useRouter();
+ const params=useLocalSearchParams<{mode?:string;from?:string}>();
+ const editing=params.mode==='edit';
+ const returnTo=params.from==='for-you'?('/(tabs)/for-you' as const):('/(tabs)/profile' as const);
+ const [saving,setSaving]=useState(false);
+ const [saveError,setSaveError]=useState('');
  const [prefs,setPrefs]=useState(()=>({...defaultPreferences,
   neighborhoods:validAreas(defaultPreferences.neighborhoods),
   budget:validBudget(defaultPreferences.budget)
@@ -57,11 +62,26 @@ export default function OnboardingScreen(){
    return {...p,[key]:p[key].includes(value)?p[key].filter(v=>v!==value):[...p[key],value]};
   });
  };
- const save=async()=>{await setPreferences({...prefs,neighborhoods:validAreas(prefs.neighborhoods),budget:validBudget(prefs.budget)});await setOnboarded(true);router.replace('/login');};
+ const save=async()=>{
+  if(saving)return;
+  setSaving(true);setSaveError('');
+  try{
+   await setPreferences({...prefs,neighborhoods:validAreas(prefs.neighborhoods),budget:validBudget(prefs.budget)});
+   if(editing){
+    router.replace(returnTo);
+   }else{
+    await setOnboarded(true);
+    // New users finish signup by creating a demo account, not by logging in.
+    router.replace('/register');
+   }
+  }catch{
+   setSaveError('Δεν αποθηκεύτηκαν οι επιλογές. Δοκίμασε ξανά.');
+  }finally{setSaving(false);}
+ };
  return <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
   <Text style={styles.logo}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text>
-  <Text style={styles.title}>Φτιάξε το δικό σου vibe.</Text>
-  <Text style={styles.subtitle}>Τρεις γρήγορες επιλογές για να γνωρίσουμε τι σου αρέσει.</Text>
+  <Text style={styles.title}>{editing?'Άλλαξε το vibe σου.':'Φτιάξε το δικό σου vibe.'}</Text>
+  <Text style={styles.subtitle}>{editing?'Οι αλλαγές αποθηκεύονται στο υπάρχον προφίλ σου.':'Τρεις γρήγορες επιλογές για να γνωρίσουμε τι σου αρέσει.'}</Text>
   <Step number={1} title="Ποιο είναι το στυλ σου;">
    {moods.map(m=><PreferenceChip key={m} label={m} selected={prefs.moods.includes(m)} onPress={()=>toggle('moods',m)}/>)}
   </Step>
@@ -74,7 +94,9 @@ export default function OnboardingScreen(){
    <Text style={styles.budgetLabel}>Budget ανά έξοδο</Text>
    {budget.map(m=><PreferenceChip key={m} label={m===60?'60€+':`${m}€`} selected={prefs.budget===m} onPress={()=>{userEdited.current=true;setPrefs(p=>({...p,budget:m}));}}/>)}
   </Step>
-  <PrimaryButton label="Βρες το vibe σου  ↗" onPress={save}/>
+  <PrimaryButton label={saving?'Αποθήκευση…':editing?'Αποθήκευση αλλαγών':'Βρες το vibe σου  ↗'} onPress={save}/>
+  {saveError?<Text style={styles.saveError}>{saveError}</Text>:null}
+  {editing?<View style={styles.cancelRow}><SecondaryButton label="Ακύρωση" onPress={()=>router.replace(returnTo)}/></View>:null}
   <Text style={styles.foot}>Προσωρινό demo προφίλ. Οι προτιμήσεις αποθηκεύονται στη συσκευή σου.</Text>
  </ScrollView>;
 }
@@ -92,5 +114,7 @@ const styles=StyleSheet.create({
  options:{flexDirection:'row',flexWrap:'wrap'},
  divider:{width:'100%',height:1,backgroundColor:Colors.border,marginBottom:14,marginTop:2},
  budgetLabel:{fontSize:13,color:Colors.muted,fontWeight:'700',width:'100%',marginBottom:12},
- foot:{fontSize:11,color:Colors.muted,textAlign:'center',marginTop:17,lineHeight:17}
+ foot:{fontSize:11,color:Colors.muted,textAlign:'center',marginTop:17,lineHeight:17},
+ cancelRow:{marginTop:12},
+ saveError:{color:Colors.danger,fontSize:12,textAlign:'center',marginTop:12}
 });
