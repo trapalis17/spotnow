@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { PreferenceChip } from '@/components/PreferenceChip';
@@ -24,8 +24,16 @@ function Step({number,title,children}:{number:number;title:string;children:React
 export default function OnboardingScreen(){
  const router=useRouter();
  const [prefs,setPrefs]=useState(defaultPreferences);
- useEffect(()=>{getPreferences().then(setPrefs).catch(()=>undefined);},[]);
+ const userEdited=useRef(false);
+ useEffect(()=>{
+  let active=true;
+  getPreferences().then(saved=>{
+   if(active&&!userEdited.current)setPrefs(saved);
+  }).catch(()=>undefined);
+  return ()=>{active=false;};
+ },[]);
  const toggle=(key:'moods'|'outings'|'neighborhoods',value:string)=>{
+  userEdited.current=true;
   setPrefs(p=>{
    if(key==='neighborhoods'){
     const exists=p.neighborhoods.some(name=>canonicalArea(name)===value);
@@ -51,7 +59,7 @@ export default function OnboardingScreen(){
    <OnboardingLocationPreferences selected={prefs.neighborhoods} onToggle={name=>toggle('neighborhoods',name)}/>
    <View style={styles.divider}/>
    <Text style={styles.budgetLabel}>Budget ανά έξοδο</Text>
-   {budget.map(m=><PreferenceChip key={m} label={`€${m}`} selected={prefs.budget===m} onPress={()=>setPrefs(p=>({...p,budget:m}))}/>)}
+   {budget.map(m=><PreferenceChip key={m} label={`€${m}`} selected={prefs.budget===m} onPress={()=>{userEdited.current=true;setPrefs(p=>({...p,budget:m}));}}/>)}
   </Step>
   <PrimaryButton label="Βρες το vibe σου  ↗" onPress={save}/>
   <Text style={styles.foot}>Προσωρινό demo προφίλ. Οι προτιμήσεις αποθηκεύονται στη συσκευή σου.</Text>
