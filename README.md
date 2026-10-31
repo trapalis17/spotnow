@@ -26,3 +26,16 @@ Discover retains its optional top-of-screen **Vibe Swipe** card. Tapping it now 
 - The original **Swipe spots**, list, area filters, mock map, saved venues and onboarding remain available.
 
 Because this is an offline-only prototype, the 24-hour timer relies on the device clock and local storage. A production-wide quota would require an authenticated server time source and backend persistence.
+
+## For You — personalized discovery
+
+New **Για σένα / For You** bottom tab, following the existing Vibe purple/lime/rose visual language with gradients, photographic editorial cards and subtle interactive states.
+
+- One featured **Top Pick**, a horizontal **Next on your radar** carousel, and a **More your vibe** feed.
+- Every recommendation is clickable and opens the existing venue detail screen. Hearts reuse locally stored Favorites.
+- Uses the existing signup preferences (mood, outing type, budget, preferred neighborhoods, music/atmosphere), selected search area, accumulated 8-per-24h Vibe Swipe likes/dislikes, and favorites.
+- Clear reasons explain each estimated **Vibe Match %**; the number is a deterministic *mock ranking estimate*, not a verified personality or business-compatibility measure.
+- Category chips (All / Coffee / Food / Drinks), **Within my budget** and **My areas** filters are interactive and optional.
+- If swipe has never been used, recommendations work from signup preferences alone; a link back to Discover encourages further learning, but does not require it.
+- Athens demo venues now use representative coordinates and names from the exact 30 signup neighborhoods so area preferences can match sample locations.
+- All 40 example venues are fictional, with illustrative photo URLs and approximate demo spend. **No network API, server, database, or backend** is involved in personalized rankings.
