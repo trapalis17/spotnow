@@ -39,3 +39,13 @@ New **Για σένα / For You** bottom tab, following the existing Vibe purple
 - If swipe has never been used, recommendations work from signup preferences alone; a link back to Discover encourages further learning, but does not require it.
 - Athens demo venues now use representative coordinates and names from the exact 30 signup neighborhoods so area preferences can match sample locations.
 - All 40 example venues are fictional, with illustrative photo URLs and approximate demo spend. **No network API, server, database, or backend** is involved in personalized rankings.
+
+## Demo account navigation
+
+- **New user:** Welcome → Onboarding → Register → Discover.
+- **Returning user:** Welcome → Login → Discover. Login restores the local profile and saved onboarding preferences; no real password authentication occurs.
+- **Edit preferences:** Profile → Onboarding (edit mode) → Profile; For You → Onboarding (edit mode) → For You. Save and Cancel stay inside the logged-in experience.
+- **Logout:** Profile → Welcome, clearing only the active session while keeping the on-device demo account, chosen preferences, favorites and Vibe DNA. Tabs check the stored session before displaying.
+- Previously created demo profiles are preserved on logout through a local account migration.
+
+The login/register forms remain frontend-only demos: passwords are not checked against a server or stored as credentials.
