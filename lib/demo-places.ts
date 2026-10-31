@@ -2,6 +2,7 @@ import type {GooglePlace} from './google-places';
 import {AREAS} from './places';
 import type {SearchArea} from './places';
 import type {TasteTag} from './vibe-dna';
+import {NEIGHBORHOODS} from './attica-neighborhoods';
 /** All venues are fictional, for prototyping only. */
 const seeds=[
  {name:'Mellow Coffee',category:'cafe',type:'coffee_shop',types:['cafe','coffee_shop'],outdoor:true,groups:true,brunch:false,cocktails:false},
@@ -33,11 +34,8 @@ const venueTasteTags = [
  ['lively','groups','social','live-music','casual']
 ] as const satisfies readonly (readonly TasteTag[])[];
 const venueDemoBudgets=[5,10,20,70,10,20,20,5,40,45,10,20] as const;
-const demoAthensNeighborhoods=[
- 'Κολωνάκι','Κουκάκι','Ψυρρή','Παλαιό Φάληρο',
- 'Σύνταγμα','Νέα Σμύρνη','Γκάζι','Γλυφάδα',
- 'Χαλάνδρι','Καλλιθέα','Πειραιάς','Περιστέρι'
-] as const;
+// Rotate through exactly the 30 neighborhoods selected for onboarding.
+const demoAthensNeighborhoods=NEIGHBORHOODS;
 const extraVenues = [
  ['Velvet Room','bar'],
  ['Little Nomad','cafe'],
@@ -93,9 +91,9 @@ export function getDemoPlaces(area:SearchArea):GooglePlace[]{
    category:s.category,
    primaryType:s.type,
    types:[...s.types],
-   latitude:area.latitude+(offsets[i%offsets.length][0]+Math.floor(i/offsets.length)*.0003),
-   longitude:area.longitude+(offsets[i%offsets.length][1]+Math.floor(i/offsets.length)*.0003),
-   address:'Εικονικό κατάστημα · '+(area.id==='athens'?demoAthensNeighborhoods[i%demoAthensNeighborhoods.length]:area.label),
+   latitude:area.id==='athens'?demoAthensNeighborhoods[i%demoAthensNeighborhoods.length].latitude+offsets[i%offsets.length][0]*.12:area.latitude+(offsets[i%offsets.length][0]+Math.floor(i/offsets.length)*.0003),
+   longitude:area.id==='athens'?demoAthensNeighborhoods[i%demoAthensNeighborhoods.length].longitude+offsets[i%offsets.length][1]*.12:area.longitude+(offsets[i%offsets.length][1]+Math.floor(i/offsets.length)*.0003),
+   address:'Εικονικό κατάστημα · '+(area.id==='athens'?demoAthensNeighborhoods[i%demoAthensNeighborhoods.length].name:area.label),
    googleMapsUrl:'',
    outdoorSeating:s.outdoor,
    goodForGroups:s.groups,
