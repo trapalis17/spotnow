@@ -57,6 +57,12 @@ export function rankGooglePlaces(places:GooglePlace[],preferences:UserPreference
     if(includesAny(liked,['date','ρομαντικ'])&&tags.includes('date')){score+=12;reasons.push('Σχετικό με τις προτιμήσεις σου για έξοδο');}
     if(includesAny(liked,['night','party','social','παρεα'])&&tags.includes('nightlife'))score+=10;
     if(includesAny(liked,['brunch'])&&tags.includes('brunch'))score+=10;
+    // Signup budget is evaluated separately from Vibe DNA and distance.
+    if(preferences&&typeof place.demoBudget==='number'){
+      const budgetFits=preferences.budget>=60||place.demoBudget<=preferences.budget;
+      if(budgetFits){score+=6;reasons.push('Μέσα στο ενδεικτικό budget σου');}
+      else{score-=8;reasons.push('Πάνω από το ενδεικτικό budget σου');}
+    }
     const preferred=(preferences?.neighborhoods??[]).some(n=>place.address&&norm(place.address).includes(norm(n)));
     if(preferred){score+=12;reasons.push('Βρίσκεται σε περιοχή προτίμησης');}
     score+=Math.max(0,24-Math.round(distance*5));
