@@ -46,8 +46,14 @@ export function parseIntent(input = ''): Intent {
 
 const priceOrder: Record<PriceBand, number> = { budget: 1, mid: 2, premium: 3 };
 
+/**
+ * Onboarding stores numeric thresholds 5, 10, 20, 40, 60.
+ * 60 denotes the open-ended "60€+" option: premium venues remain eligible.
+ * This demo catalog has three price bands, but the exact chosen threshold
+ * remains in UserPreferences.budget for future finer-grained matching.
+ */
 function userBudgetLimit(budget: number): number {
-  return budget < 40 ? 1 : budget < 80 ? 2 : 3;
+  return budget >= 60 ? 3 : budget >= 40 ? 2 : 1;
 }
 
 function isEligible(venue: Venue, preferences: UserPreferences, intent: Intent): boolean {
