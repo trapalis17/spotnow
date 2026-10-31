@@ -1,6 +1,6 @@
-import { Redirect } from 'expo-router';
+import { Redirect, useFocusEffect } from 'expo-router';
 import { Tabs } from 'expo-router/tabs';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Colors } from '../../constants/theme';
@@ -8,13 +8,13 @@ import { getUser } from '../../lib/storage';
 
 export default function TabLayout(){
  const [session,setSession]=useState<'checking'|'active'|'signed-out'>('checking');
- useEffect(()=>{
-  let mounted=true;
+ useFocusEffect(useCallback(()=>{
+  let active=true;
   getUser().then(user=>{
-   if(mounted)setSession(user?'active':'signed-out');
-  }).catch(()=>{if(mounted)setSession('signed-out');});
-  return ()=>{mounted=false;};
- },[]);
+   if(active)setSession(user?'active':'signed-out');
+  }).catch(()=>{if(active)setSession('signed-out');});
+  return ()=>{active=false;};
+ },[]));
  if(session==='checking')return <View style={{flex:1,alignItems:'center',justifyContent:'center',backgroundColor:Colors.background}}>
   <ActivityIndicator color={Colors.violet}/>
  </View>;
