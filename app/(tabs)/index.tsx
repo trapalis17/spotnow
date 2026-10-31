@@ -58,12 +58,11 @@ export default function HomeScreen(){
  },[]));
  const [now,setNow]=useState(Date.now());
  useEffect(()=>{
-   if(!tasteOpen)return;
    const tick=()=>{
      const timestamp=Date.now();
      setNow(timestamp);
      const current=dailyRef.current;
-     if(current.startedAt&&remainingDailyMs(current,timestamp)===0){
+     if(tasteOpen&&current.startedAt&&remainingDailyMs(current,timestamp)===0){
        commitDaily(ensureDailyVenueBatch(current,area,timestamp));
      }
    };
@@ -110,7 +109,7 @@ export default function HomeScreen(){
      <Text style={styles.tasteDescription}>8 συγκεκριμένα demo μαγαζιά κάθε 24 ώρες. Κάνε swipe σε spots, δες τα προφίλ τους και ανακάλυψε τι σου ταιριάζει.</Text>
      <View style={styles.tasteMeta}>
        <Ionicons name="finger-print-outline" color={Colors.violet} size={15}/>
-       <Text style={styles.tasteMetaText}>{answeredToday} / 8 σήμερα · {tasteSummary.meaningfulCount} taste signals</Text>
+       <Text style={styles.tasteMetaText}>{dailyState.startedAt&&timeLeft===0?'Νέες 8 κάρτες διαθέσιμες':`${answeredToday} / 8 σήμερα · ${tasteSummary.meaningfulCount} taste signals`}</Text>
      </View>
      <View style={styles.tasteActions}>
        <Pressable style={styles.tasteStart} onPress={()=>{openTaste('cards').catch(()=>undefined);}} accessibilityRole="button">
