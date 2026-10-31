@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
+import type {ComponentProps} from 'react';
 import {Animated,ImageBackground,Modal,PanResponder,Pressable,ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
@@ -10,7 +11,7 @@ type Props={
  onVote:(id:string,decision:TasteDecision)=>void;
  onReset:()=>void;onClose:()=>void;
 };
-type IconName=React.ComponentProps<typeof Ionicons>['name'];
+type IconName=ComponentProps<typeof Ionicons>['name'];
 
 export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onReset,onClose}:Props){
  const {width:windowWidth,height:windowHeight}=useWindowDimensions();
@@ -99,7 +100,7 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
              <Text style={styles.progressText}>{pending.length} ready now</Text>
            </View>
            <View style={styles.progressTrack}>
-             <View style={[styles.progressFill,{width:(reviewed/TASTE_CARDS.length*100)+'%'}]}/>
+             <View style={[styles.progressFill,{width:`${reviewed/TASTE_CARDS.length*100}%` as `${number}%`}]}/>
            </View>
            {active?<View style={[styles.deck,{height:cardHeight}]}>
              {next?<View style={[styles.nextCard,{height:cardHeight-8}]}>
