@@ -2,12 +2,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserPreferences, UserProfile } from '@/types';
 import type { SwipeFeedback, SwipeDecision } from './swipe-intelligence';
 import { isGooglePlaceId } from './google-places';
+import {sanitizeTasteFeedback} from './vibe-dna';
+import type {TasteFeedback} from './vibe-dna';
 
 const USER_KEY = 'vibe:user';
 const PREFS_KEY = 'vibe:prefs';
 const SAVED_KEY = 'vibe:saved';
 const ONBOARDED_KEY = 'vibe:completed-onboarding';
 const SWIPE_KEY = 'vibe:swipe-feedback:v1';
+const DNA_KEY = 'vibe:taste-feedback:v1';
+let tasteWriteQueue:Promise<void>=Promise.resolve();
 let swipeWriteQueue: Promise<void> = Promise.resolve();
 let savedWriteQueue: Promise<void> = Promise.resolve();
 
@@ -103,4 +107,23 @@ export async function ensureSavedVenue(id: string): Promise<string[]> {
   savedWriteQueue=next;
   await next;
   return output;
+}
+
+/** Separate, local-only preference learning. Never mutates signup preferences. */
+export async function getTasteFeedback():Promise<TasteFeedback>{
+ try{
+  const raw=await AsyncStorage.getItem(DNA_KEY);
+  return raw?sanitizeTasteFeedback(JSON.parse(raw)):{};
+ }catch{return {};}
+}
+export function saveTasteFeedback(feedback:TasteFeedback):Promise<void>{
+ const safe=sanitizeTasteFeedback(feedback);
+ tasteWriteQueue=tasteWriteQueue.catch(()=>undefined).then(()=>
+   AsyncStorage.setItem(DNA_KEY,JSON.stringify(safe)));
+ return tasteWriteQueue;
+}
+export function clearTasteFeedback():Promise<void>{
+ tasteWriteQueue=tasteWriteQueue.catch(()=>undefined).then(()=>
+   AsyncStorage.removeItem(DNA_KEY));
+ return tasteWriteQueue;
 }
