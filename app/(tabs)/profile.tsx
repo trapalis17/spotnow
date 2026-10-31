@@ -32,7 +32,7 @@ export default function ProfileScreen(){
     <Text style={styles.areas}>{prefs?.neighborhoods?.length?prefs.neighborhoods.join(' · '):'Δεν έχεις επιλέξει περιοχές'}</Text>
    </View>
   </View>
-  <PrimaryButton label="Άλλαξε τις προτιμήσεις σου" onPress={()=>router.push('/onboarding')}/>
+  <PrimaryButton label="Άλλαξε τις προτιμήσεις σου" onPress={()=>router.push({pathname:'/onboarding',params:{mode:'edit',from:'profile'}})}/>
   <View style={{height:12}}/>
   <SecondaryButton label="Αποσύνδεση" onPress={async()=>{await clearUser();router.replace('/');}}/>
   <Text style={styles.foot}>Το προφίλ είναι demo και αποθηκεύεται τοπικά, όχι σε online λογαριασμό.</Text>
