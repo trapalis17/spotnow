@@ -32,6 +32,12 @@ const venueTasteTags = [
  ['creative','artsy','coffee','casual'],
  ['lively','groups','social','live-music','casual']
 ] as const satisfies readonly (readonly TasteTag[])[];
+const venueDemoBudgets=[5,10,20,70,10,20,20,5,40,45,10,20] as const;
+const demoAthensNeighborhoods=[
+ 'Κολωνάκι','Κουκάκι','Ψυρρή','Παλαιό Φάληρο',
+ 'Σύνταγμα','Νέα Σμύρνη','Γκάζι','Γλυφάδα',
+ 'Χαλάνδρι','Καλλιθέα','Πειραιάς','Περιστέρι'
+] as const;
 const offsets:[number,number][]=[
  [-.002,.003],[.004,-.004],[.008,.005],[-.006,-.003],[.003,.008],
  [-.008,.006],[.005,-.007],[-.003,-.008],[.01,-.004],[-.009,-.006],
@@ -46,7 +52,7 @@ export function getDemoPlaces(area:SearchArea):GooglePlace[]{
    types:[...s.types],
    latitude:area.latitude+offsets[i][0],
    longitude:area.longitude+offsets[i][1],
-   address:'Εικονικό κατάστημα · '+area.label,
+   address:'Εικονικό κατάστημα · '+(area.id==='athens'?demoAthensNeighborhoods[i]:area.label),
    googleMapsUrl:'',
    outdoorSeating:s.outdoor,
    goodForGroups:s.groups,
@@ -55,6 +61,7 @@ export function getDemoPlaces(area:SearchArea):GooglePlace[]{
    servesCoffee:s.category==='cafe',
    reservable:false,
    tasteTags:[...venueTasteTags[i]],
+   demoBudget:venueDemoBudgets[i],
    editorialSummary:'Αυτό είναι ένα εικονικό κατάστημα για την προεπισκόπηση του Vibe. Όλα τα χαρακτηριστικά είναι ενδεικτικά.'
  }));
 }
