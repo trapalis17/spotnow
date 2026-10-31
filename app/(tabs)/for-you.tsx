@@ -177,7 +177,7 @@ export default function ForYouScreen(){
      <View style={styles.outroIcon}><Ionicons name="color-wand-outline" size={22} color={Colors.violet}/></View>
      <Text style={styles.outroTitle}>Your taste isn't static.</Text>
      <Text style={styles.outroBody}>Οι προτάσεις ανανεώνονται από τα likes, τα αγαπημένα και τις περιοχές που έχεις επιλέξει. Θέλεις να αλλάξεις κάτι;</Text>
-     <Pressable style={styles.outroButton} onPress={()=>router.push('/onboarding')} accessibilityRole="button">
+     <Pressable style={styles.outroButton} onPress={()=>router.push({pathname:'/onboarding',params:{mode:'edit',from:'for-you'}})} accessibilityRole="button">
        <Text style={styles.outroButtonText}>Edit my preferences</Text>
        <Ionicons name="arrow-forward" size={16} color="#fff"/>
      </Pressable>
