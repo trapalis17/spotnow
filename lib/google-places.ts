@@ -1,3 +1,4 @@
+import type {TasteTag} from './vibe-dna';
 export interface GooglePlace {
   id: string;
   name: string;
@@ -26,6 +27,8 @@ export interface GooglePlace {
   allowsDogs?: boolean;
   accessibility?: string[];
   editorialSummary?: string;
+  /** Locally-authored, fictional venue taste metadata for the frontend mock. */
+  tasteTags?: TasteTag[];
   photoName?: string;
   photoAttributions?: { displayName: string; uri?: string }[];
 }
