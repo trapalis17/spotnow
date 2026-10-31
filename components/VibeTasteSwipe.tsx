@@ -4,28 +4,54 @@ import {Animated,ImageBackground,Modal,PanResponder,Pressable,ScrollView,StyleSh
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Colors,Gradients} from '../constants/theme';
-import {getDnaSummary,getPendingTasteCards,TASTE_CARDS,type TasteCard,type TasteDecision,type TasteFeedback} from '../lib/vibe-dna';
+import type {TasteDecision,TasteTag} from '../lib/vibe-dna';
+import {getDemoPlaceById} from '../lib/demo-places';
+import {DAILY_SWIPE_LIMIT,getDailyVenueDnaSummary,remainingDailyMs,type DailyVenueSwipeState} from '../lib/daily-venue-swipe';
 
 type Props={
- visible:boolean;initialView?:'cards'|'dna';feedback:TasteFeedback;
+ visible:boolean;initialView?:'cards'|'dna';state:DailyVenueSwipeState|null;
  onVote:(id:string,decision:TasteDecision)=>void;
- onReset:()=>void;onClose:()=>void;
+ onReset:()=>void;onClose:()=>void;onOpenVenue:(id:string)=>void;
 };
 type IconName=ComponentProps<typeof Ionicons>['name'];
+type VenueCard={id:string;title:string;subtitle:string;image:string;tags:TasteTag[];colors:readonly [string,string];icon:IconName};
 
-export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onReset,onClose}:Props){
+export function VibeTasteSwipe({visible,initialView='cards',state,onVote,onReset,onClose,onOpenVenue}:Props){
  const {width:windowWidth,height:windowHeight}=useWindowDimensions();
  const cardWidth=Math.min(windowWidth-68,425);
  const cardHeight=Math.max(290,Math.min(430,windowHeight*.47));
  const [view,setView]=useState<'cards'|'dna'>('cards');
  const [confirmReset,setConfirmReset]=useState(false);
- const pending=useMemo(()=>getPendingTasteCards(feedback),[feedback]);
- const summary=useMemo(()=>getDnaSummary(feedback),[feedback]);
+ const [clock,setClock]=useState(Date.now());
+ useEffect(()=>{
+   if(!visible)return;
+   setClock(Date.now());
+   const timer=setInterval(()=>setClock(Date.now()),30000);
+   return ()=>clearInterval(timer);
+ },[visible]);
+ const pending=useMemo(()=>{
+   if(!state)return [];
+   return state.batchIds
+    .filter(id=>!(id in state.batchVotes))
+    .map(getDemoPlaceById).filter((p):p is NonNullable<typeof p>=>p!==null)
+    .map(place=>({
+      id:place.id,title:place.name,subtitle:place.address??'Εικονικό κατάστημα',
+      image:place.demoPhoto??'',
+      tags:place.tasteTags??[],
+      colors:(place.category==='cafe'?['#7258B9','#D5A2BA']:
+        place.category==='bar'?['#48338D','#AE579D']:['#508D9E','#C38BA9']) as readonly [string,string],
+      icon:(place.category==='cafe'?'cafe-outline':
+        place.category==='bar'?'wine-outline':'restaurant-outline') as IconName,
+    } as VenueCard));
+ },[state]);
+ const summary=useMemo(()=>getDailyVenueDnaSummary(state?.votes??{}),[state?.votes]);
  const active=pending[0];
  const next=pending[1];
+ const remaining=state?remainingDailyMs(state,clock):0;
+ const countdown=remaining>0?Math.ceil(remaining/3600000)+' ώρες':'λίγο';
  const pan=useRef(new Animated.ValueXY()).current;
  const locked=useRef(false);
- const activeRef=useRef<TasteCard|undefined>(active);
+ const activeRef=useRef<VenueCard|undefined>(active);
  const voteRef=useRef(onVote);
  const flyRef=useRef<(d:TasteDecision)=>void>(()=>undefined);
  activeRef.current=active;
@@ -70,8 +96,8 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
  const rotation=pan.x.interpolate({inputRange:[-cardWidth,0,cardWidth],outputRange:['-14deg','0deg','14deg'],extrapolate:'clamp'});
  const yesOpacity=pan.x.interpolate({inputRange:[0,cardWidth*.22],outputRange:[0,1],extrapolate:'clamp'});
  const noOpacity=pan.x.interpolate({inputRange:[-cardWidth*.22,0],outputRange:[1,0],extrapolate:'clamp'});
- const reviewed=summary.ratedCount;
- const done=reviewed===TASTE_CARDS.length;
+ const reviewed=Object.keys(state?.batchVotes??{}).length;
+ const done=reviewed>=DAILY_SWIPE_LIMIT;
  return <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
    <View style={styles.backdrop}>
      <ScrollView contentContainerStyle={[styles.scroll,{minHeight:Math.min(windowHeight,640)}]}
@@ -79,7 +105,7 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
        <View style={styles.sheet}>
          <View style={styles.heading}>
            <View style={styles.titleGroup}>
-             <Text style={styles.eyebrow}>✳ YOUR TASTE, YOUR RULES</Text>
+             <Text style={styles.eyebrow}>✳ 8 SPOTS / 24 HOURS</Text>
              <Text style={styles.title}>Vibe Swipe<Text style={{color:Colors.violet}}> ✳</Text></Text>
            </View>
            <Pressable style={styles.close} onPress={onClose} accessibilityRole="button" accessibilityLabel="Κλείσιμο Vibe Swipe">
@@ -88,7 +114,7 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
          </View>
          <View style={styles.tabs}>
            <Pressable onPress={()=>setView('cards')} style={[styles.tab,view==='cards'&&styles.activeTab]}>
-             <Text style={[styles.tabText,view==='cards'&&styles.activeTabText]}>Discover your taste</Text>
+             <Text style={[styles.tabText,view==='cards'&&styles.activeTabText]}>8 spots today</Text>
            </Pressable>
            <Pressable onPress={()=>setView('dna')} style={[styles.tab,view==='dna'&&styles.activeTab]}>
              <Text style={[styles.tabText,view==='dna'&&styles.activeTabText]}>My Vibe DNA</Text>
@@ -96,11 +122,11 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
          </View>
          {view==='cards'?<View>
            <View style={styles.progress}>
-             <Text style={styles.progressText}>{reviewed}/{TASTE_CARDS.length} preferences explored</Text>
-             <Text style={styles.progressText}>{pending.length} ready now</Text>
+             <Text style={styles.progressText}>{reviewed}/{DAILY_SWIPE_LIMIT} demo spots explored</Text>
+             <Text style={styles.progressText}>{pending.length} left for today</Text>
            </View>
            <View style={styles.progressTrack}>
-             <View style={[styles.progressFill,{width:`${reviewed/TASTE_CARDS.length*100}%` as `${number}%`}]}/>
+             <View style={[styles.progressFill,{width:`${reviewed/DAILY_SWIPE_LIMIT*100}%` as `${number}%`}]}/>
            </View>
            {active?<View style={[styles.deck,{height:cardHeight}]}>
              {next?<View style={[styles.nextCard,{height:cardHeight-8}]}>
@@ -115,7 +141,7 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
                    locations={[0,.42,1]} style={StyleSheet.absoluteFill}/>
                  <View style={styles.artTop}>
                    <View style={styles.pill}><Ionicons name={active.icon as IconName} size={16} color="#fff"/>
-                     <Text style={styles.pillText}>TASTE CARD</Text></View>
+                     <Text style={styles.pillText}>DEMO VENUE</Text></View>
                    <Ionicons name="sparkles-outline" color="rgba(255,255,255,.95)" size={25}/>
                  </View>
                  <Animated.View pointerEvents="none" style={[styles.voteStamp,styles.likeStamp,{opacity:yesOpacity}]}>
@@ -126,7 +152,7 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
                  </Animated.View>
                  <View style={styles.artBottom}>
                    <Text style={styles.cardTitle}>{active.title}</Text>
-                   <Text style={styles.cardSubtitle}>{active.subtitle}</Text>
+                   <Text style={styles.cardSubtitle}>{active.subtitle} · Ενδεικτική φωτογραφία</Text>
                    <View style={styles.tags}>{active.tags.slice(0,4).map(tag=><View key={tag} style={styles.tag}>
                      <Text style={styles.tagText}>{tag.replace(/-/g,' ')}</Text>
                    </View>)}</View>
@@ -135,8 +161,8 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
              </Animated.View>
            </View>:<View style={styles.finished}>
              <Ionicons name="sparkles" color={Colors.violet} size={40}/>
-             <Text style={styles.finishedTitle}>{done?'You know your vibe!':'More vibes coming up'}</Text>
-             <Text style={styles.finishedDesc}>{done?'Ανακάλυψες όλες τις διαθέσιμες demo κάρτες. Μπορείς να δεις ή να μηδενίσεις το Vibe DNA σου.':'Οι επόμενες κάρτες θα εμφανιστούν καθώς εξερευνάς τις διαθέσιμες προτιμήσεις.'}</Text>
+             <Text style={styles.finishedTitle}>{done?'8/8 for today ✳':'More spots coming soon'}</Text>
+             <Text style={styles.finishedDesc}>{'Νέα οκτάδα σε περίπου '+countdown+'. Η σημερινή πρόοδος αποθηκεύεται τοπικά.'}</Text>
              <Pressable onPress={()=>setView('dna')} style={styles.dnaAction}><Text style={styles.dnaActionText}>View my Vibe DNA ↗</Text></Pressable>
            </View>}
            {active?<View style={styles.controls}>
@@ -150,12 +176,14 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
                <Ionicons name="heart" color={Colors.mint} size={25}/><Text style={styles.actionLabel}>My vibe</Text>
              </Pressable>
            </View>:null}
-           <Text style={styles.hint}>Swipe δεξιά ♥, αριστερά × · Skip = ουδέτερο. Μπορείς να φύγεις οποιαδήποτε στιγμή.</Text>
+           {active?<Pressable style={styles.profileLink} onPress={()=>onOpenVenue(active.id)}
+             accessibilityRole="button"><Text style={styles.profileText}>Δες το προφίλ του {active.title} ↗</Text></Pressable>:null}
+           <Text style={styles.hint}>8 μαγαζιά κάθε 24 ώρες · Swipe δεξιά ♥, αριστερά × ή Skip. Επιστρέφεις όποτε θέλεις.</Text>
          </View>:<View style={styles.dna}>
            <LinearGradient colors={Gradients.hero} style={styles.dnaHero}>
              <Ionicons name="finger-print-outline" color="#fff" size={32}/>
-             <Text style={styles.dnaHeroTitle}>Your evolving Vibe DNA</Text>
-             <Text style={styles.dnaHeroSub}>{summary.meaningfulCount} προτιμήσεις έχουν επηρεάσει τα demo matches. Δεν είναι μέτρηση προσωπικότητας.</Text>
+             <Text style={styles.dnaHeroTitle}>Your venue Vibe DNA</Text>
+             <Text style={styles.dnaHeroSub}>{summary.meaningfulCount} αξιολογήσεις μαγαζιών έχουν επηρεάσει τα demo matches. Δεν είναι μέτρηση προσωπικότητας.</Text>
            </LinearGradient>
            <View style={styles.stats}>
              {([['♥',summary.likes,'Likes'],['×',summary.dislikes,'Dislikes'],['↷',summary.skipped,'Skips']] as const).map(([symbol,value,label])=>
@@ -163,7 +191,7 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
            </View>
            <Text style={styles.dnaHeading}>Τι σου ταιριάζει</Text>
            {summary.positives.length?<View style={styles.dnaChips}>{summary.positives.map(item=><View key={item.tag} style={styles.positive}><Text style={styles.positiveText}>♥ {item.label}</Text></View>)}</View>
-            :<Text style={styles.emptyText}>Κάνε like σε concepts που σου αρέσουν για να χτίσεις το προφίλ σου.</Text>}
+            :<Text style={styles.emptyText}>Κάνε like σε μαγαζιά που σου αρέσουν για να χτίσεις το προφίλ σου.</Text>}
            <Text style={styles.dnaHeading}>Τι προτιμάς λιγότερο</Text>
            {summary.negatives.length?<View style={styles.dnaChips}>{summary.negatives.map(item=><View key={item.tag} style={styles.negative}><Text style={styles.negativeText}>× {item.label}</Text></View>)}</View>
             :<Text style={styles.emptyText}>Τα dislike μειώνουν τη συνάφεια αυτών των χαρακτηριστικών.</Text>}
@@ -171,13 +199,13 @@ export function VibeTasteSwipe({visible,initialView='cards',feedback,onVote,onRe
            {!confirmReset?<Pressable onPress={()=>setConfirmReset(true)} style={styles.reset} accessibilityRole="button">
              <Ionicons name="refresh-outline" color={Colors.rose} size={17}/><Text style={styles.resetText}>Reset Vibe DNA</Text>
            </Pressable>:<View style={styles.confirm}>
-             <Text style={styles.confirmText}>Να διαγραφούν οι απαντήσεις σου στο Vibe Swipe;</Text>
+             <Text style={styles.confirmText}>Να μηδενιστούν τα taste signals; Το σημερινό όριο δεν αλλάζει.</Text>
              <View style={styles.confirmRow}>
                <Pressable style={styles.confirmCancel} onPress={()=>setConfirmReset(false)}><Text style={styles.cancelText}>Άκυρο</Text></Pressable>
                <Pressable style={styles.confirmDelete} onPress={()=>{onReset();setConfirmReset(false);setView('cards');}}><Text style={styles.deleteText}>Ναι, reset</Text></Pressable>
              </View>
            </View>}
-           <Pressable onPress={()=>setView('cards')} style={styles.backToSwipe}><Text style={styles.backText}>Continue swiping ↗</Text></Pressable>
+           <Pressable onPress={()=>setView('cards')} style={styles.backToSwipe}><Text style={styles.backText}>Back to today's spots ↗</Text></Pressable>
          </View>}
        </View>
      </ScrollView>
@@ -254,5 +282,7 @@ const styles=StyleSheet.create({
  confirmDelete:{flex:1,padding:12,borderRadius:12,backgroundColor:Colors.rose,alignItems:'center'},
  cancelText:{fontSize:12,fontWeight:'800',color:Colors.text},
  deleteText:{fontSize:12,fontWeight:'900',color:'#fff'},
+ profileLink:{alignItems:'center',paddingVertical:11,marginBottom:4,borderRadius:13,backgroundColor:'#F0EAFB'},
+ profileText:{fontWeight:'900',fontSize:12,color:Colors.violet},
  backToSwipe:{padding:12,alignItems:'center'},backText:{color:Colors.violet,fontWeight:'900',fontSize:12}
 });
