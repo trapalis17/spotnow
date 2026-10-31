@@ -75,7 +75,7 @@ export function SwipeDiscovery({matches,feedback,onVote,onReset,onOpen}:Props){
    <View style={styles.topline}>
      <Text style={styles.count}>{pending.length} spots να ανακαλύψεις</Text>
      <View style={styles.topActions}>
-      <View style={styles.learning}><Ionicons name="sparkles" color={Colors.violet} size={14}/><Text style={styles.learningText}>Μαθαίνουμε το vibe σου</Text></View>
+      <View style={styles.learning}><Ionicons name="sparkles" color={Colors.violet} size={14}/><Text style={styles.learningText}>Swipe demo spots</Text></View>
       {count>0?<Pressable onPress={onReset} accessibilityRole="button" accessibilityLabel="Μηδενισμός swipe επιλογών" style={styles.resetButton}>
         <Ionicons name="refresh" color={Colors.violet} size={17}/>
       </Pressable>:null}
