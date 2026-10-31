@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { PreferenceChip } from '@/components/PreferenceChip';
+import { OnboardingLocationPreferences } from '@/components/OnboardingLocationPreferences';
+import { canonicalArea } from '@/lib/attica-neighborhoods';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Colors, Spacing } from '@/constants/theme';
 import { defaultPreferences, getPreferences, setOnboarded, setPreferences } from '@/lib/storage';
@@ -10,7 +12,6 @@ import { useEffect } from 'react';
 
 const moods=['cozy','romantic','quiet','lively','creative','social'];
 const outings=['coffee with friends','date night','brunch','night out','study session','casual drinks'];
-const areas=['Plaka','Kolonaki','Psyrri','Gazi','Koukaki','Palaio Faliro','Glyfada'];
 const budget=[20,40,60,80,120];
 function Step({number,title,children}:{number:number;title:string;children:React.ReactNode}){
  return <View style={styles.step}>
@@ -25,7 +26,15 @@ export default function OnboardingScreen(){
  const [prefs,setPrefs]=useState(defaultPreferences);
  useEffect(()=>{getPreferences().then(setPrefs).catch(()=>undefined);},[]);
  const toggle=(key:'moods'|'outings'|'neighborhoods',value:string)=>{
-  setPrefs(p=>({...p,[key]:p[key].includes(value)?p[key].filter(v=>v!==value):[...p[key],value]}));
+  setPrefs(p=>{
+   if(key==='neighborhoods'){
+    const exists=p.neighborhoods.some(name=>canonicalArea(name)===value);
+    return {...p,neighborhoods:exists
+      ?p.neighborhoods.filter(name=>canonicalArea(name)!==value)
+      :[...p.neighborhoods,value]};
+   }
+   return {...p,[key]:p[key].includes(value)?p[key].filter(v=>v!==value):[...p[key],value]};
+  });
  };
  const save=async()=>{await setPreferences(prefs);await setOnboarded(true);router.replace('/login');};
  return <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -39,7 +48,7 @@ export default function OnboardingScreen(){
    {outings.map(m=><PreferenceChip key={m} label={m} selected={prefs.outings.includes(m)} onPress={()=>toggle('outings',m)}/>)}
   </Step>
   <Step number={3} title="Πού και με τι budget;">
-   {areas.map(m=><PreferenceChip key={m} label={m} selected={prefs.neighborhoods.includes(m)} onPress={()=>toggle('neighborhoods',m)}/>)}
+   <OnboardingLocationPreferences selected={prefs.neighborhoods} onToggle={name=>toggle('neighborhoods',name)}/>
    <View style={styles.divider}/>
    <Text style={styles.budgetLabel}>Budget ανά έξοδο</Text>
    {budget.map(m=><PreferenceChip key={m} label={`€${m}`} selected={prefs.budget===m} onPress={()=>setPrefs(p=>({...p,budget:m}))}/>)}
