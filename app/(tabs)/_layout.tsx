@@ -11,6 +11,5 @@ export default function TabLayout(){
    <Tabs.Screen name="saved" options={{title:'Αγαπημένα',tabBarIcon:({color,size})=><Ionicons name="heart-outline" color={typeof color==='string'?color:Colors.violet} size={size}/>}}/>
    <Tabs.Screen name="profile" options={{title:'Προφίλ',tabBarIcon:({color,size})=><Ionicons name="person-circle-outline" color={typeof color==='string'?color:Colors.violet} size={size}/>}}/>
    <Tabs.Screen name="explore" options={{href:null}}/>
-   <Tabs.Screen name="vibe-now" options={{title:"Vibe Now",tabBarIcon:({color,size})=><Ionicons name="sparkles-outline" color={typeof color==="string"?color:Colors.violet} size={size}/>}}/>
  </Tabs>;
 }
