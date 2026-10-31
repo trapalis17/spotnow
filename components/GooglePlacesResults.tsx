@@ -12,9 +12,10 @@ import { SwipeDiscovery } from './SwipeDiscovery';
 import { GoogleVenueCard } from './GoogleVenueCard';
 import { GooglePinsMap } from './GooglePinsMap';
 import { Colors } from '../constants/theme';
+import type {TasteFeedback} from '../lib/vibe-dna';
 type Filter='all'|'cafe'|'restaurant'|'bar';
-export function GooglePlacesResults({area,compact=false,prompt='',query='',filter='all',mapMode=false,swipeMode=false,hideHeading=false}:{
- area:SearchArea;compact?:boolean;prompt?:string;query?:string;filter?:Filter;mapMode?:boolean;swipeMode?:boolean;hideHeading?:boolean;
+export function GooglePlacesResults({area,compact=false,prompt='',query='',filter='all',mapMode=false,swipeMode=false,hideHeading=false,tasteFeedback={}}:{
+ area:SearchArea;compact?:boolean;prompt?:string;query?:string;filter?:Filter;mapMode?:boolean;swipeMode?:boolean;hideHeading?:boolean;tasteFeedback?:TasteFeedback;
 }){
  const router=useRouter();
  const {places,loading,error}=useGooglePlaces(area);
@@ -28,10 +29,10 @@ export function GooglePlacesResults({area,compact=false,prompt='',query='',filte
    getSavedVenueIds().then(setSavedIds).catch(()=>undefined);
    getSwipeFeedback().then(f=>{feedbackRef.current=f;setFeedback(f);}).catch(()=>undefined);
  },[]));
- const ranked=useMemo(()=>rankGooglePlaces(places,preferences,prompt,area).filter(x=>
+ const ranked=useMemo(()=>rankGooglePlaces(places,preferences,prompt,area,tasteFeedback).filter(x=>
    (filter==='all'||x.place.category===filter)&&
    (!query||[x.place.name,x.place.address??'',...x.vibe.tags].join(' ').toLocaleLowerCase('el-GR').includes(query.toLocaleLowerCase('el-GR')))
- ),[places,preferences,prompt,area,filter,query]);
+ ),[places,preferences,prompt,area,filter,query,tasteFeedback]);
  const personalized=useMemo(()=>personalizeMatches(ranked,feedback),[ranked,feedback]);
  const recommended=useMemo(()=>personalized.filter(x=>feedback[x.place.id]!=='pass'),[personalized,feedback]);
  const shown=mapMode?recommended.slice(0,3):compact&&!expanded?recommended.slice(0,5):recommended;
