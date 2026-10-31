@@ -3,6 +3,8 @@ import type { GooglePlace } from './google-places';
 import type { SearchArea } from './places';
 import { distanceKm } from './places';
 import { parseIntent } from './recommendations';
+import {getTasteMatchAdjustment} from './vibe-dna';
+import type {TasteFeedback} from './vibe-dna';
 
 export type PlaceVibe = { label: string; tags:string[]; evidence:string[]; confidence:'high'|'medium'|'low' };
 export type PlaceMatch = { place:GooglePlace; score:number; reasons:string[]; vibe:PlaceVibe };
@@ -36,7 +38,7 @@ export function inferPlaceVibe(place:GooglePlace):PlaceVibe {
     tags.has('quick')?'Quick bite':tags.has('coffee')?'Coffee & chill':'Food spot';
   return {label,tags:[...tags],evidence,confidence:evidence.length>=2?'high':evidence.length===1?'medium':'low'};
 }
-export function rankGooglePlaces(places:GooglePlace[],preferences:UserPreferences|null,prompt:string,area:SearchArea):PlaceMatch[]{
+export function rankGooglePlaces(places:GooglePlace[],preferences:UserPreferences|null,prompt:string,area:SearchArea, dna:TasteFeedback={}):PlaceMatch[]{
   const intent=parseIntent(prompt);
   const ptext=norm(prompt);
   const liked=norm([...(preferences?.moods??[]),...(preferences?.outings??[]),...(preferences?.atmosphere??[]),...(preferences?.social??[])].join(' '));
@@ -60,6 +62,10 @@ export function rankGooglePlaces(places:GooglePlace[],preferences:UserPreference
     score+=Math.max(0,24-Math.round(distance*5));
     if(distance<2)reasons.push('Κοντά στην επιλεγμένη περιοχή');
     if(place.rating!==undefined&&place.userRatingCount!==undefined&&place.userRatingCount>=20){score+=Math.max(0,(place.rating-3)*7);}
-    return {place,score:Math.max(0,Math.min(100,Math.round(score))),reasons:reasons.length?reasons.slice(0,3):['Με βάση την κατηγορία και την απόσταση'],vibe};
+    const learned=getTasteMatchAdjustment(place.tasteTags,dna);
+    if(learned.reason)reasons.unshift(learned.reason);
+    // Explainable estimate, not personality compatibility; DNA never overrides location, budget, or explicit preferences.
+    const estimate=Math.max(0,Math.min(100,Math.round(score+learned.delta)));
+    return {place,score:estimate,reasons:reasons.length?reasons.slice(0,3):['Με βάση την κατηγορία και την απόσταση'],vibe};
   }).sort((a,b)=>b.score-a.score||a.place.name.localeCompare(b.place.name));
 }
