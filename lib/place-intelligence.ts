@@ -3,7 +3,7 @@ import type { GooglePlace } from './google-places';
 import type { SearchArea } from './places';
 import { distanceKm } from './places';
 import { parseIntent } from './recommendations';
-import {getTasteMatchAdjustment} from './vibe-dna';
+import {getDailyVenueMatchAdjustment} from './daily-venue-swipe';
 import type {TasteFeedback} from './vibe-dna';
 
 export type PlaceVibe = { label: string; tags:string[]; evidence:string[]; confidence:'high'|'medium'|'low' };
@@ -68,7 +68,7 @@ export function rankGooglePlaces(places:GooglePlace[],preferences:UserPreference
     score+=Math.max(0,24-Math.round(distance*5));
     if(distance<2)reasons.push('Κοντά στην επιλεγμένη περιοχή');
     if(place.rating!==undefined&&place.userRatingCount!==undefined&&place.userRatingCount>=20){score+=Math.max(0,(place.rating-3)*7);}
-    const learned=getTasteMatchAdjustment(place.tasteTags,dna);
+    const learned=getDailyVenueMatchAdjustment(place.tasteTags,dna);
     if(learned.reason)reasons.unshift(learned.reason);
     // Explainable estimate, not personality compatibility; DNA never overrides location, budget, or explicit preferences.
     const estimate=Math.max(0,Math.min(100,Math.round(score+learned.delta)));
