@@ -83,7 +83,10 @@ export function resetDailyVenueDNA(state:DailyVenueSwipeState):DailyVenueSwipeSt
  // DNA resets, NOT the 8-card quota or the active 24-hour timer.
  return {...state,votes:{}};
 }
+const weightsCache=new WeakMap<TasteFeedback,Record<TasteTag,number>>();
 export function getVenueDnaWeights(votes:TasteFeedback):Record<TasteTag,number>{
+ const cached=weightsCache.get(votes);
+ if(cached)return cached;
  const weights=Object.fromEntries(TASTE_TAGS.map(tag=>[tag,0])) as Record<TasteTag,number>;
  for(const [id,decision] of Object.entries(votes)){
   if(decision==='skip')continue;
@@ -92,6 +95,7 @@ export function getVenueDnaWeights(votes:TasteFeedback):Record<TasteTag,number>{
   const direction=decision==='like'?1:-1;
   for(const tag of place.tasteTags) weights[tag]+=direction/place.tasteTags.length;
  }
+ weightsCache.set(votes,weights);
  return weights;
 }
 export function getDailyVenueDnaSummary(votes:TasteFeedback){
