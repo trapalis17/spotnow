@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import {useCallback,useMemo,useState} from 'react';
+import {useFocusEffect} from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GooglePlacesResults } from '../../components/GooglePlacesResults';
+import { VibeTasteSwipe } from '../../components/VibeTasteSwipe';
+import {getDnaSummary,type TasteDecision,type TasteFeedback} from '../../lib/vibe-dna';
+import {getTasteFeedback,saveTasteFeedback,clearTasteFeedback} from '../../lib/storage';
 import { Colors, Spacing } from '../../constants/theme';
 import { useSearchArea } from '../../hooks/useSearchArea';
 import { AREAS } from '../../lib/places';
@@ -26,6 +30,24 @@ export default function HomeScreen(){
  const [mood,setMood]=useState('');
  const [discoveryMode,setDiscoveryMode]=useState<'list'|'map'|'swipe'>('swipe');
  const [showAllAreas,setShowAllAreas]=useState(false);
+ const [tasteFeedback,setTasteFeedback]=useState<TasteFeedback>({});
+ const [tasteOpen,setTasteOpen]=useState(false);
+ const [tasteView,setTasteView]=useState<'cards'|'dna'>('cards');
+ useFocusEffect(useCallback(()=>{
+   let active=true;
+   getTasteFeedback().then(saved=>{if(active)setTasteFeedback(saved);}).catch(()=>undefined);
+   return ()=>{active=false;};
+ },[]));
+ const tasteSummary=useMemo(()=>getDnaSummary(tasteFeedback),[tasteFeedback]);
+ const openTaste=(view:'cards'|'dna')=>{setTasteView(view);setTasteOpen(true);};
+ const voteTaste=(id:string,decision:TasteDecision)=>{
+   setTasteFeedback(previous=>{
+     const next={...previous,[id]:decision};
+     saveTasteFeedback(next).catch(()=>undefined);
+     return next;
+   });
+ };
+ const resetTaste=()=>{setTasteFeedback({});clearTasteFeedback().catch(()=>undefined);};
  const areas=showAllAreas?AREAS:AREAS.slice(0,5);
  return <ScrollView style={styles.page} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
    <View style={styles.brand}>
@@ -34,6 +56,29 @@ export default function HomeScreen(){
    </View>
    <Text style={styles.headline}>Πού πάμε<Text style={{color:Colors.violet}}> σήμερα;</Text></Text>
    <Text style={styles.intro}>3 βήματα για να βρεις το spot σου · Demo preview.</Text>
+   <LinearGradient colors={['#E7DFFF','#FFEAF2','#E8F8EC']}
+     start={{x:0,y:0}} end={{x:1,y:1}} style={styles.tasteEntry}>
+     <View style={styles.tasteTop}>
+       <View style={styles.tasteSymbol}><Ionicons name="sparkles" size={24} color={Colors.violet}/></View>
+       <Text style={styles.tasteKicker}>NEW ✳ PREFERENCE LEARNING</Text>
+       <View style={styles.tasteDots}><Text style={styles.tasteDotsText}>♥ × ↷</Text></View>
+     </View>
+     <Text style={styles.tasteTitle}>Vibe Swipe <Text style={{color:Colors.violet}}>✳</Text></Text>
+     <Text style={styles.tasteDescription}>Ποια αισθητική είναι η φάση σου; Κάνε swipe σε moods, όχι μαγαζιά, και δες το Vibe DNA σου να εξελίσσεται.</Text>
+     <View style={styles.tasteMeta}>
+       <Ionicons name="finger-print-outline" color={Colors.violet} size={15}/>
+       <Text style={styles.tasteMetaText}>{tasteSummary.ratedCount} / 24 concepts explored · {tasteSummary.meaningfulCount} taste signals</Text>
+     </View>
+     <View style={styles.tasteActions}>
+       <Pressable style={styles.tasteStart} onPress={()=>openTaste('cards')} accessibilityRole="button">
+         <Text style={styles.tasteStartText}>{tasteSummary.ratedCount?'Continue swiping':'Start swiping'} ↗</Text>
+       </Pressable>
+       <Pressable style={styles.tasteReview} onPress={()=>openTaste('dna')} accessibilityRole="button">
+         <Text style={styles.tasteReviewText}>My Vibe DNA</Text>
+         <Ionicons name="arrow-forward-outline" color={Colors.violet} size={16}/>
+       </Pressable>
+     </View>
+   </LinearGradient>
 
    <View style={styles.step}>
      <NumberLabel n={1} title="Τι έχεις όρεξη;"/>
@@ -86,7 +131,7 @@ export default function HomeScreen(){
      <View style={styles.toggle}>
        {([
         {id:'list',label:'Λίστα',icon:'list'},
-        {id:'swipe',label:'Swipe',icon:'albums-outline'},
+        {id:'swipe',label:'Swipe spots',icon:'albums-outline'},
         {id:'map',label:'Χάρτης',icon:'map-outline'},
        ] as const).map(item=><Pressable key={item.id} onPress={()=>setDiscoveryMode(item.id)}
          accessibilityRole="button" accessibilityState={{selected:discoveryMode===item.id}}
@@ -97,10 +142,12 @@ export default function HomeScreen(){
        </Pressable>)}
      </View>
    </View>
-   {discoveryMode==='swipe'?<Text style={styles.swipeIntro}>Swipe δεξιά για ♥, αριστερά για × — και οι προτάσεις γίνονται πιο δικές σου.</Text>:null}
-   <GooglePlacesResults area={area} filter={category} prompt={mood}
+   {discoveryMode==='swipe'?<Text style={styles.swipeIntro}>Swipe demo spots για αποθήκευση ή pass. Το Vibe Swipe πιο πάνω μαθαίνει τις αισθητικές σου προτιμήσεις.</Text>:null}
+   <GooglePlacesResults area={area} filter={category} prompt={mood} tasteFeedback={tasteFeedback}
      compact={discoveryMode==='list'} mapMode={discoveryMode==='map'}
      swipeMode={discoveryMode==='swipe'} hideHeading/>
+   <VibeTasteSwipe visible={tasteOpen} initialView={tasteView} feedback={tasteFeedback}
+     onVote={voteTaste} onReset={resetTaste} onClose={()=>setTasteOpen(false)}/>
  </ScrollView>;
 }
 const styles=StyleSheet.create({
@@ -142,4 +189,21 @@ const styles=StyleSheet.create({
  toggleText:{color:Colors.text,fontSize:11,fontWeight:'800'},
  toggleTextActive:{color:'#fff'},
  swipeIntro:{fontSize:12,color:Colors.muted,lineHeight:19,marginTop:8},
+ tasteEntry:{borderRadius:25,padding:17,overflow:'hidden',marginBottom:19,borderWidth:1,borderColor:'rgba(112,74,177,.13)'},
+ tasteTop:{flexDirection:'row',alignItems:'center',gap:8,marginBottom:12},
+ tasteSymbol:{backgroundColor:'rgba(255,255,255,.8)',height:36,width:36,alignItems:'center',justifyContent:'center',borderRadius:12},
+ tasteKicker:{color:Colors.violet,fontSize:9,fontWeight:'900',letterSpacing:1.1,flex:1},
+ tasteDots:{paddingHorizontal:9,paddingVertical:6,borderRadius:25,backgroundColor:'rgba(255,255,255,.8)'},
+ tasteDotsText:{fontSize:13,color:Colors.rose,fontWeight:'900'},
+ tasteTitle:{color:Colors.text,fontSize:25,fontWeight:'900',letterSpacing:-1},
+ tasteDescription:{fontSize:12,color:Colors.text,lineHeight:19,marginTop:7,marginBottom:12,maxWidth:350},
+ tasteMeta:{flexDirection:'row',alignItems:'center',gap:7,marginBottom:14},
+ tasteMetaText:{fontSize:11,color:Colors.muted,fontWeight:'800'},
+ tasteActions:{flexDirection:'row',alignItems:'center',gap:8},
+ tasteStart:{flex:1,backgroundColor:Colors.violet,borderRadius:13,alignItems:'center',paddingVertical:13,paddingHorizontal:11},
+ tasteStartText:{color:'#fff',fontSize:12,fontWeight:'900'},
+ tasteReview:{flex:1,flexDirection:'row',gap:5,alignItems:'center',justifyContent:'center',
+   borderRadius:13,borderWidth:1,borderColor:'rgba(102,69,191,.24)',paddingVertical:13,paddingHorizontal:8,
+   backgroundColor:'rgba(255,255,255,.68)'},
+ tasteReviewText:{fontSize:11,color:Colors.violet,fontWeight:'900'},
 });
