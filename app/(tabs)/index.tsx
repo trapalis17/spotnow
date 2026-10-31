@@ -1,4 +1,4 @@
-import {useCallback,useMemo,useState} from 'react';
+import {useCallback,useMemo,useRef,useState} from 'react';
 import {useFocusEffect} from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -31,23 +31,36 @@ export default function HomeScreen(){
  const [discoveryMode,setDiscoveryMode]=useState<'list'|'map'|'swipe'>('swipe');
  const [showAllAreas,setShowAllAreas]=useState(false);
  const [tasteFeedback,setTasteFeedback]=useState<TasteFeedback>({});
+ const tasteRef=useRef<TasteFeedback>({});
+ const tasteEditVersion=useRef(0);
  const [tasteOpen,setTasteOpen]=useState(false);
  const [tasteView,setTasteView]=useState<'cards'|'dna'>('cards');
  useFocusEffect(useCallback(()=>{
    let active=true;
-   getTasteFeedback().then(saved=>{if(active)setTasteFeedback(saved);}).catch(()=>undefined);
+   const version=tasteEditVersion.current;
+   getTasteFeedback().then(saved=>{
+     if(active&&tasteEditVersion.current===version){
+       tasteRef.current=saved;
+       setTasteFeedback(saved);
+     }
+   }).catch(()=>undefined);
    return ()=>{active=false;};
  },[]));
  const tasteSummary=useMemo(()=>getDnaSummary(tasteFeedback),[tasteFeedback]);
  const openTaste=(view:'cards'|'dna')=>{setTasteView(view);setTasteOpen(true);};
  const voteTaste=(id:string,decision:TasteDecision)=>{
-   setTasteFeedback(previous=>{
-     const next={...previous,[id]:decision};
-     saveTasteFeedback(next).catch(()=>undefined);
-     return next;
-   });
+   tasteEditVersion.current+=1;
+   const next={...tasteRef.current,[id]:decision};
+   tasteRef.current=next;
+   setTasteFeedback(next);
+   saveTasteFeedback(next).catch(()=>undefined);
  };
- const resetTaste=()=>{setTasteFeedback({});clearTasteFeedback().catch(()=>undefined);};
+ const resetTaste=()=>{
+   tasteEditVersion.current+=1;
+   tasteRef.current={};
+   setTasteFeedback({});
+   clearTasteFeedback().catch(()=>undefined);
+ };
  const areas=showAllAreas?AREAS:AREAS.slice(0,5);
  return <ScrollView style={styles.page} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
    <View style={styles.brand}>
