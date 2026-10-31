@@ -7,7 +7,13 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Το Vibe ζητά την τοποθεσία σου μόνο για να προτείνει τις 7 κοντινότερες περιοχές κατά την εγγραφή."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
