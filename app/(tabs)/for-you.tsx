@@ -5,6 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Colors,Gradients,Spacing} from '../../constants/theme';
 import {ForYouVenueCard} from '../../components/ForYouVenueCard';
+import {trackDemoEvent} from '../../lib/demo-analytics';
 import {getDemoPlaces} from '../../lib/demo-places';
 import {getForYouMatches,filterForYouMatches,type ForYouCategory} from '../../lib/for-you';
 import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
@@ -63,12 +64,13 @@ export default function ForYouScreen(){
  const displayName=profile?.name?caps(profile.name):'you';
  const budgetName=preferences.budget>=60?'60€+':preferences.budget+'€';
 
- const openVenue=(id:string)=>router.push({pathname:'/google-venue',params:{id}});
+ const openVenue=(id:string)=>{trackDemoEvent('recommendation_opened',id);router.push({pathname:'/google-venue',params:{id}});};
  const save=async(id:string)=>{
    if(saveLock.current.has(id))return;
    saveLock.current.add(id);
    try{
      const updated=await toggleSavedVenue('google-'+id);
+     trackDemoEvent('venue_save_toggled',id);
      setSavedIds(updated);
    }catch{setError('Δεν αποθηκεύτηκε η αλλαγή στα αγαπημένα. Δοκίμασε ξανά.');}
    finally{saveLock.current.delete(id);}
