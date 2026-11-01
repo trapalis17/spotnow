@@ -122,7 +122,7 @@ export default function HomeScreen(){
        ] as const).map(item=><Pressable key={item.id} onPress={()=>setDiscoveryMode(item.id)}
          accessibilityRole="button" accessibilityState={{selected:discoveryMode===item.id}}
          style={[styles.toggleBtn,discoveryMode===item.id&&styles.toggleActive]}
-         accessibilityLabel={item.id==='swipe'?'Swipe προτάσεις με like και pass':item.label}>
+         accessibilityLabel={item.label}>
          <Ionicons name={item.icon} size={17} color={discoveryMode===item.id?'#fff':Colors.text}/>
          <Text style={[styles.toggleText,discoveryMode===item.id&&styles.toggleTextActive]}>{item.label}</Text>
        </Pressable>)}
