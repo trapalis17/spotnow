@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
-import {Modal,Pressable,ScrollView,StyleSheet,Text,View,Image} from 'react-native';
+import {Modal,Pressable,ScrollView,StyleSheet,Text,View,Image,PanResponder} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {TASTE_CARDS,getPendingTasteCards,getDnaSummary,type TasteFeedback,type TasteDecision} from '../lib/vibe-dna';
 import {getTasteFeedback,saveTasteFeedback,clearTasteFeedback} from '../lib/storage';
@@ -19,6 +19,10 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
    setFeedback(next);
    saveTasteFeedback(next).catch(()=>undefined);
  };
+ const pan=useMemo(()=>PanResponder.create({
+   onMoveShouldSetPanResponder:(_,g)=>Math.abs(g.dx)>22&&Math.abs(g.dx)>Math.abs(g.dy),
+   onPanResponderRelease:(_,g)=>{if(g.dx>75)vote('like');else if(g.dx< -75)vote('dislike');}
+ }),[active?.id,feedback]);
  const reset=()=>{setFeedback({});clearTasteFeedback().catch(()=>undefined);};
  return <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
   <View style={s.root}>
@@ -34,7 +38,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
     <Text style={s.kicker}>LEARN YOUR TASTE · NOT VENUE SEARCH</Text>
     <Text style={s.title}>What feels like you?</Text>
     <Text style={s.body}>Swipe through moods and spaces, not specific shops. Your preferences shape For You.</Text>
-    {active?<View style={s.card}>
+    {active?<View style={s.card} {...pan.panHandlers}>
       <Image source={{uri:active.image}} style={s.image} resizeMode="cover"/>
       <Text style={s.title}>{active.title}</Text>
       <Text style={s.body}>{active.subtitle}</Text>
