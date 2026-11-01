@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect,useRouter } from 'expo-router';
 import { useCallback,useMemo,useRef,useState } from 'react';
 import { ActivityIndicator,Pressable,StyleSheet,Text,View } from 'react-native';
@@ -35,7 +36,7 @@ export function GooglePlacesResults({area,compact=false,prompt='',query='',filte
  ),[places,preferences,prompt,area,filter,query,tasteFeedback]);
  const personalized=useMemo(()=>personalizeMatches(ranked,feedback),[ranked,feedback]);
  const recommended=useMemo(()=>personalized.filter(x=>feedback[x.place.id]!=='pass'),[personalized,feedback]);
- const shown=mapMode?recommended.slice(0,3):compact&&!expanded?recommended.slice(0,5):recommended;
+ const shown=compact&&!expanded?recommended.slice(0,5):recommended;
  const open=(id:string)=>router.push({pathname:'/google-venue',params:{id}});
  const save=async(id:string)=>setSavedIds(await toggleSavedVenue('google-'+id));
  const vote=(id:string,decision:SwipeDecision)=>{
@@ -56,13 +57,13 @@ export function GooglePlacesResults({area,compact=false,prompt='',query='',filte
    </View>
    <Text style={styles.total}>{loading?'…':ranked.length}</Text>
   </View>:null}
-  {loading?<View style={styles.loading}><ActivityIndicator color={Colors.lime}/><Text style={styles.muted}>Φορτώνουμε τα demo spots…</Text></View>:null}
+  {loading?<View style={styles.loading}><ActivityIndicator color={Colors.violet}/><Text style={styles.muted}>Φορτώνουμε τα demo spots…</Text></View>:null}
   {error?<Text style={styles.error}>Δεν φορτώνουν τα demo δεδομένα: {error}. Δοκίμασε άλλη περιοχή.</Text>:null}
   {!loading&&!error&&mapMode?<GooglePinsMap area={area} places={recommended.map(x=>x.place)} onSelect={open}/>:null}
   {!loading&&!error&&swipeMode?<SwipeDiscovery matches={personalized} feedback={feedback}
     onVote={vote} onReset={resetVotes} onOpen={open}/>:null}
-  {!loading&&!error&&!swipeMode&&shown.length===0?<Text style={styles.muted}>Δεν βρέθηκαν αποτελέσματα για αυτό το vibe ή το φίλτρο.</Text>:null}
-  {!swipeMode&&shown.map(match=><GoogleVenueCard key={match.place.id} match={match} saved={savedIds.includes('google-'+match.place.id)}
+  {!loading&&!error&&!swipeMode&&recommended.length===0?<View style={styles.empty}><Ionicons name="search-outline" size={28} color={Colors.violet}/><Text style={styles.emptyTitle}>No spots found</Text><Text style={styles.muted}>Δοκίμασε άλλο φίλτρο ή άλλη περιοχή.</Text></View>:null}
+  {!mapMode&&!swipeMode&&shown.map(match=><GoogleVenueCard key={match.place.id} match={match} saved={savedIds.includes('google-'+match.place.id)}
    onPress={()=>open(match.place.id)} onSave={()=>save(match.place.id)}/>)}
   {compact&&!mapMode&&!swipeMode&&!expanded&&recommended.length>5?<Pressable onPress={()=>setExpanded(true)} style={styles.showMore} accessibilityRole="button"><Text style={styles.showMoreText}>Περισσότερα μαγαζιά  ({recommended.length})  ↓</Text></Pressable>:null}
   {!swipeMode?<Text style={styles.legal}>Demo venues (φανταστικά) · Ενδεικτικό Vibe match, όχι πραγματική αξιολόγηση.</Text>:null}
@@ -70,6 +71,8 @@ export function GooglePlacesResults({area,compact=false,prompt='',query='',filte
  </View>;
 }
 const styles=StyleSheet.create({
+ empty:{backgroundColor:'#F0ECFA',alignItems:'center',padding:28,borderRadius:20,gap:5,marginBottom:12},
+ emptyTitle:{fontSize:17,fontWeight:'900',color:Colors.text,marginTop:7},
  container:{marginTop:14},heading:{marginBottom:15,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
  eyebrow:{color:Colors.lime,fontSize:10,fontWeight:'900',letterSpacing:1.2,marginBottom:6},
  title:{color:Colors.text,fontSize:20,fontWeight:'900',letterSpacing:-.5},
