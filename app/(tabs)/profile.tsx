@@ -5,20 +5,24 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { PrimaryButton, SecondaryButton } from '../../components/PrimaryButton';
 import { Colors, Gradients, Spacing } from '../../constants/theme';
-import { clearUser, getPreferences, getUser } from '../../lib/storage';
+import { clearUser, getPreferences, getUser, getTasteFeedback, clearTasteFeedback } from '../../lib/storage';
+import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
 import type { UserPreferences, UserProfile } from '../../types';
 
 export default function ProfileScreen(){
  const router=useRouter();
  const [user,setUser]=useState<UserProfile|null>(null);
  const [prefs,setPrefs]=useState<UserPreferences|null>(null);
+ const [taste,setTaste]=useState<TasteFeedback>({});
  const [signingOut,setSigningOut]=useState(false);
  const [logoutError,setLogoutError]=useState('');
  useFocusEffect(useCallback(()=>{
   getUser().then(setUser).catch(()=>undefined);
   getPreferences().then(setPrefs).catch(()=>undefined);
+  getTasteFeedback().then(setTaste).catch(()=>undefined);
  },[]));
  const display=user?.name||'Vibe explorer';
+ const dna=getDnaSummary(taste);
  const logout=async()=>{
   if(signingOut)return;
   setSigningOut(true);setLogoutError('');
@@ -44,6 +48,12 @@ export default function ProfileScreen(){
     <Text style={styles.areas}>{prefs?.neighborhoods?.length?prefs.neighborhoods.join(' · '):'Δεν έχεις επιλέξει περιοχές'}</Text>
    </View>
   </View>
+  <View style={styles.card}>
+   <View style={styles.row}><Ionicons name="finger-print-outline" size={24} color={Colors.violet}/><Text style={styles.heading}>Your Vibe DNA</Text></View>
+   <Text style={styles.dnaSubtitle}>{dna.meaningfulCount} taste signals · Προφίλ προτιμήσεων, όχι αξιολόγηση προσωπικότητας</Text>
+   {dna.positives.length?dna.positives.map(x=><View style={styles.dnaRow} key={x.tag}><Text style={styles.dnaName}>{x.label}</Text><View style={styles.dnaTrack}><View style={[styles.dnaFill,{width:(Math.min(100,Math.max(5,x.weight*45))+'%') as any}]}/></View></View>):<Text style={styles.dnaSubtitle}>Κάνε Taste Swipe στο Ανακάλυψε για να ξεκινήσει το Vibe DNA.</Text>}
+   <Pressable onPress={()=>{clearTasteFeedback().then(()=>setTaste({})).catch(()=>undefined);}} style={{marginTop:18}} accessibilityRole="button"><Text style={{color:Colors.violet,fontWeight:'800'}}>Reset Vibe DNA</Text></Pressable>
+  </View>
   <PrimaryButton label="Άλλαξε τις προτιμήσεις σου" onPress={()=>router.push({pathname:'/onboarding',params:{mode:'edit',from:'profile'}})}/>
   <View style={{height:12}}/>
   <SecondaryButton label={signingOut?'Αποσύνδεση…':'Αποσύνδεση'} onPress={logout}/>
@@ -52,6 +62,10 @@ export default function ProfileScreen(){
  </ScrollView>;
 }
 const styles=StyleSheet.create({
+ dnaSubtitle:{fontSize:12,color:Colors.muted,lineHeight:19,marginTop:14},
+ dnaRow:{marginTop:15,gap:6},dnaName:{fontSize:13,color:Colors.text,fontWeight:'700'},
+ dnaTrack:{height:7,backgroundColor:'#F0EAFB',borderRadius:20,overflow:'hidden'},
+ dnaFill:{height:'100%',backgroundColor:Colors.violet,borderRadius:20},
  page:{flex:1,backgroundColor:Colors.background},
  content:{paddingHorizontal:Spacing.lg,paddingTop:39,paddingBottom:60},
  title:{fontSize:34,color:Colors.text,fontWeight:'900',letterSpacing:-1.3,marginBottom:24},
