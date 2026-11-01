@@ -100,14 +100,6 @@ export default function GoogleVenueProfile(){
    </View>:null}
 
    <View style={styles.main}>
-    <View style={styles.visitCard}>
-      <Text style={styles.visitHeading}>Was it your vibe? ✳</Text>
-      <Text style={styles.visitBody}>Έχεις επισκεφθεί το συγκεκριμένο demo spot; Το feedback είναι προαιρετικό και αποθηκεύεται μόνο στη συσκευή.</Text>
-      {!confirmedVisit&&!visitFeedback?<Pressable style={styles.visitButton} onPress={()=>setConfirmedVisit(true)}><Text style={styles.visitButtonText}>Ναι, το επισκέφθηκα</Text></Pressable>:null}
-      {confirmedVisit||visitFeedback?<View style={styles.feedbackRow}>
-        {([['yes','Loved it'],['kind-of','Kind of'],['no','Not really']] as const).map(([key,label])=><Pressable key={key} onPress={()=>{setVisitFeedback(key);saveVisitFeedback(place.id,key).catch(()=>undefined);}} style={[styles.feedbackChoice,visitFeedback===key&&styles.feedbackSelected]}><Text style={styles.feedbackText}>{label}</Text></Pressable>)}
-      </View>:null}
-    </View>
     <View style={styles.facts}>
      {place.rating!==undefined?<View style={styles.fact}>
        <Ionicons name="star" size={17} color="#ECAB29"/>
@@ -141,7 +133,7 @@ export default function GoogleVenueProfile(){
 
     <LinearGradient colors={['#F0EAFE','#F7F1FF']} style={styles.vibePanel}>
      <View style={styles.panelIcon}><Ionicons name="sparkles" size={22} color={Colors.violet}/></View>
-     <Text style={styles.panelTitle}>Τι vibe έχει;</Text>
+     <Text style={styles.panelTitle}>The vibe</Text>
      <Text style={styles.vibeTitle}>{vibe?.label}</Text>
      <View style={styles.tags}>
        {vibe?.tags.slice(0,5).map(tag=><View key={tag} style={styles.tag}><Text style={styles.tagText}>{tag}</Text></View>)}
@@ -152,7 +144,7 @@ export default function GoogleVenueProfile(){
 
     {place.editorialSummary?<Text style={styles.summary}>{place.editorialSummary}</Text>:null}
     {amenities.length||place.accessibility?.length?<View style={styles.section}>
-      <Text style={styles.sectionTitle}>Τι θα βρεις εδώ</Text>
+      <Text style={styles.sectionTitle}>Highlights</Text>
       <View style={styles.amenities}>
        {amenities.map(({key,name,icon})=><View key={key} style={styles.amenity}>
         <Ionicons name={icon} size={17} color={Colors.violet}/>
@@ -164,7 +156,7 @@ export default function GoogleVenueProfile(){
 
     {place.weekdayDescriptions?.length?<View style={styles.section}>
       <Pressable style={styles.sectionToggle} onPress={()=>setShowHours(v=>!v)} accessibilityRole="button" accessibilityState={{expanded:showHours}}>
-       <View style={styles.sectionToggleLabel}><Ionicons name="time-outline" size={21} color={Colors.violet}/><Text style={styles.sectionTitle}>Ωράριο λειτουργίας</Text></View>
+       <View style={styles.sectionToggleLabel}><Ionicons name="time-outline" size={21} color={Colors.violet}/><Text style={styles.sectionTitle}>Opening hours</Text></View>
        <Ionicons name={showHours?'chevron-up':'chevron-down'} size={20} color={Colors.text}/>
       </Pressable>
       {showHours?<View style={styles.hours}>{place.weekdayDescriptions.map((line,i)=>
@@ -172,7 +164,7 @@ export default function GoogleVenueProfile(){
      </View>:null}
 
     <View style={styles.section}>
-     <View style={styles.sectionToggleLabel}><Ionicons name="location-outline" size={21} color={Colors.violet}/><Text style={styles.sectionTitle}>Τοποθεσία</Text></View>
+     <View style={styles.sectionToggleLabel}><Ionicons name="location-outline" size={21} color={Colors.violet}/><Text style={styles.sectionTitle}>Location</Text></View>
      <Text style={styles.street}>{place.address??'Προβολή στο Google Maps'}</Text>
      <Pressable style={styles.mapToggle} onPress={()=>setShowMap(v=>!v)} accessibilityRole="button">
       <Text style={styles.mapToggleText}>{showMap?'Κλείσιμο χάρτη':'Δες το στον χάρτη'}</Text>
@@ -181,15 +173,23 @@ export default function GoogleVenueProfile(){
      {showMap?<GooglePinsMap area={{id:'venue',label:place.name,latitude:place.latitude,longitude:place.longitude}}
        places={[place]} onSelect={()=>open(place.googleMapsUrl)}/>:null}
     </View>
+    <View style={styles.visitCard}>
+      <Text style={styles.visitHeading}>Was it your vibe? ✳</Text>
+      <Text style={styles.visitBody}>Έχεις επισκεφθεί το συγκεκριμένο demo spot; Το feedback είναι προαιρετικό και αποθηκεύεται μόνο στη συσκευή.</Text>
+      {!confirmedVisit&&!visitFeedback?<Pressable style={styles.visitButton} onPress={()=>setConfirmedVisit(true)}><Text style={styles.visitButtonText}>Ναι, το επισκέφθηκα</Text></Pressable>:null}
+      {confirmedVisit||visitFeedback?<View style={styles.feedbackRow}>
+        {([['yes','Loved it'],['kind-of','Kind of'],['no','Not really']] as const).map(([key,label])=><Pressable key={key} onPress={()=>{setVisitFeedback(key);saveVisitFeedback(place.id,key).catch(()=>undefined);}} style={[styles.feedbackChoice,visitFeedback===key&&styles.feedbackSelected]}><Text style={styles.feedbackText}>{label}</Text></Pressable>)}
+      </View>:null}
+    </View>
     <Text style={styles.googleCredit}>Demo καταχώριση — τα χαρακτηριστικά είναι ενδεικτικά, όχι πραγματικά δεδομένα.</Text>
    </View>
   </View>:null}
  </ScrollView>;
 }
 const styles=StyleSheet.create({
- visitCard:{borderRadius:20,backgroundColor:'#F1EAFE',padding:17,marginBottom:16},
+ visitCard:{borderRadius:20,backgroundColor:'#F1EAFE',padding:17,marginTop:19,marginBottom:16},
  visitHeading:{fontSize:17,fontWeight:'900',color:Colors.text},
- visitBody:{fontSize:12,lineHeight:19,color:Colors.muted,marginVertical:9},
+ visitBody:{fontSize:13,lineHeight:20,color:Colors.muted,marginVertical:9},
  visitButton:{backgroundColor:Colors.violet,borderRadius:13,padding:12,alignItems:'center'},
  visitButtonText:{fontSize:12,color:'#fff',fontWeight:'800'},
  feedbackRow:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:7},
