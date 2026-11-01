@@ -9,7 +9,7 @@ import {getDemoPlaces} from '../../lib/demo-places';
 import {getForYouMatches,filterForYouMatches,type ForYouCategory} from '../../lib/for-you';
 import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
 import {DEFAULT_AREA,getSelectedArea,type SearchArea} from '../../lib/places';
-import {defaultPreferences,getTasteFeedback,getPreferences,getSavedVenueIds,getUser,toggleSavedVenue} from '../../lib/storage';
+import {defaultPreferences,getTasteFeedback,getPreferences,getSavedVenueIds,getUser,toggleSavedVenue,getVisitFeedback,type VisitFeedback} from '../../lib/storage';
 import type {UserPreferences,UserProfile} from '../../types';
 
 const choices=[
@@ -27,6 +27,7 @@ export default function ForYouScreen(){
  const [selectedArea,setSelectedArea]=useState<SearchArea>(DEFAULT_AREA);
  const [profile,setProfile]=useState<UserProfile|null>(null);
  const [savedIds,setSavedIds]=useState<string[]>([]);
+ const [visits,setVisits]=useState<Record<string,VisitFeedback>>({});
  const [category,setCategory]=useState<ForYouCategory>('all');
  const [budgetOnly,setBudgetOnly]=useState(true);
  const [onlyMyAreas,setOnlyMyAreas]=useState(false);
@@ -38,10 +39,10 @@ export default function ForYouScreen(){
    let active=true;
    setLoading(true);setError('');
    Promise.all([
-     getPreferences(),getTasteFeedback(),getSelectedArea(),getSavedVenueIds(),getUser()
-   ]).then(([prefs,dna,area,saved,user])=>{
+     getPreferences(),getTasteFeedback(),getSelectedArea(),getSavedVenueIds(),getUser(),getVisitFeedback()
+   ]).then(([prefs,dna,area,saved,user,visitData])=>{
      if(!active)return;
-     setPreferences(prefs);setTaste(dna);setSelectedArea(area);setSavedIds(saved);setProfile(user);
+     setPreferences(prefs);setTaste(dna);setSelectedArea(area);setSavedIds(saved);setProfile(user);setVisits(visitData);
    }).catch(()=>{
      if(active)setError('Δεν μπορέσαμε να φορτώσουμε όλες τις αποθηκευμένες επιλογές. Δείχνουμε προσωρινά τα demo δεδομένα.');
    }).finally(()=>{if(active)setLoading(false);});
@@ -49,8 +50,8 @@ export default function ForYouScreen(){
  },[]));
 
  const places=useMemo(()=>getDemoPlaces(selectedArea),[selectedArea]);
- const fullMatches=useMemo(()=>getForYouMatches(places,preferences,selectedArea,taste,savedIds),
-   [places,preferences,selectedArea,taste,savedIds]);
+ const fullMatches=useMemo(()=>getForYouMatches(places,preferences,selectedArea,taste,savedIds,visits),
+   [places,preferences,selectedArea,taste,savedIds,visits]);
  const picks=useMemo(()=>filterForYouMatches(fullMatches,category,budgetOnly,onlyMyAreas),
    [fullMatches,category,budgetOnly,onlyMyAreas]);
  const dnaSummary=useMemo(()=>getDnaSummary(taste),[taste]);
