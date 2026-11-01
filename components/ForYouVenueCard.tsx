@@ -3,7 +3,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import type {ForYouMatch} from '../lib/for-you';
 import {venueCategoryLabel} from '../lib/for-you';
-import {Colors} from '../constants/theme';
+import {Colors,Radius} from '../constants/theme';
 
 type Props={
  match:ForYouMatch;variant?:'featured'|'portrait'|'row';
@@ -116,12 +116,12 @@ const styles=StyleSheet.create({
  heroName:{color:'#fff',fontSize:32,fontWeight:'900',letterSpacing:-1.1,lineHeight:37},
  heroReason:{color:'rgba(255,255,255,.90)',fontSize:13,lineHeight:18,marginTop:7,marginBottom:15},
  heroBottomRow:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
- heroMatch:{flexDirection:'row',gap:8,alignItems:'center',paddingHorizontal:12,paddingVertical:10,backgroundColor:'rgba(255,255,255,.17)',borderWidth:1,borderColor:'rgba(255,255,255,.25)',borderRadius:13},
+ heroMatch:{flexDirection:'row',gap:6,alignItems:'center',paddingHorizontal:12,paddingVertical:10,backgroundColor:'rgba(255,255,255,.17)',borderWidth:1,borderColor:'rgba(255,255,255,.25)',borderRadius:Radius.pill,flexShrink:1},
  heroMatchText:{color:'#fff',fontSize:12,fontWeight:'900'},
  arrowCircle:{width:41,height:41,borderRadius:14,backgroundColor:Colors.limeSoft,alignItems:'center',justifyContent:'center'},
  portrait:{width:225,backgroundColor:'#fff',borderRadius:22,overflow:'hidden',borderWidth:1,borderColor:Colors.border,marginRight:12,marginBottom:6},
  portraitTop:{flexDirection:'row',justifyContent:'space-between',padding:12},
- portraitMatch:{backgroundColor:'rgba(255,255,255,.96)',borderRadius:12,paddingHorizontal:9,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:4,height:36},
+ portraitMatch:{backgroundColor:'rgba(255,255,255,.96)',borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:4,height:36},
  portraitMatchText:{fontWeight:'900',fontSize:12,color:Colors.violet},
  portraitTags:{marginTop:'auto',paddingHorizontal:11,paddingBottom:11,flexDirection:'row',gap:6},
  photoTag:{backgroundColor:'rgba(20,10,35,.54)',borderRadius:20,paddingHorizontal:8,paddingVertical:6},
@@ -140,5 +140,5 @@ const styles=StyleSheet.create({
  rowName:{flex:1,fontSize:16,fontWeight:'900',color:Colors.text,letterSpacing:-.3},
  rowWhy:{fontSize:12,color:Colors.muted,marginTop:7,lineHeight:18},
  rowFooter:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:9},
- rowPercent:{fontWeight:'900',color:Colors.violet,fontSize:11}
+ rowPercent:{fontWeight:'900',color:Colors.violet,fontSize:11,backgroundColor:'#F2ECFF',paddingVertical:7,paddingHorizontal:11,borderRadius:Radius.pill,overflow:'hidden'}
 });
