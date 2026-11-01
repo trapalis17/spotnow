@@ -12,6 +12,8 @@ export default function SavedScreen(){
  const [ids,setIds]=useState<string[]>([]);
  const [collections,setCollections]=useState<SavedCollection[]>([]);
  const [newName,setNewName]=useState('');
+ const [renaming,setRenaming]=useState<string|null>(null);
+ const [renameValue,setRenameValue]=useState('');
  useFocusEffect(useCallback(()=>{getSavedVenueIds().then(setIds).catch(()=>setIds([]));getCollections().then(setCollections).catch(()=>undefined);},[]));
  const updateCollections=(next:SavedCollection[])=>{setCollections(next);saveCollections(next).catch(()=>undefined);};
  const addCollection=()=>{const name=newName.trim();if(!name)return;updateCollections([...collections,{id:'collection-'+Date.now().toString(36),name,venueIds:[]}]);setNewName('');};
@@ -25,7 +27,7 @@ export default function SavedScreen(){
   <View style={styles.collectionPanel}>
    <Text style={styles.collectionHeading}>My collections ✳</Text>
    <View style={styles.newCollection}><TextInput value={newName} onChangeText={setNewName} placeholder="New collection name" style={styles.collectionInput} placeholderTextColor={Colors.muted}/><Pressable accessibilityRole="button" onPress={addCollection} style={styles.addButton}><Ionicons name="add" size={23} color="#fff"/></Pressable></View>
-   {collections.map(c=><View key={c.id} style={styles.collectionRow}><View style={{flex:1}}><Text style={styles.collectionName}>{c.name}</Text><Text style={styles.collectionCount}>{c.venueIds.length} spots</Text></View><Pressable accessibilityRole="button" accessibilityLabel={'Διαγραφή '+c.name} onPress={()=>updateCollections(collections.filter(x=>x.id!==c.id))}><Ionicons name="trash-outline" size={19} color={Colors.rose}/></Pressable></View>)}
+   {collections.map(c=><View key={c.id} style={styles.collectionRow}><View style={{flex:1}}>{renaming===c.id?<TextInput style={styles.collectionInput} value={renameValue} onChangeText={setRenameValue} autoFocus onSubmitEditing={()=>{const name=renameValue.trim();if(name)updateCollections(collections.map(x=>x.id===c.id?{...x,name}:x));setRenaming(null);}}/>:<Text style={styles.collectionName}>{c.name}</Text>}<Text style={styles.collectionCount}>{c.venueIds.length} spots</Text></View><Pressable onPress={()=>{if(renaming===c.id){const name=renameValue.trim();if(name)updateCollections(collections.map(x=>x.id===c.id?{...x,name}:x));setRenaming(null);}else{setRenaming(c.id);setRenameValue(c.name);}}} style={{padding:9}}><Ionicons name={renaming===c.id?'checkmark':'pencil-outline'} size={19} color={Colors.violet}/></Pressable><Pressable accessibilityRole="button" accessibilityLabel={'Διαγραφή '+c.name} onPress={()=>updateCollections(collections.filter(x=>x.id!==c.id))}><Ionicons name="trash-outline" size={19} color={Colors.rose}/></Pressable></View>)}
   </View>
   {!places.length?<LinearGradient colors={['#F0E9FF','#FDEBF4']} style={styles.empty}>
    <Ionicons name="heart-outline" size={42} color={Colors.rose}/>
