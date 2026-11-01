@@ -5,11 +5,11 @@ import {TASTE_CARDS,getPendingTasteCards,getDnaSummary,type TasteFeedback,type T
 import {getTasteFeedback,saveTasteFeedback,clearTasteFeedback} from '../lib/storage';
 import {Colors} from '../constants/theme';
 
-export function TasteConceptModal({visible,onClose}:{visible:boolean;onClose:()=>void}){
+export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible:boolean;onClose:()=>void;initialView?:'cards'|'dna'}){
  const [feedback,setFeedback]=useState<TasteFeedback>({});
  const [view,setView]=useState<'cards'|'dna'>('cards');
  const [hydrated,setHydrated]=useState(false);
- useEffect(()=>{if(visible){setHydrated(false);getTasteFeedback().then(x=>{setFeedback(x);setHydrated(true);}).catch(()=>setHydrated(true));}},[visible]);
+ useEffect(()=>{if(visible){setView(initialView);setHydrated(false);getTasteFeedback().then(x=>{setFeedback(x);setHydrated(true);}).catch(()=>setHydrated(true));}},[visible,initialView]);
  const pending=useMemo(()=>getPendingTasteCards(feedback),[feedback]);
  const summary=useMemo(()=>getDnaSummary(feedback),[feedback]);
  const active=pending[0];
