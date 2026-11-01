@@ -49,3 +49,14 @@ New **Για σένα / For You** bottom tab, following the existing Vibe purple
 - Previously created demo profiles are preserved on logout through a local account migration.
 
 The login/register forms remain frontend-only demos: passwords are not checked against a server or stored as credentials.
+
+## Vibe v2 frontend improvements (feature branch)
+- The top Discover entry opens an abstract **Taste Swipe**: aesthetic concepts and experiences, not venue discovery. It accepts right/left gestures and clickable Like / Dislike / Skip actions. Concept votes persist locally and the Vibe DNA can be reviewed or reset.
+- The separate venue Swipe Spots mode was removed from Discover to avoid competing swiping interfaces; List and Map remain.
+- **For You** now reads abstract taste feedback. Its taste match calculation excludes budget, preferred neighborhoods and travel distance, which remain separate sorting/filter criteria. When taste evidence is absent, cards avoid claiming a numeric match.
+- Profile displays the learned Vibe DNA and supports resetting it. Saved supports on-device collections; venue details allow voluntary post-visit feedback.
+- Onboarding no longer immediately requests GPS permission. The user explicitly triggers nearby suggestions; manual selection and the 30-area dataset remain available. Budget is labeled per person.
+- All data and features remain mock/local. No new backend, authentication service or venue API was added.
+- Regression tests are included in `tests/vibe-v2.test.ts` and can be run with `npm test` after dependencies are installed.
+
+**Limitations:** This branch has not been runtime-tested in Expo here. Collection UI currently supports creating/deleting collections and adding saved venues; renaming, visit-feedback-driven ranking, daily concept caps, a calibrated confidence model, and a production authentication flow remain future work. The 40 fictional venues are intentionally unchanged.
