@@ -43,8 +43,9 @@ function Photo({match,height,children}:{
 }
 export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props){
  const {place,score,areaLabel,tasteReasons,tasteTags}=match;
+ const scoreLabel=score>0?('≈'+score+'%'):'More data needed';
  if(variant==='featured')return <Pressable onPress={onPress} accessibilityRole="button"
-   accessibilityLabel={place.name+' · '+score+'% εκτιμώμενο Vibe Match'}
+   accessibilityLabel={place.name+' · '+(score>0?score+'% εκτιμώμενο Vibe Match':'Ανεπαρκή δεδομένα')}
    style={({pressed})=>[styles.featured,pressed&&styles.pressed]}>
    <Photo match={match} height={330}>
     <View style={styles.featuredTop}>
@@ -56,18 +57,18 @@ export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props
      <Text style={styles.heroName} numberOfLines={2}>{place.name}</Text>
      <Text style={styles.heroReason} numberOfLines={2}>{tasteReasons[0]}</Text>
      <View style={styles.heroBottomRow}>
-       <View style={styles.heroMatch}><Ionicons name="sparkles" size={16} color={Colors.limeSoft}/><Text style={styles.heroMatchText}>≈{score}% Vibe Match</Text></View>
+       <View style={styles.heroMatch}><Ionicons name="sparkles" size={16} color={Colors.limeSoft}/><Text style={styles.heroMatchText}>{scoreLabel} Vibe Match</Text></View>
        <View style={styles.arrowCircle}><Ionicons name="arrow-forward" size={19} color={Colors.text}/></View>
      </View>
     </View>
    </Photo>
   </Pressable>;
  if(variant==='portrait')return <Pressable onPress={onPress} accessibilityRole="button"
-   accessibilityLabel={place.name+' · '+score+'% εκτιμώμενο Vibe Match'}
+   accessibilityLabel={place.name+' · '+(score>0?score+'% εκτιμώμενο Vibe Match':'Ανεπαρκή δεδομένα')}
    style={({pressed})=>[styles.portrait,pressed&&styles.pressed]}>
    <Photo match={match} height={158}>
     <View style={styles.portraitTop}>
-     <View style={styles.portraitMatch}><Ionicons name="sparkles" color={Colors.violet} size={13}/><Text style={styles.portraitMatchText}>≈{score}%</Text></View>
+     <View style={styles.portraitMatch}><Ionicons name="sparkles" color={Colors.violet} size={13}/><Text style={styles.portraitMatchText}>{scoreLabel}</Text></View>
      <SaveHeart saved={saved} onSave={onSave}/>
     </View>
     <View style={styles.portraitTags}>
@@ -81,7 +82,7 @@ export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props
    </View>
   </Pressable>;
  return <Pressable onPress={onPress} accessibilityRole="button"
-  accessibilityLabel={place.name+' · '+score+'% εκτιμώμενο Vibe Match'}
+  accessibilityLabel={place.name+' · '+(score>0?score+'% εκτιμώμενο Vibe Match':'Ανεπαρκή δεδομένα')}
   style={({pressed})=>[styles.row,pressed&&styles.pressed]}>
   <View style={styles.rowPicture}>
    <Photo match={match} height={119}>
@@ -95,7 +96,7 @@ export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props
     </View>
     <View style={styles.areaRow}><Ionicons name="location-outline" size={13} color={Colors.muted}/><Text style={styles.smallArea} numberOfLines={1}>{areaLabel}</Text></View>
     <Text style={styles.rowWhy} numberOfLines={2}>{tasteReasons[0]}</Text>
-    <View style={styles.rowFooter}><Text style={styles.rowPercent}>✳ ≈{score}% match</Text><Ionicons name="arrow-forward-outline" color={Colors.violet} size={18}/></View>
+    <View style={styles.rowFooter}><Text style={styles.rowPercent}>✳ {scoreLabel} match</Text><Ionicons name="arrow-forward-outline" color={Colors.violet} size={18}/></View>
   </View>
  </Pressable>;
 }
