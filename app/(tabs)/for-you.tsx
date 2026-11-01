@@ -7,9 +7,9 @@ import {Colors,Gradients,Spacing} from '../../constants/theme';
 import {ForYouVenueCard} from '../../components/ForYouVenueCard';
 import {getDemoPlaces} from '../../lib/demo-places';
 import {getForYouMatches,filterForYouMatches,type ForYouCategory} from '../../lib/for-you';
-import {getDailyVenueDnaSummary,emptyDailyVenueSwipeState,type DailyVenueSwipeState} from '../../lib/daily-venue-swipe';
+import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
 import {DEFAULT_AREA,getSelectedArea,type SearchArea} from '../../lib/places';
-import {defaultPreferences,getDailyVenueSwipeState,getPreferences,getSavedVenueIds,getUser,toggleSavedVenue} from '../../lib/storage';
+import {defaultPreferences,getTasteFeedback,getPreferences,getSavedVenueIds,getUser,toggleSavedVenue} from '../../lib/storage';
 import type {UserPreferences,UserProfile} from '../../types';
 
 const choices=[
@@ -23,7 +23,7 @@ const caps=(name:string)=>name.trim().split(/\s+/)[0]||'you';
 export default function ForYouScreen(){
  const router=useRouter();
  const [preferences,setPreferences]=useState<UserPreferences>(defaultPreferences);
- const [daily,setDaily]=useState<DailyVenueSwipeState>(emptyDailyVenueSwipeState);
+ const [taste,setTaste]=useState<TasteFeedback>({});
  const [selectedArea,setSelectedArea]=useState<SearchArea>(DEFAULT_AREA);
  const [profile,setProfile]=useState<UserProfile|null>(null);
  const [savedIds,setSavedIds]=useState<string[]>([]);
@@ -38,10 +38,10 @@ export default function ForYouScreen(){
    let active=true;
    setLoading(true);setError('');
    Promise.all([
-     getPreferences(),getDailyVenueSwipeState(),getSelectedArea(),getSavedVenueIds(),getUser()
+     getPreferences(),getTasteFeedback(),getSelectedArea(),getSavedVenueIds(),getUser()
    ]).then(([prefs,dna,area,saved,user])=>{
      if(!active)return;
-     setPreferences(prefs);setDaily(dna);setSelectedArea(area);setSavedIds(saved);setProfile(user);
+     setPreferences(prefs);setTaste(dna);setSelectedArea(area);setSavedIds(saved);setProfile(user);
    }).catch(()=>{
      if(active)setError('Δεν μπορέσαμε να φορτώσουμε όλες τις αποθηκευμένες επιλογές. Δείχνουμε προσωρινά τα demo δεδομένα.');
    }).finally(()=>{if(active)setLoading(false);});
@@ -49,11 +49,11 @@ export default function ForYouScreen(){
  },[]));
 
  const places=useMemo(()=>getDemoPlaces(selectedArea),[selectedArea]);
- const fullMatches=useMemo(()=>getForYouMatches(places,preferences,selectedArea,daily.votes,savedIds),
-   [places,preferences,selectedArea,daily.votes,savedIds]);
+ const fullMatches=useMemo(()=>getForYouMatches(places,preferences,selectedArea,taste,savedIds),
+   [places,preferences,selectedArea,taste,savedIds]);
  const picks=useMemo(()=>filterForYouMatches(fullMatches,category,budgetOnly,onlyMyAreas),
    [fullMatches,category,budgetOnly,onlyMyAreas]);
- const dnaSummary=useMemo(()=>getDailyVenueDnaSummary(daily.votes),[daily.votes]);
+ const dnaSummary=useMemo(()=>getDnaSummary(taste),[taste]);
  const featured=picks[0];
  const carousel=picks.slice(1,6);
  const other=picks.slice(6,18);
@@ -105,7 +105,7 @@ export default function ForYouScreen(){
          <View key={label+'-'+i} style={styles.profileChip}><Text style={styles.profileChipText}>✳ {label}</Text></View>)}
      </View>
      <Pressable style={styles.learnMore} onPress={()=>router.push('/(tabs)')} accessibilityRole="button">
-       <Text style={styles.learnMoreText}>Make my vibe smarter · 8 swipes / 24h</Text>
+       <Text style={styles.learnMoreText}>Refine my Vibe DNA · Taste Swipe</Text>
        <Ionicons name="arrow-forward" size={17} color={Colors.violet}/>
      </Pressable>
    </View>
