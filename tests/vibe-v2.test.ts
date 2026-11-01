@@ -11,11 +11,11 @@ test('nearby selection returns exactly seven sorted areas',()=>{
  const a=closestAreas({latitude:37.944,longitude:23.7165},7);
  assert.equal(a.length,7);assert.equal(a[0].name,'Νέα Σμύρνη');
 });
-test('taste swipe uses non-venue concepts and supports negative feedback',()=>{
+test('taste swipe uses curated real venue names and supports negative feedback',()=>{
  assert.ok(TASTE_CARDS.length>=8);
- const liked=getTasteMatchAdjustment(['cozy'],{'cozy-intimate':'like'});
- const disliked=getTasteMatchAdjustment(['cozy'],{'cozy-intimate':'dislike'});
+ const liked=getTasteMatchAdjustment(['alternative'],{'real-six-dogs':'like'});
+ const disliked=getTasteMatchAdjustment(['alternative'],{'real-six-dogs':'dislike'});
  assert.ok(liked.delta>0);
  assert.ok(disliked.delta<0);
- assert.equal(getDnaSummary({'cozy-intimate':'skip'}).meaningfulCount,0);
+ assert.equal(getDnaSummary({'real-six-dogs':'skip'}).meaningfulCount,0);
 });
