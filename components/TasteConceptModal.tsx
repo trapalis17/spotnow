@@ -1,0 +1,75 @@
+import {useEffect,useMemo,useState} from 'react';
+import {Modal,Pressable,ScrollView,StyleSheet,Text,View,Image} from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import {TASTE_CARDS,getPendingTasteCards,getDnaSummary,type TasteFeedback,type TasteDecision} from '../lib/vibe-dna';
+import {getTasteFeedback,saveTasteFeedback,clearTasteFeedback} from '../lib/storage';
+import {Colors} from '../constants/theme';
+
+export function TasteConceptModal({visible,onClose}:{visible:boolean;onClose:()=>void}){
+ const [feedback,setFeedback]=useState<TasteFeedback>({});
+ const [view,setView]=useState<'cards'|'dna'>('cards');
+ const [hydrated,setHydrated]=useState(false);
+ useEffect(()=>{if(visible){setHydrated(false);getTasteFeedback().then(x=>{setFeedback(x);setHydrated(true);}).catch(()=>setHydrated(true));}},[visible]);
+ const pending=useMemo(()=>getPendingTasteCards(feedback),[feedback]);
+ const summary=useMemo(()=>getDnaSummary(feedback),[feedback]);
+ const active=pending[0];
+ const vote=(decision:TasteDecision)=>{
+   if(!active)return;
+   const next={...feedback,[active.id]:decision};
+   setFeedback(next);
+   saveTasteFeedback(next).catch(()=>undefined);
+ };
+ const reset=()=>{setFeedback({});clearTasteFeedback().catch(()=>undefined);};
+ return <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+  <View style={s.root}>
+   <View style={s.header}>
+    <Text style={s.brand}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text>
+    <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Κλείσιμο"><Ionicons name="close-circle-outline" size={30} color={Colors.text}/></Pressable>
+   </View>
+   <View style={s.switcher}>
+    <Pressable onPress={()=>setView('cards')} style={[s.tab,view==='cards'&&s.selected]}><Text style={s.tabText}>Taste swipe</Text></Pressable>
+    <Pressable onPress={()=>setView('dna')} style={[s.tab,view==='dna'&&s.selected]}><Text style={s.tabText}>My Vibe DNA</Text></Pressable>
+   </View>
+   {!hydrated?<Text style={s.body}>Loading preferences…</Text>:view==='cards'?<ScrollView contentContainerStyle={s.content}>
+    <Text style={s.kicker}>LEARN YOUR TASTE · NOT VENUE SEARCH</Text>
+    <Text style={s.title}>What feels like you?</Text>
+    <Text style={s.body}>Swipe through moods and spaces, not specific shops. Your preferences shape For You.</Text>
+    {active?<View style={s.card}>
+      <Image source={{uri:active.image}} style={s.image} resizeMode="cover"/>
+      <Text style={s.title}>{active.title}</Text>
+      <Text style={s.body}>{active.subtitle}</Text>
+      <Text style={s.tags}>{active.tags.slice(0,4).join(' · ')}</Text>
+      <View style={s.actions}>
+       <Pressable accessibilityRole="button" style={s.action} onPress={()=>vote('dislike')}><Ionicons name="close" size={25} color={Colors.rose}/><Text>Not mine</Text></Pressable>
+       <Pressable accessibilityRole="button" style={s.action} onPress={()=>vote('skip')}><Ionicons name="play-skip-forward" size={23} color={Colors.muted}/><Text>Skip</Text></Pressable>
+       <Pressable accessibilityRole="button" style={[s.action,s.like]} onPress={()=>vote('like')}><Ionicons name="heart" size={24} color={Colors.violet}/><Text>My vibe</Text></Pressable>
+      </View>
+    </View>:<View style={s.card}><Text style={s.title}>Your vibe is taking shape ✳</Text><Text style={s.body}>You've explored all available taste concepts.</Text><Pressable onPress={()=>setView('dna')}><Text style={s.link}>Explore Vibe DNA ↗</Text></Pressable></View>}
+    <Text style={s.footer}>{summary.ratedCount} / {TASTE_CARDS.length} concepts explored · You can come back any time</Text>
+   </ScrollView>:<ScrollView contentContainerStyle={s.content}>
+     <Text style={s.kicker}>YOUR TASTE PROFILE</Text>
+     <Text style={s.title}>Vibe DNA ✳</Text>
+     <Text style={s.body}>{summary.meaningfulCount} meaningful responses. This represents venue preferences, not a personality diagnosis.</Text>
+     <Text style={s.section}>Your top vibes</Text>
+     {summary.positives.length?summary.positives.map(x=><View key={x.tag} style={s.pill}><Text style={s.pillText}>✳ {x.label}</Text></View>):<Text style={s.body}>Like a few concepts to reveal your preferences.</Text>}
+     <Text style={s.section}>Less your vibe</Text>
+     {summary.negatives.length?summary.negatives.map(x=><View key={x.tag} style={s.pill}><Text style={s.pillText}>× {x.label}</Text></View>):<Text style={s.body}>No dislikes yet.</Text>}
+     <Pressable style={s.reset} onPress={reset}><Text style={s.link}>Reset learned taste preferences</Text></Pressable>
+   </ScrollView>}
+  </View>
+ </Modal>;
+}
+const s=StyleSheet.create({
+ root:{flex:1,backgroundColor:Colors.background},header:{paddingHorizontal:22,paddingTop:26,paddingBottom:15,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
+ brand:{fontSize:29,fontWeight:'900',color:Colors.text},switcher:{flexDirection:'row',gap:8,paddingHorizontal:18},
+ tab:{borderRadius:18,paddingVertical:12,paddingHorizontal:16,backgroundColor:'#EDE8F5'},selected:{backgroundColor:'#D9C7FA'},
+ tabText:{fontWeight:'800',color:Colors.violet},content:{paddingHorizontal:22,paddingTop:20,paddingBottom:56},
+ kicker:{fontSize:10,color:Colors.violet,fontWeight:'900',letterSpacing:1},title:{fontSize:27,fontWeight:'900',color:Colors.text,marginVertical:8},
+ body:{fontSize:14,color:Colors.muted,lineHeight:21},card:{backgroundColor:'#fff',padding:15,borderRadius:25,marginTop:22,borderWidth:1,borderColor:Colors.border},
+ image:{width:'100%',height:280,borderRadius:19},tags:{color:Colors.violet,fontSize:12,marginTop:11},
+ actions:{flexDirection:'row',justifyContent:'space-between',gap:6,marginTop:20},
+ action:{flex:1,alignItems:'center',paddingVertical:13,backgroundColor:'#F2EDF6',borderRadius:17,gap:5},
+ like:{backgroundColor:'#E5D6FB'},footer:{textAlign:'center',fontSize:11,color:Colors.muted,marginTop:19},
+ section:{fontSize:17,fontWeight:'900',color:Colors.text,marginTop:27,marginBottom:12},pill:{backgroundColor:'#E8DDF9',borderRadius:15,padding:14,marginVertical:4},
+ pillText:{fontSize:13,fontWeight:'800',color:Colors.violet},reset:{marginTop:35},link:{color:Colors.violet,fontWeight:'800'}
+});
