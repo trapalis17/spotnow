@@ -28,9 +28,9 @@ const s=StyleSheet.create({
  photo:{width:120,alignItems:'center',justifyContent:'center'},
  details:{flex:1,padding:14,gap:5},
  top:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
- category:{fontSize:11,fontWeight:'800',color:Colors.violet},
+ category:{fontSize:11,fontWeight:'800',color:Colors.violet,backgroundColor:'#F3EFFF',paddingVertical:6,paddingHorizontal:11,borderRadius:Radius.pill,overflow:'hidden'},
  name:{fontSize:17,fontWeight:'900',letterSpacing:-.3,color:Colors.text},
  area:{fontSize:12,color:Colors.muted},
  bottom:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:4},
- match:{fontSize:12,fontWeight:'900',color:Colors.violet}
+ match:{fontSize:12,fontWeight:'900',color:Colors.violet,backgroundColor:'#F2ECFF',paddingHorizontal:12,paddingVertical:7,borderRadius:Radius.pill,overflow:'hidden'}
 });
