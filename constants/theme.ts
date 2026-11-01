@@ -6,6 +6,8 @@ export const Colors={
  background:'#FAF8FF',backgroundAlt:'#F6F2FF',card:'#FFFFFF',cardSoft:'#F4F0FF',panel:'#FFFFFF',
  text:'#29243C',muted:'#6F6885',subtle:'#938CA7',
  violet:'#5B47D6',purple:'#5942C1',lavender:'#8B7CFF',lilac:'#EAE2FC',pink:'#F3D6FF',
+ // Compatibility tokens used by legacy screens; all now lavender based.
+ clay:'#8B7CFF',oat:'#FAF8FF',sand:'#EAE2FC',sage:'#DDF3B2',
  lime:'#506B35',limeSoft:'#DDF3B2',mint:'#44766A',rose:'#C75D93',orange:'#976B40',
  border:'rgba(91,71,214,0.12)',success:'#2C7C5C',warning:'#936A2D',danger:'#C54575',
 };
