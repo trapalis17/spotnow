@@ -112,9 +112,9 @@ const s=StyleSheet.create({
  nearText:{fontSize:12,fontWeight:'800',color:Colors.violet},
  areas:{gap:8,paddingBottom:22},
  area:{backgroundColor:'#fff',borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border,paddingVertical:11,paddingHorizontal:16},
- areaSelected:{backgroundColor:'#F0E9FF',borderColor:'#B9A5F7'},
+ areaSelected:{backgroundColor:'#F3E2D7',borderColor:'#B9A5F7'},
  areaText:{fontSize:12,color:Colors.muted,fontWeight:'700'},
- areaMore:{borderRadius:Radius.pill,backgroundColor:'#F0EAFE',paddingHorizontal:15,paddingVertical:11},resultsHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
- mode:{flexDirection:'row',gap:4,backgroundColor:'#F0EDF7',borderRadius:Radius.pill,padding:4},
+ areaMore:{borderRadius:Radius.pill,backgroundColor:'#F7EAE0',paddingHorizontal:15,paddingVertical:11},resultsHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
+ mode:{flexDirection:'row',gap:4,backgroundColor:'#F3EBE4',borderRadius:Radius.pill,padding:4},
  modeButton:{padding:10,borderRadius:Radius.pill},modeSelected:{backgroundColor:'#fff'}
 });

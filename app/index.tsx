@@ -17,7 +17,7 @@ export default function WelcomeScreen(){
    <LinearGradient colors={Gradients.hero} start={{x:0,y:0}} end={{x:1,y:1}} style={s.hero}>
     <View style={s.orb}/><View style={s.heroSymbol}><Ionicons name="sparkles-outline" size={31} color="#fff"/></View>
     <Text style={s.heroEyebrow}>NOT JUST ANOTHER PLACES APP</Text>
-    <Text style={s.heroTitle}>Find places that<Text style={{color:'#E9FBBE'}}> feel like you.</Text></Text>
+    <Text style={s.heroTitle}>Find places that<Text style={{color:'#F3EDCD'}}> feel like you.</Text></Text>
     <Text style={s.heroBody}>Discover cafés, bars & restaurants that match your vibe.</Text>
    </LinearGradient>
    <View style={s.benefits}>
@@ -47,7 +47,7 @@ const s=StyleSheet.create({
  heroBody:{fontSize:14,color:'rgba(255,255,255,.90)',lineHeight:22,marginTop:14},
  benefits:{paddingVertical:21,gap:17},
  benefit:{flexDirection:'row',alignItems:'center',gap:12},
- benefitIcon:{backgroundColor:'#F0EAFE',width:44,height:44,borderRadius:14,alignItems:'center',justifyContent:'center'},
+ benefitIcon:{backgroundColor:'#F7EAE0',width:44,height:44,borderRadius:14,alignItems:'center',justifyContent:'center'},
  benefitText:{flex:1},benefitTitle:{fontSize:14,fontWeight:'900',color:Colors.text},benefitDetail:{fontSize:12,color:Colors.muted,marginTop:4},
  actions:{marginTop:18},foot:{fontSize:11,color:Colors.muted,textAlign:'center',marginTop:21}
 });

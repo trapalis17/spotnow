@@ -81,7 +81,7 @@ const s=StyleSheet.create({
  progressHeader:{flexDirection:'row',justifyContent:'space-between',marginBottom:12,alignItems:'center'},
  kicker:{fontSize:10,fontWeight:'900',color:Colors.violet,letterSpacing:1.4},counter:{fontSize:12,fontWeight:'900',color:Colors.muted},
  progress:{flexDirection:'row',gap:6,marginBottom:28},
- progressSegment:{height:5,flex:1,borderRadius:6,backgroundColor:'#E6E0F1'},
+ progressSegment:{height:5,flex:1,borderRadius:6,backgroundColor:'#EADDD2'},
  progressOn:{backgroundColor:Colors.violet},
  title:{fontSize:Type.hero,lineHeight:41,color:Colors.text,fontWeight:'900',letterSpacing:-1.4},
  subtitle:{fontSize:14,color:Colors.muted,marginTop:8,lineHeight:21,marginBottom:25},
