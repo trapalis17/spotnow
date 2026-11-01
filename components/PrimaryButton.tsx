@@ -1,29 +1,23 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Gradients } from '../constants/theme';
-
-export function PrimaryButton({label,onPress,compact=false}: {label:string;onPress:()=>void;compact?:boolean}) {
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={({pressed})=>[styles.wrap,pressed&&{opacity:0.85}]}>
-      <LinearGradient colors={Gradients.vibe} start={{x:0,y:0}} end={{x:1,y:0}}
-        style={[styles.button,compact&&styles.compact]}>
-        <Text style={styles.primary}>{label}</Text>
-        <Text style={styles.arrow}>↗</Text>
-      </LinearGradient>
-    </Pressable>
-  );
+import {Pressable,StyleSheet,Text,View} from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import {Colors,Radius} from '../constants/theme';
+export function PrimaryButton({label,onPress,compact=false}:{label:string;onPress:()=>void;compact?:boolean}){
+ return <Pressable accessibilityRole="button" onPress={onPress} style={({pressed})=>[styles.primary,compact&&styles.compact,pressed&&styles.pressed]}>
+  <Text style={styles.primaryText}>{label}</Text><Ionicons name="arrow-forward" size={18} color="#fff"/>
+ </Pressable>;
 }
-export function SecondaryButton({label,onPress}:{label:string;onPress:()=>void}) {
-  return <Pressable onPress={onPress} accessibilityRole="button" style={styles.secondary}>
-    <Text style={styles.secondaryText}>{label}</Text>
-  </Pressable>;
+export function SecondaryButton({label,onPress}:{label:string;onPress:()=>void}){
+ return <Pressable accessibilityRole="button" onPress={onPress} style={({pressed})=>[styles.secondary,pressed&&styles.pressed]}>
+  <Text style={styles.secondaryText}>{label}</Text>
+ </Pressable>;
 }
 const styles=StyleSheet.create({
-  wrap:{borderRadius:18,overflow:'hidden'},
-  button:{minHeight:53,paddingHorizontal:18,paddingVertical:14,alignItems:'center',justifyContent:'space-between',flexDirection:'row',gap:10},
-  compact:{minHeight:45,paddingVertical:10},
-  primary:{color:'#151F12',fontSize:14,fontWeight:'900',letterSpacing:.1},
-  arrow:{color:'#151F12',fontSize:20,fontWeight:'800'},
-  secondary:{paddingHorizontal:18,paddingVertical:15,alignItems:'center',justifyContent:'center',borderRadius:18,backgroundColor:Colors.cardSoft,borderWidth:1,borderColor:Colors.border},
-  secondaryText:{fontWeight:'800',color:Colors.text,fontSize:14},
+ primary:{minHeight:54,backgroundColor:Colors.violet,borderRadius:Radius.md,paddingHorizontal:19,paddingVertical:14,
+  flexDirection:'row',alignItems:'center',justifyContent:'center',gap:11},
+ primaryText:{fontSize:15,fontWeight:'800',color:'#fff',letterSpacing:.1},
+ compact:{minHeight:44,paddingVertical:11},
+ pressed:{opacity:.85,transform:[{scale:.99}]},
+ secondary:{minHeight:50,borderRadius:Radius.md,alignItems:'center',justifyContent:'center',
+  backgroundColor:Colors.cardSoft,borderWidth:1,borderColor:Colors.border,paddingHorizontal:16,paddingVertical:13},
+ secondaryText:{fontWeight:'800',fontSize:14,color:Colors.violet}
 });
