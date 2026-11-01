@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {trackDemoEvent} from '../lib/demo-analytics';
 import {Modal,Pressable,ScrollView,StyleSheet,Text,View,Image,PanResponder} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {TASTE_CARDS,getPendingTasteCards,getDnaSummary,type TasteFeedback,type TasteDecision} from '../lib/vibe-dna';
@@ -22,6 +23,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
    if(!active)return;
    const next={...feedback,[active.id]:decision};
    setFeedback(next);
+   trackDemoEvent('vibe_card_'+(decision==='like'?'liked':decision==='dislike'?'disliked':'skipped'),active.id);
    saveTasteFeedback(next).catch(()=>undefined);
    const nextSession={startedAt:session.startedAt||Date.now(),count:session.count+1};
    setSession(nextSession);AsyncStorage.setItem(sessionKey,JSON.stringify(nextSession)).catch(()=>undefined);
