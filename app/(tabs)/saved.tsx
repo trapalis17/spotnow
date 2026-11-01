@@ -5,6 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Colors,Spacing} from '../../constants/theme';
 import {getSavedVenueIds,toggleSavedVenue,getCollections,saveCollections,type SavedCollection} from '../../lib/storage';
+import {trackDemoEvent} from '../../lib/demo-analytics';
 import {getDemoPlaceById} from '../../lib/demo-places';
 import type {GooglePlace} from '../../lib/google-places';
 export default function SavedScreen(){
@@ -16,7 +17,7 @@ export default function SavedScreen(){
  const [renameValue,setRenameValue]=useState('');
  useFocusEffect(useCallback(()=>{getSavedVenueIds().then(setIds).catch(()=>setIds([]));getCollections().then(setCollections).catch(()=>undefined);},[]));
  const updateCollections=(next:SavedCollection[])=>{setCollections(next);saveCollections(next).catch(()=>undefined);};
- const addCollection=()=>{const name=newName.trim();if(!name)return;updateCollections([...collections,{id:'collection-'+Date.now().toString(36),name,venueIds:[]}]);setNewName('');};
+ const addCollection=()=>{const name=newName.trim();if(!name)return;trackDemoEvent('collection_created');updateCollections([...collections,{id:'collection-'+Date.now().toString(36),name,venueIds:[]}]);setNewName('');};
  const addToCollection=(collectionId:string,venueId:string)=>{
    updateCollections(collections.map(c=>c.id!==collectionId?c:{...c,venueIds:c.venueIds.includes(venueId)?c.venueIds.filter(v=>v!==venueId):[...c.venueIds,venueId]}));
  };
