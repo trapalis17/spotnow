@@ -3,7 +3,7 @@ import {Platform,Pressable,StyleSheet,Text,TextInput,View} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Location from 'expo-location';
 import {PreferenceChip} from './PreferenceChip';
-import {Colors} from '../constants/theme';
+import {Colors,Radius} from '../constants/theme';
 import {
   REGIONS,NEIGHBORHOODS,canonicalArea,closestAreas,normalizeSearch,
   type CoordinatePoint,type Neighborhood,
@@ -146,14 +146,14 @@ const styles=StyleSheet.create({
  root:{width:'100%',marginBottom:10},
  head:{flexDirection:'row',alignItems:'center',gap:7,marginBottom:10,flexWrap:'wrap'},
  label:{color:Colors.text,fontWeight:'800',fontSize:13},
- count:{color:Colors.violet,fontSize:11,fontWeight:'800',marginLeft:'auto'},
+ count:{color:Colors.violet,fontSize:11,fontWeight:'800',marginLeft:'auto',backgroundColor:'#F1ECFF',borderRadius:Radius.pill,overflow:'hidden',paddingHorizontal:12,paddingVertical:6},
  info:{fontSize:12,color:Colors.muted,lineHeight:19,marginVertical:9},
  referenceRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:12},
  referenceText:{fontSize:11,color:Colors.muted,flex:1},
  change:{fontSize:11,color:Colors.violet,fontWeight:'900',padding:6},
  smallHeading:{fontSize:12,color:Colors.muted,fontWeight:'700',marginBottom:11},
  chips:{flexDirection:'row',flexWrap:'wrap'},
- more:{backgroundColor:'#F1EDFF',borderRadius:14,borderColor:Colors.border,borderWidth:1,
+ more:{backgroundColor:'#F1EDFF',borderRadius:Radius.pill,borderColor:Colors.border,borderWidth:1,
    paddingVertical:13,paddingHorizontal:15,alignItems:'center',marginTop:5,marginBottom:12},
  moreText:{color:Colors.violet,fontWeight:'900',fontSize:12},
  expanded:{width:'100%',paddingTop:1},
