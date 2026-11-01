@@ -39,11 +39,11 @@ export default function ProfileScreen(){
   </View>
   <View style={s.section}><Text style={s.sectionTitle}>Preferences</Text><Pressable onPress={()=>router.push({pathname:'/onboarding',params:{mode:'edit',from:'profile'}})} accessibilityRole="button"><Text style={s.edit}>Edit <Ionicons name="arrow-forward" size={14}/></Text></Pressable></View>
   <View style={s.prefCard}>
-   <View style={s.infoRow}><View style={s.prefIcon}><Ionicons name="sparkles-outline" color={Colors.violet} size={19}/></View><View style={s.infoMain}><Text style={s.infoLabel}>Your style</Text><Text style={s.infoValue}>{prefs?.moods?.length?prefs.moods.slice(0,3).join(' · '):'Not selected'}</Text></View></View>
+   <View style={s.infoRow}><View style={s.prefIcon}><Ionicons name="sparkles-outline" color={Colors.violet} size={19}/></View><View style={s.infoMain}><Text style={s.infoLabel}>Your style</Text><View style={s.preferencePills}>{prefs?.moods?.length?prefs.moods.slice(0,3).map(m=><Text key={m} style={s.preferencePill}>{m}</Text>):<Text style={s.infoValue}>Not selected</Text>}</View></View></View>
    <View style={s.divider}/>
-   <View style={s.infoRow}><View style={s.prefIcon}><Ionicons name="location-outline" color={Colors.violet} size={19}/></View><View style={s.infoMain}><Text style={s.infoLabel}>Your areas</Text><Text style={s.infoValue}>{prefs?.neighborhoods?.length?prefs.neighborhoods.slice(0,3).join(' · ')+(prefs.neighborhoods.length>3?' +'+(prefs.neighborhoods.length-3):''):'Not selected'}</Text></View></View>
+   <View style={s.infoRow}><View style={s.prefIcon}><Ionicons name="location-outline" color={Colors.violet} size={19}/></View><View style={s.infoMain}><Text style={s.infoLabel}>Your areas</Text><View style={s.preferencePills}>{prefs?.neighborhoods?.length?<>{prefs.neighborhoods.slice(0,2).map(a=><Text key={a} style={s.preferencePill}>{a}</Text>)}{prefs.neighborhoods.length>2?<Text style={s.preferencePill}>+{prefs.neighborhoods.length-2}</Text>:null}</>:<Text style={s.infoValue}>Not selected</Text>}</View></View></View>
    <View style={s.divider}/>
-   <View style={s.infoRow}><View style={s.prefIcon}><Ionicons name="wallet-outline" color={Colors.violet} size={19}/></View><View style={s.infoMain}><Text style={s.infoLabel}>Budget per person</Text><Text style={s.infoValue}>{budget}</Text></View></View>
+   <View style={s.infoRow}><View style={s.prefIcon}><Ionicons name="wallet-outline" color={Colors.violet} size={19}/></View><View style={s.infoMain}><Text style={s.infoLabel}>Budget per person</Text><Text style={s.budgetPill}>{budget}</Text></View></View>
   </View>
   <View style={s.section}><Text style={s.sectionTitle}>Account</Text></View>
   <Pressable onPress={logout} accessibilityRole="button" style={({pressed})=>[s.logout,pressed&&{opacity:.75}]}><Ionicons name="log-out-outline" size={20} color={Colors.danger}/><Text style={s.logoutText}>{busy?'Signing out…':'Log out'}</Text><Ionicons name="chevron-forward" color={Colors.muted} size={19}/></Pressable>
@@ -77,6 +77,9 @@ const s=StyleSheet.create({
  infoRow:{flexDirection:'row',alignItems:'center',gap:13,paddingVertical:9},
  prefIcon:{width:42,height:42,backgroundColor:'#F1EBFF',borderRadius:13,alignItems:'center',justifyContent:'center'},
  infoMain:{flex:1},infoLabel:{fontSize:12,color:Colors.muted},infoValue:{color:Colors.text,fontWeight:'800',fontSize:14,marginTop:3,lineHeight:20},
+ preferencePills:{flexDirection:'row',flexWrap:'wrap',gap:6,marginTop:7},
+ preferencePill:{fontSize:12,fontWeight:'800',color:Colors.violet,backgroundColor:'#F1EBFF',paddingHorizontal:12,paddingVertical:7,borderRadius:Radius.pill,overflow:'hidden'},
+ budgetPill:{alignSelf:'flex-start',marginTop:7,fontSize:13,fontWeight:'900',color:Colors.violet,backgroundColor:'#F1EBFF',paddingHorizontal:15,paddingVertical:8,borderRadius:Radius.pill,overflow:'hidden'},
  divider:{height:1,backgroundColor:Colors.border,marginVertical:5},
  logout:{flexDirection:'row',alignItems:'center',gap:12,minHeight:57,paddingHorizontal:18,backgroundColor:'#fff',borderRadius:Radius.md,borderWidth:1,borderColor:Colors.border},
  logoutText:{flex:1,color:Colors.danger,fontSize:14,fontWeight:'800'},
