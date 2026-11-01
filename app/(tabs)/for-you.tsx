@@ -7,7 +7,7 @@ import {Colors,Gradients,Spacing,Radius,Type} from '../../constants/theme';
 import {ForYouVenueCard} from '../../components/ForYouVenueCard';
 import {trackDemoEvent} from '../../lib/demo-analytics';
 import {getDemoPlaces} from '../../lib/demo-places';
-import {getForYouMatches,filterForYouMatches,type ForYouCategory} from '../../lib/for-you';
+import {getForYouMatches,filterForYouMatches,curateForYouSections,type ForYouCategory} from '../../lib/for-you';
 import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
 import {DEFAULT_AREA,getSelectedArea,type SearchArea} from '../../lib/places';
 import {defaultPreferences,getTasteFeedback,getPreferences,getSavedVenueIds,getUser,toggleSavedVenue,getVisitFeedback,type VisitFeedback} from '../../lib/storage';
@@ -43,7 +43,8 @@ export default function ForYouScreen(){
  const matches=useMemo(()=>getForYouMatches(places,preferences,area,taste,savedIds,visits),[places,preferences,area,taste,savedIds,visits]);
  const picks=useMemo(()=>filterForYouMatches(matches,category,budgetOnly,onlyMyAreas),[matches,category,budgetOnly,onlyMyAreas]);
  const dna=useMemo(()=>getDnaSummary(taste),[taste]);
- const featured=picks[0],next=picks.slice(1,5),others=picks.slice(5,15);
+ const sections=useMemo(()=>curateForYouSections(picks),[picks]);
+ const {topPick:featured,perfect,hiddenGems,tryDifferent,more}=sections;
  const name=user?.name?.trim().split(' ')[0]||'you';
  const openVenue=(id:string)=>{trackDemoEvent('recommendation_opened',id);router.push({pathname:'/google-venue',params:{id}});};
  const save=async(id:string)=>{
@@ -78,15 +79,25 @@ export default function ForYouScreen(){
    {render(featured,'featured')}
    <View style={s.why}><Ionicons name="sparkles-outline" size={17} color={Colors.violet}/><Text style={s.whyText}>{featured.tasteReasons[0]}</Text></View>
   </View>:null}
-  {!loading&&next.length>0?<View style={s.block}>
-   <View style={s.section}><Text style={s.sectionTitle}>Next on your radar</Text><Text style={s.sectionMeta}>{next.length} SPOTS</Text></View>
-   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingRight:Spacing.lg,paddingBottom:7}}>
-    {next.map(item=>render(item,'portrait'))}
+  {!loading&&perfect.length>0?<View style={s.block}>
+   <View style={s.section}><View style={s.sectionHeading}><Text style={s.sectionTitle}>Perfect for you</Text><Text style={s.sectionHint}>Τα πιο κοντινά στο γούστο σου.</Text></View><Text style={s.sectionMeta}>{perfect.length} PICKS</Text></View>
+   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.horizontalCards}>
+    {perfect.map(item=>render(item,'portrait'))}
    </ScrollView>
   </View>:null}
-  {!loading&&others.length>0?<View style={s.block}>
+  {!loading&&hiddenGems.length>0?<View style={s.block}>
+   <View style={s.section}><View style={s.sectionHeading}><Text style={s.sectionTitle}>Hidden gems</Text><Text style={s.sectionHint}>Μέρη έξω από τις συνήθεις περιοχές σου.</Text></View><Ionicons name="compass-outline" size={19} color={Colors.violet}/></View>
+   {hiddenGems.map(item=>render(item,'row'))}
+  </View>:null}
+  {!loading&&tryDifferent.length>0?<View style={s.block}>
+   <View style={s.section}><View style={s.sectionHeading}><Text style={s.sectionTitle}>Try something different</Text><Text style={s.sectionHint}>Άλλη κατηγορία, νέο vibe.</Text></View><Ionicons name="shuffle-outline" size={19} color={Colors.violet}/></View>
+   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.horizontalCards}>
+    {tryDifferent.map(item=>render(item,'portrait'))}
+   </ScrollView>
+  </View>:null}
+  {!loading&&more.length>0?<View style={s.block}>
    <View style={s.section}><Text style={s.sectionTitle}>More your vibe</Text><Text style={s.sectionMeta}>EXPLORE</Text></View>
-   {others.map(item=>render(item,'row'))}
+   {more.map(item=>render(item,'row'))}
   </View>:null}
   {!loading&&!picks.length?<View style={s.empty}>
     <Ionicons name="options-outline" size={37} color={Colors.violet}/>
@@ -94,7 +105,7 @@ export default function ForYouScreen(){
     <Text style={s.hint}>Άνοιξε λίγο τις επιλογές σου για να δεις περισσότερα μέρη.</Text>
     <Pressable style={s.clear} onPress={()=>{setCategory('all');setBudgetOnly(false);setOnlyMyAreas(false);}} accessibilityRole="button"><Text style={s.clearText}>Clear filters</Text></Pressable>
   </View>:null}
-  <Text style={s.footer}>Demo recommendations · Φανταστικά καταστήματα και εκτιμώμενα ποσοστά συμβατότητας.</Text>
+  <Text style={s.footer}>Demo recommendations · Φανταστικά καταστήματα. Το Hidden gems σημαίνει προτάσεις εκτός των προτιμώμενων περιοχών σου, όχι επιβεβαιωμένη δημοτικότητα.</Text>
  </ScrollView>;
 }
 const s=StyleSheet.create({
@@ -121,6 +132,9 @@ const s=StyleSheet.create({
  edit:{marginLeft:'auto',padding:10,borderRadius:12,backgroundColor:Colors.cardSoft},
  section:{marginBottom:15,marginTop:9,flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10},
  sectionTitle:{fontSize:Type.section,fontWeight:'900',color:Colors.text,letterSpacing:-.6},
+ sectionHeading:{flex:1,gap:5},
+ sectionHint:{fontSize:12,lineHeight:17,color:Colors.muted},
+ horizontalCards:{paddingBottom:7,paddingRight:Spacing.lg},
  sectionMeta:{fontSize:9,color:Colors.violet,letterSpacing:.8,fontWeight:'900'},
  why:{flexDirection:'row',alignItems:'center',gap:9,padding:14,borderRadius:15,backgroundColor:'#F1EDFC',marginTop:9},
  whyText:{fontSize:12,lineHeight:18,color:Colors.text,flex:1},
