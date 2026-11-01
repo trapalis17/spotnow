@@ -50,7 +50,7 @@ export default function HomeScreen(){
        <View style={styles.tasteDots}><Text style={styles.tasteDotsText}>♥ × ↷</Text></View>
      </View>
      <Text style={styles.tasteTitle}>Vibe Swipe <Text style={{color:Colors.violet}}>✳</Text></Text>
-     <Text style={styles.tasteDescription}>Κάνε swipe σε αισθητικές, ατμόσφαιρες και εμπειρίες. Μαθαίνουμε τι σου αρέσει για καλύτερες προτάσεις — όχι για να ψάχνεις μαγαζιά.</Text>
+     <Text style={styles.tasteDescription}>Κάνε swipe σε πραγματικά μαγαζιά της Αθήνας. Τα likes και dislikes βοηθούν το Vibe να καταλάβει τις προτιμήσεις σου, όχι να κλείσεις τραπέζι.</Text>
      <View style={styles.tasteMeta}>
        <Ionicons name="finger-print-outline" color={Colors.violet} size={15}/>
        <Text style={styles.tasteMetaText}>{tasteCount} concepts explored · πάντα διαθέσιμο</Text>
