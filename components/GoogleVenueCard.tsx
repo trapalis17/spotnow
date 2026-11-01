@@ -84,7 +84,7 @@ const styles=StyleSheet.create({
  body:{paddingHorizontal:17,paddingTop:16,paddingBottom:18},
  gridBody:{paddingHorizontal:12,paddingTop:12,paddingBottom:13,minHeight:103},
  name:{fontSize:22,fontWeight:'900',letterSpacing:-.65,color:Colors.text,lineHeight:28},
- gridName:{fontSize:15,fontWeight:'850',letterSpacing:-.3,lineHeight:19,minHeight:19},
+ gridName:{fontSize:15,fontWeight:'800',letterSpacing:-.3,lineHeight:19,minHeight:19},
  locationRow:{flexDirection:'row',gap:5,alignItems:'center',marginTop:7},
  area:{fontSize:13,color:Colors.muted,flex:1},
  gridArea:{fontSize:11},
