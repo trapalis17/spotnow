@@ -42,8 +42,9 @@ function Photo({match,height,children}:{
  </View>;
 }
 export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props){
- const {place,score,areaLabel,tasteReasons,tasteTags}=match;
+ const {place,score,areaLabel,tasteReasons,tasteTags,matchConfidence}=match;
  const scoreLabel=score>0?('≈'+score+'%'):'More data needed';
+ const confidenceLabel=matchConfidence==='high'?'More signals':matchConfidence==='medium'?'Early estimate':'Limited data';
  if(variant==='featured')return <Pressable onPress={onPress} accessibilityRole="button"
    accessibilityLabel={place.name+' · '+(score>0?score+'% εκτιμώμενο Vibe Match':'Ανεπαρκή δεδομένα')}
    style={({pressed})=>[styles.featured,pressed&&styles.pressed]}>
@@ -57,7 +58,7 @@ export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props
      <Text style={styles.heroName} numberOfLines={2}>{place.name}</Text>
      <Text style={styles.heroReason} numberOfLines={2}>{tasteReasons[0]}</Text>
      <View style={styles.heroBottomRow}>
-       <View style={styles.heroMatch}><Ionicons name="sparkles" size={16} color={Colors.limeSoft}/><Text style={styles.heroMatchText}>{scoreLabel} Vibe Match</Text></View>
+       <View style={styles.heroMatch}><Ionicons name="sparkles" size={16} color={Colors.limeSoft}/><Text style={styles.heroMatchText}>{scoreLabel} Vibe Match · {confidenceLabel}</Text></View>
        <View style={styles.arrowCircle}><Ionicons name="arrow-forward" size={19} color={Colors.text}/></View>
      </View>
     </View>
