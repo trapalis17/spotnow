@@ -12,7 +12,7 @@ import type {VisitFeedback} from './storage';
 export type ForYouCategory='all'|'cafe'|'restaurant'|'bar';
 export type ForYouMatch=PlaceMatch&{
   areaLabel:string;nearbyKm:number;inBudget:boolean;preferredArea:boolean;
-  tasteReasons:string[];tasteTags:TasteTag[];isLiked:boolean;rankScore:number;
+  tasteReasons:string[];tasteTags:TasteTag[];isLiked:boolean;rankScore:number;matchConfidence:'low'|'medium'|'high';
 };
 
 const fold=(text:string)=>text.toLocaleLowerCase('el-GR')
@@ -104,9 +104,11 @@ export function getForYouMatches(
    const score=tasteEvidence===0||tags.length===0?0:Math.max(20,Math.min(95,Math.round(
      50+validTags.length*8+Math.max(-25,Math.min(25,dna.delta))+visitDelta
    )));
+   const meaningfulSwipes=Object.values(votes).filter(x=>x!=='skip').length;
+   const matchConfidence:ForYouMatch['matchConfidence']=tasteEvidence===0||tags.length<2?'low':meaningfulSwipes>=8&&tags.length>=4?'high':'medium';
    const rankBoost=(preferredArea?15:0)+(inBudget?9:-15)+Math.max(0,12-Math.round(nearbyKm*1.6))+(isLiked?4:0);
    return {
-     ...match,score,rankScore:score+rankBoost,areaLabel,nearbyKm,inBudget,preferredArea,isLiked,
+     ...match,score,matchConfidence,rankScore:score+rankBoost,areaLabel,nearbyKm,inBudget,preferredArea,isLiked,
      tasteReasons:reasons.slice(0,3),tasteTags:tags
    };
  }).filter(item=>votes[item.place.id]!=='dislike')
