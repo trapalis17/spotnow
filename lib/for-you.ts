@@ -6,6 +6,8 @@ import {rankGooglePlaces,type PlaceMatch} from './place-intelligence';
 import {getTasteMatchAdjustment} from './vibe-dna';
 import {canonicalArea} from './attica-neighborhoods';
 import {distanceKm} from './places';
+import {getDemoPlaceById} from './demo-places';
+import type {VisitFeedback} from './storage';
 
 export type ForYouCategory='all'|'cafe'|'restaurant'|'bar';
 export type ForYouMatch=PlaceMatch&{
@@ -62,12 +64,19 @@ export function tastesFromSignup(preferences:UserPreferences):TasteTag[]{
 
 export function getForYouMatches(
  places:GooglePlace[],preferences:UserPreferences,area:SearchArea,
- votes:TasteFeedback,savedIds:readonly string[]=[]
+ votes:TasteFeedback,savedIds:readonly string[]=[],visitFeedback:Record<string,VisitFeedback>={}
 ):ForYouMatch[]{
  const baseline=rankGooglePlaces(places,preferences,'',area,votes);
  const wanted=new Set(tastesFromSignup(preferences));
  const preferredAreas=new Set(preferences.neighborhoods.map(n=>fold(canonicalArea(n))));
  const saved=new Set(savedIds);
+ const visitTags:Record<string,number>={};
+ for(const [id,vote] of Object.entries(visitFeedback)){
+   const visited=getDemoPlaceById(id);
+   if(!visited?.tasteTags)continue;
+   const weight=vote==='yes'?1:vote==='no'?-1:0;
+   for(const tag of visited.tasteTags)visitTags[tag]=(visitTags[tag]??0)+weight/visited.tasteTags.length;
+ }
  return baseline.map(match=>{
    const {place}=match;
    const areaLabel=venueAreaLabel(place);
@@ -89,9 +98,11 @@ export function getForYouMatches(
    // Match % measures demo taste affinity ONLY; area, budget, distance and favorites rank separately.
    const validTags=tags.filter(tag=>wanted.has(tag));
    const learnedTags=tags.filter(tag=>Math.abs(dna.delta)>0);
-   const tasteEvidence=wanted.size+Object.keys(votes).length;
+   const tasteEvidence=wanted.size+Object.keys(votes).length+Object.keys(visitFeedback).length;
+   const visitDelta=Math.max(-15,Math.min(15,Math.round(tags.reduce((acc,t)=>acc+(visitTags[t]??0),0)*9)));
+   if(visitDelta>0)reasons.push('Μοιάζει με μέρη που αξιολόγησες θετικά');
    const score=tasteEvidence===0||tags.length===0?0:Math.max(20,Math.min(95,Math.round(
-     50+validTags.length*8+Math.max(-25,Math.min(25,dna.delta))
+     50+validTags.length*8+Math.max(-25,Math.min(25,dna.delta))+visitDelta
    )));
    const rankBoost=(preferredArea?15:0)+(inBudget?9:-15)+Math.max(0,12-Math.round(nearbyKm*1.6))+(isLiked?4:0);
    return {
