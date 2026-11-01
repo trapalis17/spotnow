@@ -8,7 +8,7 @@ import { isGooglePlaceId } from '../lib/google-places';
 import { getDemoPlaceById } from '../lib/demo-places';
 import type { GooglePlace } from '../lib/google-places';
 import { inferPlaceVibe } from '../lib/place-intelligence';
-import { getSavedVenueIds, toggleSavedVenue } from '../lib/storage';
+import { getSavedVenueIds, toggleSavedVenue, getVisitFeedback, saveVisitFeedback, type VisitFeedback } from '../lib/storage';
 import { GooglePinsMap } from '../components/GooglePinsMap';
 
 const priceText:Record<string,string>={
@@ -39,6 +39,8 @@ export default function GoogleVenueProfile(){
  const [saved,setSaved]=useState(false);
  const [showHours,setShowHours]=useState(false);
  const [showMap,setShowMap]=useState(false);
+ const [confirmedVisit,setConfirmedVisit]=useState(false);
+ const [visitFeedback,setVisitFeedback]=useState<VisitFeedback|null>(null);
  const [retry,setRetry]=useState(0);
  useEffect(()=>{
   const placeId=typeof id==='string'?id:'';
@@ -48,6 +50,7 @@ export default function GoogleVenueProfile(){
   setLoading(false);
   setShowHours(false);setShowMap(false);
   getSavedVenueIds().then(ids=>setSaved(ids.includes('google-'+placeId))).catch(()=>undefined);
+  getVisitFeedback().then(items=>setVisitFeedback(items[placeId]??null)).catch(()=>undefined);
  },[id,retry]);
  const open=(_url?:string|null)=>{Alert.alert('Demo preview','Οι οδηγίες και τα εξωτερικά links θα συνδεθούν σε επόμενο στάδιο.');};
  const vibe=place?inferPlaceVibe(place):null;
@@ -97,6 +100,14 @@ export default function GoogleVenueProfile(){
    </View>:null}
 
    <View style={styles.main}>
+    <View style={styles.visitCard}>
+      <Text style={styles.visitHeading}>Was it your vibe? ✳</Text>
+      <Text style={styles.visitBody}>Έχεις επισκεφθεί το συγκεκριμένο demo spot; Το feedback είναι προαιρετικό και αποθηκεύεται μόνο στη συσκευή.</Text>
+      {!confirmedVisit&&!visitFeedback?<Pressable style={styles.visitButton} onPress={()=>setConfirmedVisit(true)}><Text style={styles.visitButtonText}>Ναι, το επισκέφθηκα</Text></Pressable>:null}
+      {confirmedVisit||visitFeedback?<View style={styles.feedbackRow}>
+        {([['yes','Loved it'],['kind-of','Kind of'],['no','Not really']] as const).map(([key,label])=><Pressable key={key} onPress={()=>{setVisitFeedback(key);saveVisitFeedback(place.id,key).catch(()=>undefined);}} style={[styles.feedbackChoice,visitFeedback===key&&styles.feedbackSelected]}><Text style={styles.feedbackText}>{label}</Text></Pressable>)}
+      </View>:null}
+    </View>
     <View style={styles.facts}>
      {place.rating!==undefined?<View style={styles.fact}>
        <Ionicons name="star" size={17} color="#ECAB29"/>
@@ -176,6 +187,15 @@ export default function GoogleVenueProfile(){
  </ScrollView>;
 }
 const styles=StyleSheet.create({
+ visitCard:{borderRadius:20,backgroundColor:'#F1EAFE',padding:17,marginBottom:16},
+ visitHeading:{fontSize:17,fontWeight:'900',color:Colors.text},
+ visitBody:{fontSize:12,lineHeight:19,color:Colors.muted,marginVertical:9},
+ visitButton:{backgroundColor:Colors.violet,borderRadius:13,padding:12,alignItems:'center'},
+ visitButtonText:{fontSize:12,color:'#fff',fontWeight:'800'},
+ feedbackRow:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:7},
+ feedbackChoice:{borderWidth:1,borderColor:Colors.border,borderRadius:12,padding:10,backgroundColor:'#fff'},
+ feedbackSelected:{borderColor:Colors.violet,backgroundColor:'#DFD0F9'},
+ feedbackText:{color:Colors.violet,fontWeight:'800',fontSize:11},
  page:{flex:1,backgroundColor:Colors.background},content:{paddingBottom:45},
  loading:{paddingTop:135,alignItems:'center',gap:20},
  message:{color:Colors.muted,fontSize:14},
