@@ -1,13 +1,10 @@
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useState} from 'react';
 import {useFocusEffect,useRouter} from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GooglePlacesResults } from '../../components/GooglePlacesResults';
 import {TasteConceptModal} from '../../components/TasteConceptModal';
-import type {TasteDecision} from '../../lib/vibe-dna';
-import {emptyDailyVenueSwipeState,ensureDailyVenueBatch,recordDailyVenueVote,resetDailyVenueDNA,
- getDailyVenueDnaSummary,remainingDailyMs,type DailyVenueSwipeState} from '../../lib/daily-venue-swipe';
 import {getTasteFeedback} from '../../lib/storage';
 import { Colors, Spacing } from '../../constants/theme';
 import { useSearchArea } from '../../hooks/useSearchArea';
@@ -27,7 +24,6 @@ function NumberLabel({n,title}: {n:number;title:string}) {
  </View>;
 }
 export default function HomeScreen(){
- const router=useRouter();
  const {area,changeArea,useDeviceLocation}=useSearchArea();
  const [category,setCategory]=useState<Category>('all');
  const [mood,setMood]=useState('');
@@ -135,7 +131,7 @@ export default function HomeScreen(){
    <GooglePlacesResults area={area} filter={category} prompt={mood} 
      compact={discoveryMode==='list'} mapMode={discoveryMode==='map'}
       hideHeading/>
-   <TasteConceptModal visible={tasteOpen} onClose={()=>{setTasteOpen(false);getTasteFeedback().then(v=>setTasteCount(Object.keys(v).length)).catch(()=>undefined);}}/>
+   <TasteConceptModal initialView={tasteView} visible={tasteOpen} onClose={()=>{setTasteOpen(false);getTasteFeedback().then(v=>setTasteCount(Object.keys(v).length)).catch(()=>undefined);}}/>
  </ScrollView>;
 }
 const styles=StyleSheet.create({
