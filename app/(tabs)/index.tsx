@@ -4,11 +4,11 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GooglePlacesResults } from '../../components/GooglePlacesResults';
-import { VibeTasteSwipe } from '../../components/VibeTasteSwipe';
+import {TasteConceptModal} from '../../components/TasteConceptModal';
 import type {TasteDecision} from '../../lib/vibe-dna';
 import {emptyDailyVenueSwipeState,ensureDailyVenueBatch,recordDailyVenueVote,resetDailyVenueDNA,
  getDailyVenueDnaSummary,remainingDailyMs,type DailyVenueSwipeState} from '../../lib/daily-venue-swipe';
-import {getDailyVenueSwipeState,saveDailyVenueSwipeState} from '../../lib/storage';
+import {getTasteFeedback} from '../../lib/storage';
 import { Colors, Spacing } from '../../constants/theme';
 import { useSearchArea } from '../../hooks/useSearchArea';
 import { AREAS } from '../../lib/places';
@@ -31,65 +31,13 @@ export default function HomeScreen(){
  const {area,changeArea,useDeviceLocation}=useSearchArea();
  const [category,setCategory]=useState<Category>('all');
  const [mood,setMood]=useState('');
- const [discoveryMode,setDiscoveryMode]=useState<'list'|'map'|'swipe'>('swipe');
+ const [discoveryMode,setDiscoveryMode]=useState<'list'|'map'>('list');
  const [showAllAreas,setShowAllAreas]=useState(false);
- const [dailyState,setDailyState]=useState<DailyVenueSwipeState>(emptyDailyVenueSwipeState);
- const dailyRef=useRef<DailyVenueSwipeState>(emptyDailyVenueSwipeState());
- const dailyHydrated=useRef(false);
- const editVersion=useRef(0);
  const [tasteOpen,setTasteOpen]=useState(false);
  const [tasteView,setTasteView]=useState<'cards'|'dna'>('cards');
- const commitDaily=(next:DailyVenueSwipeState)=>{
-   editVersion.current+=1;
-   dailyRef.current=next;
-   dailyHydrated.current=true;
-   setDailyState(next);
-   saveDailyVenueSwipeState(next).catch(()=>undefined);
- };
- useFocusEffect(useCallback(()=>{
-   let active=true;
-   const version=editVersion.current;
-   getDailyVenueSwipeState().then(saved=>{
-     if(active&&editVersion.current===version){
-       dailyRef.current=saved;dailyHydrated.current=true;setDailyState(saved);
-     }
-   }).catch(()=>undefined);
-   return ()=>{active=false;};
- },[]));
- const [now,setNow]=useState(Date.now());
- useEffect(()=>{
-   const tick=()=>{
-     const timestamp=Date.now();
-     setNow(timestamp);
-     const current=dailyRef.current;
-     if(tasteOpen&&current.startedAt&&remainingDailyMs(current,timestamp)===0){
-       commitDaily(ensureDailyVenueBatch(current,area,timestamp));
-     }
-   };
-   const timer=setInterval(tick,30000);
-   return ()=>clearInterval(timer);
- },[tasteOpen,area]);
- const tasteSummary=useMemo(()=>getDailyVenueDnaSummary(dailyState.votes),[dailyState.votes]);
- const openTaste=async(view:'cards'|'dna')=>{
-   const current=dailyHydrated.current?dailyRef.current:await getDailyVenueSwipeState();
-   const next=ensureDailyVenueBatch(current,area,Date.now());
-   commitDaily(next);
-   setNow(Date.now());
-   setTasteView(view);
-   setTasteOpen(true);
- };
- const voteTaste=(id:string,decision:TasteDecision)=>{
-   const now=Date.now();
-   const current=dailyRef.current;
-   // Do not allow an expired day's card to count as an extra swipe.
-   const active=current.startedAt&&remainingDailyMs(current,now)>0
-     ?current:ensureDailyVenueBatch(current,area,now);
-   const next=recordDailyVenueVote(active,id,decision);
-   if(next!==current)commitDaily(next);
- };
- const resetTaste=()=>commitDaily(resetDailyVenueDNA(dailyRef.current));
- const answeredToday=Object.keys(dailyState.batchVotes).length;
- const timeLeft=remainingDailyMs(dailyState,now);
+ const [tasteCount,setTasteCount]=useState(0);
+ useFocusEffect(useCallback(()=>{getTasteFeedback().then(v=>setTasteCount(Object.keys(v).length)).catch(()=>undefined);},[]));
+ const openTaste=async(view:'cards'|'dna')=>{setTasteView(view);setTasteOpen(true);};
  const areas=showAllAreas?AREAS:AREAS.slice(0,5);
  return <ScrollView style={styles.page} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
    <View style={styles.brand}>
@@ -106,14 +54,14 @@ export default function HomeScreen(){
        <View style={styles.tasteDots}><Text style={styles.tasteDotsText}>♥ × ↷</Text></View>
      </View>
      <Text style={styles.tasteTitle}>Vibe Swipe <Text style={{color:Colors.violet}}>✳</Text></Text>
-     <Text style={styles.tasteDescription}>8 συγκεκριμένα demo μαγαζιά κάθε 24 ώρες. Κάνε swipe σε spots, δες τα προφίλ τους και ανακάλυψε τι σου ταιριάζει.</Text>
+     <Text style={styles.tasteDescription}>Κάνε swipe σε αισθητικές, ατμόσφαιρες και εμπειρίες. Μαθαίνουμε τι σου αρέσει για καλύτερες προτάσεις — όχι για να ψάχνεις μαγαζιά.</Text>
      <View style={styles.tasteMeta}>
        <Ionicons name="finger-print-outline" color={Colors.violet} size={15}/>
-       <Text style={styles.tasteMetaText}>{dailyState.startedAt&&timeLeft===0?'Νέες 8 κάρτες διαθέσιμες':`${answeredToday} / 8 σήμερα · ${tasteSummary.meaningfulCount} taste signals`}</Text>
+       <Text style={styles.tasteMetaText}>{tasteCount} concepts explored · πάντα διαθέσιμο</Text>
      </View>
      <View style={styles.tasteActions}>
        <Pressable style={styles.tasteStart} onPress={()=>{openTaste('cards').catch(()=>undefined);}} accessibilityRole="button">
-         <Text style={styles.tasteStartText}>{answeredToday>=8?'Δες τη σημερινή οκτάδα':answeredToday?'Continue swiping':'Start swiping'} ↗</Text>
+         <Text style={styles.tasteStartText}>{'Start swiping'} ↗</Text>
        </Pressable>
        <Pressable style={styles.tasteReview} onPress={()=>{openTaste('dna').catch(()=>undefined);}} accessibilityRole="button">
          <Text style={styles.tasteReviewText}>My Vibe DNA</Text>
@@ -173,7 +121,7 @@ export default function HomeScreen(){
      <View style={styles.toggle}>
        {([
         {id:'list',label:'Λίστα',icon:'list'},
-        {id:'swipe',label:'Swipe spots',icon:'albums-outline'},
+       
         {id:'map',label:'Χάρτης',icon:'map-outline'},
        ] as const).map(item=><Pressable key={item.id} onPress={()=>setDiscoveryMode(item.id)}
          accessibilityRole="button" accessibilityState={{selected:discoveryMode===item.id}}
@@ -184,13 +132,10 @@ export default function HomeScreen(){
        </Pressable>)}
      </View>
    </View>
-   {discoveryMode==='swipe'?<Text style={styles.swipeIntro}>Swipe demo spots για αποθήκευση ή pass. Το Vibe Swipe πιο πάνω παρουσιάζει 8 ονομαστικά μαγαζιά ανά 24ωρο.</Text>:null}
-   <GooglePlacesResults area={area} filter={category} prompt={mood} tasteFeedback={dailyState.votes}
+   <GooglePlacesResults area={area} filter={category} prompt={mood} 
      compact={discoveryMode==='list'} mapMode={discoveryMode==='map'}
-     swipeMode={discoveryMode==='swipe'} hideHeading/>
-   <VibeTasteSwipe visible={tasteOpen} initialView={tasteView} state={dailyState}
-     onVote={voteTaste} onReset={resetTaste} onClose={()=>setTasteOpen(false)}
-     onOpenVenue={id=>{setTasteOpen(false);router.push({pathname:'/google-venue',params:{id}});}}/>
+      hideHeading/>
+   <TasteConceptModal visible={tasteOpen} onClose={()=>{setTasteOpen(false);getTasteFeedback().then(v=>setTasteCount(Object.keys(v).length)).catch(()=>undefined);}}/>
  </ScrollView>;
 }
 const styles=StyleSheet.create({
