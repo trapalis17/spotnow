@@ -3,14 +3,14 @@ import type {GooglePlace} from './google-places';
 import type {SearchArea} from './places';
 import type {TasteFeedback,TasteTag} from './vibe-dna';
 import {rankGooglePlaces,type PlaceMatch} from './place-intelligence';
-import {getDailyVenueMatchAdjustment} from './daily-venue-swipe';
+import {getTasteMatchAdjustment} from './vibe-dna';
 import {canonicalArea} from './attica-neighborhoods';
 import {distanceKm} from './places';
 
 export type ForYouCategory='all'|'cafe'|'restaurant'|'bar';
 export type ForYouMatch=PlaceMatch&{
   areaLabel:string;nearbyKm:number;inBudget:boolean;preferredArea:boolean;
-  tasteReasons:string[];tasteTags:TasteTag[];isLiked:boolean;
+  tasteReasons:string[];tasteTags:TasteTag[];isLiked:boolean;rankScore:number;
 };
 
 const fold=(text:string)=>text.toLocaleLowerCase('el-GR')
@@ -74,30 +74,32 @@ export function getForYouMatches(
    const preferredArea=preferredAreas.has(fold(areaLabel));
    const tags=place.tasteTags??[];
    const shared=[...new Set(tags.filter(tag=>wanted.has(tag)))];
-   const dna=getDailyVenueMatchAdjustment(tags,votes);
+   const dna=getTasteMatchAdjustment(tags,votes);
    const nearbyKm=distanceKm(area,place);
    const inBudget=preferences.budget>=60||place.demoBudget===undefined||place.demoBudget<=preferences.budget;
-   const isLiked=votes[place.id]==='like'||saved.has('google-'+place.id);
+   const isLiked=saved.has('google-'+place.id);
    const reasons:string[]=[];
    if(preferredArea)reasons.push('Στην περιοχή που επέλεξες');
    if(shared.length)reasons.push('Ταιριάζει με '+(LABELS[shared[0]]??shared[0]));
-   if(dna.delta>0)reasons.push('Παρόμοιο με μαγαζιά που σου άρεσαν');
+   if(dna.delta>0)reasons.push('Ταιριάζει με τις επιλογές σου στο Taste Swipe');
    if(isLiked)reasons.push('Από τις αγαπημένες σου επιλογές');
    if(inBudget)reasons.push('Στο budget σου');
    if(nearbyKm<=3)reasons.push('Κοντά στην περιοχή αναζήτησης');
    if(!reasons.length)reasons.push('Με βάση το προφίλ και τα ενδιαφέροντά σου');
-   // This is a relative, fictional recommendation estimate, not a measured fit.
-   const score=Math.max(22,Math.min(97,Math.round(
-     36+shared.length*6+Math.max(-12,Math.min(15,dna.delta))+
-     (preferredArea?15:0)+(inBudget?9:-15)+
-     Math.max(0,12-Math.round(nearbyKm*1.6))+(isLiked?7:0)
+   // Match % measures demo taste affinity ONLY; area, budget, distance and favorites rank separately.
+   const validTags=tags.filter(tag=>wanted.has(tag));
+   const learnedTags=tags.filter(tag=>Math.abs(dna.delta)>0);
+   const tasteEvidence=wanted.size+Object.keys(votes).length;
+   const score=tasteEvidence===0||tags.length===0?0:Math.max(20,Math.min(95,Math.round(
+     50+validTags.length*8+Math.max(-25,Math.min(25,dna.delta))
    )));
+   const rankBoost=(preferredArea?15:0)+(inBudget?9:-15)+Math.max(0,12-Math.round(nearbyKm*1.6))+(isLiked?4:0);
    return {
-     ...match,score,areaLabel,nearbyKm,inBudget,preferredArea,isLiked,
+     ...match,score,rankScore:score+rankBoost,areaLabel,nearbyKm,inBudget,preferredArea,isLiked,
      tasteReasons:reasons.slice(0,3),tasteTags:tags
    };
  }).filter(item=>votes[item.place.id]!=='dislike')
-   .sort((a,b)=>b.score-a.score||a.nearbyKm-b.nearbyKm||a.place.name.localeCompare(b.place.name));
+   .sort((a,b)=>b.rankScore-a.rankScore||a.nearbyKm-b.nearbyKm||a.place.name.localeCompare(b.place.name));
 }
 
 export function filterForYouMatches(
