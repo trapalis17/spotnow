@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {trackDemoEvent} from '../lib/demo-analytics';
-import {Modal,Pressable,ScrollView,StyleSheet,Text,View,Image,PanResponder} from 'react-native';
+import {Modal,Pressable,ScrollView,StyleSheet,Text,View,PanResponder} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {TASTE_CARDS,getPendingTasteCards,getDnaSummary,type TasteFeedback,type TasteDecision} from '../lib/vibe-dna';
 import {getTasteFeedback,saveTasteFeedback,clearTasteFeedback} from '../lib/storage';
@@ -44,11 +44,11 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
     <Pressable onPress={()=>setView('dna')} style={[s.tab,view==='dna'&&s.selected]}><Text style={s.tabText}>My Vibe DNA</Text></Pressable>
    </View>
    {!hydrated?<Text style={s.body}>Loading preferences…</Text>:view==='cards'?<ScrollView contentContainerStyle={s.content}>
-    <Text style={s.kicker}>LEARN YOUR TASTE · NOT VENUE SEARCH</Text>
-    <Text style={s.title}>What feels like you?</Text>
-    <Text style={s.body}>Swipe through moods and spaces, not specific shops. Your preferences shape For You.</Text>
+    <Text style={s.kicker}>REAL ATHENS VENUES · TASTE LEARNING</Text>
+    <Text style={s.title}>Would you go here?</Text>
+    <Text style={s.body}>Swipe σε πραγματικά μαγαζιά της Αθήνας. Το Like/Dislike μαθαίνει τι σου αρέσει, δεν αποτελεί κράτηση ή αναζήτηση.</Text>
     {active?<View style={s.card} {...pan.panHandlers}>
-      <Image source={{uri:active.image}} style={s.image} resizeMode="cover"/>
+      <View style={[s.image,{backgroundColor:active.colors[0],justifyContent:'center',alignItems:'center',padding:22}]}><Ionicons name={active.icon as any} size={60} color="#FFFFFF"/><Text style={{fontWeight:'900',fontSize:20,color:'#fff',textAlign:'center',marginTop:15}}>{active.title}</Text><Text style={{color:'#F3ECFF',marginTop:7,textAlign:'center'}}>Υπαρκτό μαγαζί · ενδεικτική κάρτα χωρίς φωτογραφία</Text></View>
       <Text style={s.title}>{active.title}</Text>
       <Text style={s.body}>{active.subtitle}</Text>
       <Text style={s.tags}>{active.tags.slice(0,4).join(' · ')}</Text>
@@ -57,8 +57,8 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
        <Pressable accessibilityRole="button" style={s.action} onPress={()=>vote('skip')}><Ionicons name="play-skip-forward" size={23} color={Colors.muted}/><Text>Skip</Text></Pressable>
        <Pressable accessibilityRole="button" style={[s.action,s.like]} onPress={()=>vote('like')}><Ionicons name="heart" size={24} color={Colors.violet}/><Text>My vibe</Text></Pressable>
       </View>
-    </View>:<View style={s.card}><Text style={s.title}>Your vibe is taking shape ✳</Text><Text style={s.body}>{pending.length?'You have completed today’s 8 swipes. Come back after 24 hours from your first swipe.':'You have explored all available taste concepts.'}</Text><Pressable onPress={()=>setView('dna')}><Text style={s.link}>Explore Vibe DNA ↗</Text></Pressable></View>}
-    <Text style={s.footer}>{summary.ratedCount} / {TASTE_CARDS.length} concepts explored · {remaining} swipes available in this session</Text>
+    </View>:<View style={s.card}><Text style={s.title}>Your vibe is taking shape ✳</Text><Text style={s.body}>{pending.length?'You have completed today’s 8 swipes. Come back after 24 hours from your first swipe.':'You have explored all available real venue cards.'}</Text><Pressable onPress={()=>setView('dna')}><Text style={s.link}>Explore Vibe DNA ↗</Text></Pressable></View>}
+    <Text style={s.footer}>{summary.ratedCount} / {TASTE_CARDS.length} venues rated · {remaining} swipes available in this session</Text>
    </ScrollView>:<ScrollView contentContainerStyle={s.content}>
      <Text style={s.kicker}>YOUR TASTE PROFILE</Text>
      <Text style={s.title}>Vibe DNA ✳</Text>
