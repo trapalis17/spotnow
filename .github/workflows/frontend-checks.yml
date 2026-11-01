@@ -2,8 +2,6 @@ name: Vibe frontend checks
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [feature/vibe-v2-improvements]
 jobs:
   verify:
     runs-on: ubuntu-latest
