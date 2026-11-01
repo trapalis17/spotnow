@@ -127,3 +127,39 @@ export function filterForYouMatches(
    (!onlyMyAreas||match.preferredArea)
  );
 }
+
+/**
+ * Editorial grouping of the existing locally-ranked mock recommendations.
+ * No claim of measured popularity: "Hidden gems" means overlooked by this
+ * user's current preferences, not actually obscure businesses.
+ * Every venue appears in at most one section and active filters stay respected.
+ */
+export type ForYouSections={
+ topPick:ForYouMatch|undefined;
+ perfect:ForYouMatch[];
+ hiddenGems:ForYouMatch[];
+ tryDifferent:ForYouMatch[];
+ more:ForYouMatch[];
+};
+export function curateForYouSections(matches:ForYouMatch[]):ForYouSections{
+ const assigned=new Set<string>();
+ const take=(qualifies:(match:ForYouMatch)=>boolean,max:number):ForYouMatch[]=>{
+  const list:ForYouMatch[]=[];
+  for(const match of matches){
+   if(list.length>=max)break;
+   if(assigned.has(match.place.id)||!qualifies(match))continue;
+   assigned.add(match.place.id);
+   list.push(match);
+  }
+  return list;
+ };
+ const topPick=take(()=>true,1)[0];
+ // The highest ranking suggestions are the core "perfect for you" group.
+ const perfect=take(()=>true,3);
+ // Under-the-radar: outside explicitly selected neighborhoods, not already saved.
+ const hiddenGems=take(m=>!m.preferredArea&&!m.isLiked,3);
+ // Variety: another type of outing than the top recommendation.
+ const tryDifferent=take(m=>Boolean(topPick)&&m.place.category!==topPick?.place.category,3);
+ const more=take(()=>true,12);
+ return {topPick,perfect,hiddenGems,tryDifferent,more};
+}
