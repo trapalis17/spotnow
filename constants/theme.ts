@@ -6,7 +6,7 @@ export const Colors = {
  border:'rgba(62,42,99,0.11)',success:'#21764F',warning:'#936019',danger:'#B63C59',
 };
 export const Spacing={xs:8,sm:12,md:16,lg:20,xl:24,xxl:32,xxxl:40};
-export const Radius={sm:12,md:18,lg:24,xl:30};
+export const Radius={sm:12,md:18,lg:24,xl:30,pill:999};
 export const Type={hero:35,title:29,section:21,body:14,small:12,caption:11};
 export const Gradients={
  hero:['#6246D8','#8B5DDC','#B871CA'] as const,
