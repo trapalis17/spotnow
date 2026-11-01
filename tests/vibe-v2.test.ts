@@ -19,3 +19,21 @@ test('taste swipe uses curated real venue names and supports negative feedback',
  assert.ok(disliked.delta<0);
  assert.equal(getDnaSummary({'real-six-dogs':'skip'}).meaningfulCount,0);
 });
+
+import {curateForYouSections,type ForYouMatch} from '../lib/for-you';
+
+test('For You editorial sections do not repeat venues and respect input filtering',()=>{
+ const matches=Array.from({length:18},(_,i)=>({
+  place:{id:'demo-'+i,category:(i%3===0?'cafe':i%3===1?'restaurant':'bar')},
+  score:90-i,rankScore:100-i,preferredArea:i%4===0,isLiked:i%5===0,
+ })) as unknown as ForYouMatch[];
+ const groups=curateForYouSections(matches);
+ const entries=[...(groups.topPick?[groups.topPick]:[]),...groups.perfect,...groups.hiddenGems,...groups.tryDifferent,...groups.more];
+ const ids=entries.map(x=>x.place.id);
+ assert.equal(new Set(ids).size,ids.length,'same venue should never appear twice');
+ assert.equal(groups.topPick?.place.id,'demo-0');
+ assert.ok(groups.hiddenGems.every(x=>!x.preferredArea&&!x.isLiked));
+ assert.ok(groups.tryDifferent.every(x=>x.place.category!==groups.topPick?.place.category));
+ assert.ok(ids.every(id=>matches.some(x=>x.place.id===id)));
+ assert.deepEqual(curateForYouSections([]),{topPick:undefined,perfect:[],hiddenGems:[],tryDifferent:[],more:[]});
+});
