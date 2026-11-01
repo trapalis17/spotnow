@@ -36,7 +36,7 @@ export function GooglePlacesResults({area,compact=false,prompt='',query='',filte
  ),[places,preferences,prompt,area,filter,query,tasteFeedback]);
  const personalized=useMemo(()=>personalizeMatches(ranked,feedback),[ranked,feedback]);
  const recommended=useMemo(()=>personalized.filter(x=>feedback[x.place.id]!=='pass'),[personalized,feedback]);
- const shown=compact&&!expanded?recommended.slice(0,5):recommended;
+ const shown=compact&&!expanded?recommended.slice(0,7):recommended;
  const open=(id:string)=>router.push({pathname:'/google-venue',params:{id}});
  const save=async(id:string)=>setSavedIds(await toggleSavedVenue('google-'+id));
  const vote=(id:string,decision:SwipeDecision)=>{
@@ -63,14 +63,25 @@ export function GooglePlacesResults({area,compact=false,prompt='',query='',filte
   {!loading&&!error&&swipeMode?<SwipeDiscovery matches={personalized} feedback={feedback}
     onVote={vote} onReset={resetVotes} onOpen={open}/>:null}
   {!loading&&!error&&!swipeMode&&recommended.length===0?<View style={styles.empty}><Ionicons name="search-outline" size={28} color={Colors.violet}/><Text style={styles.emptyTitle}>No spots found</Text><Text style={styles.muted}>Δοκίμασε άλλο φίλτρο ή άλλη περιοχή.</Text></View>:null}
-  {!mapMode&&!swipeMode&&shown.map(match=><GoogleVenueCard key={match.place.id} match={match} saved={savedIds.includes('google-'+match.place.id)}
+  {!mapMode&&!swipeMode&&compact&&shown.length>0?<View>
+    <GoogleVenueCard match={shown[0]} variant="featured" saved={savedIds.includes('google-'+shown[0].place.id)}
+     onPress={()=>open(shown[0].place.id)} onSave={()=>save(shown[0].place.id)}/>
+    {shown.length>1?<View style={styles.venueGrid}>
+      {shown.slice(1).map(match=><GoogleVenueCard key={match.place.id} variant="grid" match={match}
+       saved={savedIds.includes('google-'+match.place.id)}
+       onPress={()=>open(match.place.id)} onSave={()=>save(match.place.id)}/>)}
+    </View>:null}
+   </View>:null}
+  {!mapMode&&!swipeMode&&!compact&&shown.map(match=><GoogleVenueCard key={match.place.id} match={match}
+   saved={savedIds.includes('google-'+match.place.id)}
    onPress={()=>open(match.place.id)} onSave={()=>save(match.place.id)}/>)}
-  {compact&&!mapMode&&!swipeMode&&!expanded&&recommended.length>5?<Pressable onPress={()=>setExpanded(true)} style={styles.showMore} accessibilityRole="button"><Text style={styles.showMoreText}>Περισσότερα μαγαζιά  ({recommended.length})  ↓</Text></Pressable>:null}
+  {compact&&!mapMode&&!swipeMode&&!expanded&&recommended.length>7?<Pressable onPress={()=>setExpanded(true)} style={styles.showMore} accessibilityRole="button"><Text style={styles.showMoreText}>Περισσότερα μαγαζιά  ({recommended.length})  ↓</Text></Pressable>:null}
   {!swipeMode?<Text style={styles.legal}>Demo venues (φανταστικά) · Ενδεικτικό Vibe match, όχι πραγματική αξιολόγηση.</Text>:null}
 
  </View>;
 }
 const styles=StyleSheet.create({
+ venueGrid:{flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between',alignItems:'flex-start'},
  empty:{backgroundColor:'#F0ECFA',alignItems:'center',padding:28,borderRadius:20,gap:5,marginBottom:12},
  emptyTitle:{fontSize:17,fontWeight:'900',color:Colors.text,marginTop:7},
  container:{marginTop:14},heading:{marginBottom:15,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
@@ -82,6 +93,6 @@ const styles=StyleSheet.create({
  error:{color:Colors.danger,lineHeight:22,marginVertical:12,fontSize:13},
  legal:{fontSize:10,lineHeight:17,color:Colors.muted,marginTop:6},
  link:{color:Colors.lime,fontSize:13,fontWeight:'900',marginVertical:15},
- showMore:{padding:15,backgroundColor:'#EEE8FA',borderRadius:16,alignItems:'center',marginBottom:13},
+ showMore:{padding:15,backgroundColor:'#EEE8FA',borderRadius:999,alignItems:'center',marginBottom:13},
  showMoreText:{color:Colors.violet,fontWeight:'900',fontSize:13},
 });
