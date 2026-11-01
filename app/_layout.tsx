@@ -1,13 +1,14 @@
-import { Slot } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { View } from 'react-native';
+import {Slot} from 'expo-router';
+import {StatusBar} from 'expo-status-bar';
+import {SafeAreaProvider,SafeAreaView} from 'react-native-safe-area-context';
+import {Colors} from '../constants/theme';
 
-export default function RootLayout() {
-  return (
-    <View style={{ flex: 1 }}>
-      <StatusBar style="dark" />
-      <Slot />
-    </View>
-  );
+/** Consistent safe-area canvas for notched phones and web previews. */
+export default function RootLayout(){
+ return <SafeAreaProvider>
+  <SafeAreaView style={{flex:1,backgroundColor:Colors.background}} edges={['top']}>
+   <StatusBar style="dark"/>
+   <Slot/>
+  </SafeAreaView>
+ </SafeAreaProvider>;
 }
