@@ -60,3 +60,6 @@ The login/register forms remain frontend-only demos: passwords are not checked a
 - Regression tests are included in `tests/vibe-v2.test.ts` and can be run with `npm test` after dependencies are installed.
 
 **Limitations:** This branch has not been runtime-tested in Expo here. Collection UI currently supports creating/deleting collections and adding saved venues; renaming, visit-feedback-driven ranking, daily concept caps, a calibrated confidence model, and a production authentication flow remain future work. The 40 fictional venues are intentionally unchanged.
+
+## Real-venue taste swipe update
+The **Taste Swipe** on Discover now uses ten curated, existing Athens venues identified from public venue listings (e.g., Six d.o.g.s., The Clumsies, Neratzia Bistro, Kalimeres, Nomad, Gaston). Cards show only venue names, neighborhoods and broad publicly supported categories. **No live inventory, confirmed opening hours, prices, current imagery, or venue API** are available. Gradient artwork avoids presenting stock photos as actual venue photographs. Feedback learns the user’s taste and influences the fictional For You dataset. The separate search uses demo stores. There are up to eight cards per rolling 24-hour session, until the small curated pool is exhausted. Add more vetted real venues to expand the pool.
