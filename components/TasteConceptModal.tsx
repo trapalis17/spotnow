@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Modal,Pressable,ScrollView,StyleSheet,Text,View,Image,PanResponder} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {TASTE_CARDS,getPendingTasteCards,getDnaSummary,type TasteFeedback,type TasteDecision} from '../lib/vibe-dna';
@@ -9,15 +10,21 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
  const [feedback,setFeedback]=useState<TasteFeedback>({});
  const [view,setView]=useState<'cards'|'dna'>('cards');
  const [hydrated,setHydrated]=useState(false);
- useEffect(()=>{if(visible){setView(initialView);setHydrated(false);getTasteFeedback().then(x=>{setFeedback(x);setHydrated(true);}).catch(()=>setHydrated(true));}},[visible,initialView]);
+ const [session,setSession]=useState({startedAt:0,count:0});
+ const DAY=86400000;
+ const sessionKey='vibe:concept-session:v1';
+ useEffect(()=>{if(visible){setView(initialView);setHydrated(false);Promise.all([getTasteFeedback(),AsyncStorage.getItem(sessionKey)]).then(([x,raw])=>{setFeedback(x);let previous={startedAt:0,count:0};try{if(raw)previous=JSON.parse(raw);}catch{} const valid=previous.startedAt>0&&Date.now()-previous.startedAt<DAY;setSession(valid?previous:{startedAt:Date.now(),count:0});setHydrated(true);}).catch(()=>setHydrated(true));}},[visible,initialView]);
  const pending=useMemo(()=>getPendingTasteCards(feedback),[feedback]);
  const summary=useMemo(()=>getDnaSummary(feedback),[feedback]);
- const active=pending[0];
+ const remaining= session.startedAt>0&&Date.now()-session.startedAt<DAY?Math.max(0,8-session.count):8;
+ const active=remaining>0?pending[0]:undefined;
  const vote=(decision:TasteDecision)=>{
    if(!active)return;
    const next={...feedback,[active.id]:decision};
    setFeedback(next);
    saveTasteFeedback(next).catch(()=>undefined);
+   const nextSession={startedAt:session.startedAt||Date.now(),count:session.count+1};
+   setSession(nextSession);AsyncStorage.setItem(sessionKey,JSON.stringify(nextSession)).catch(()=>undefined);
  };
  const pan=useMemo(()=>PanResponder.create({
    onMoveShouldSetPanResponder:(_,g)=>Math.abs(g.dx)>22&&Math.abs(g.dx)>Math.abs(g.dy),
@@ -48,8 +55,8 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
        <Pressable accessibilityRole="button" style={s.action} onPress={()=>vote('skip')}><Ionicons name="play-skip-forward" size={23} color={Colors.muted}/><Text>Skip</Text></Pressable>
        <Pressable accessibilityRole="button" style={[s.action,s.like]} onPress={()=>vote('like')}><Ionicons name="heart" size={24} color={Colors.violet}/><Text>My vibe</Text></Pressable>
       </View>
-    </View>:<View style={s.card}><Text style={s.title}>Your vibe is taking shape ✳</Text><Text style={s.body}>You've explored all available taste concepts.</Text><Pressable onPress={()=>setView('dna')}><Text style={s.link}>Explore Vibe DNA ↗</Text></Pressable></View>}
-    <Text style={s.footer}>{summary.ratedCount} / {TASTE_CARDS.length} concepts explored · You can come back any time</Text>
+    </View>:<View style={s.card}><Text style={s.title}>Your vibe is taking shape ✳</Text><Text style={s.body}>{pending.length?'You have completed today’s 8 swipes. Come back after 24 hours from your first swipe.':'You have explored all available taste concepts.'}</Text><Pressable onPress={()=>setView('dna')}><Text style={s.link}>Explore Vibe DNA ↗</Text></Pressable></View>}
+    <Text style={s.footer}>{summary.ratedCount} / {TASTE_CARDS.length} concepts explored · {remaining} swipes available in this session</Text>
    </ScrollView>:<ScrollView contentContainerStyle={s.content}>
      <Text style={s.kicker}>YOUR TASTE PROFILE</Text>
      <Text style={s.title}>Vibe DNA ✳</Text>
