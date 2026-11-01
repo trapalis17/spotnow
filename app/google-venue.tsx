@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Spacing } from '../constants/theme';
+import { Colors, Spacing, Radius } from '../constants/theme';
 import { isGooglePlaceId } from '../lib/google-places';
 import { getDemoPlaceById } from '../lib/demo-places';
 import type { GooglePlace } from '../lib/google-places';
@@ -193,7 +193,7 @@ const styles=StyleSheet.create({
  visitButton:{backgroundColor:Colors.violet,borderRadius:13,padding:12,alignItems:'center'},
  visitButtonText:{fontSize:12,color:'#fff',fontWeight:'800'},
  feedbackRow:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:7},
- feedbackChoice:{borderWidth:1,borderColor:Colors.border,borderRadius:12,padding:10,backgroundColor:'#fff'},
+ feedbackChoice:{borderWidth:1,borderColor:Colors.border,borderRadius:Radius.pill,paddingHorizontal:14,paddingVertical:11,backgroundColor:'#fff'},
  feedbackSelected:{borderColor:Colors.violet,backgroundColor:'#DFD0F9'},
  feedbackText:{color:Colors.violet,fontWeight:'800',fontSize:11},
  page:{flex:1,backgroundColor:Colors.background},content:{paddingBottom:45},
@@ -209,7 +209,7 @@ const styles=StyleSheet.create({
  circleButton:{height:45,width:45,borderRadius:16,alignItems:'center',justifyContent:'center',backgroundColor:'rgba(21,14,42,.48)'},
  heroBottom:{paddingHorizontal:24,paddingBottom:29},
  heroSymbol:{position:'absolute',right:26,top:75,transform:[{rotate:'-15deg'}]},
- categoryBadge:{alignSelf:'flex-start',backgroundColor:'rgba(255,255,255,.24)',paddingHorizontal:13,paddingVertical:7,borderRadius:11,borderWidth:1,borderColor:'rgba(255,255,255,.38)',marginBottom:14},
+ categoryBadge:{alignSelf:'flex-start',backgroundColor:'rgba(255,255,255,.24)',paddingHorizontal:14,paddingVertical:8,borderRadius:Radius.pill,borderWidth:1,borderColor:'rgba(255,255,255,.38)',marginBottom:14},
  categoryBadgeText:{color:'#fff',fontSize:12,fontWeight:'900'},
  name:{color:'#fff',fontSize:34,fontWeight:'900',letterSpacing:-1.35,lineHeight:40},
  heroAddressRow:{flexDirection:'row',gap:7,alignItems:'flex-start',marginTop:11},
@@ -218,7 +218,7 @@ const styles=StyleSheet.create({
  credit:{fontSize:10,color:Colors.muted,marginTop:3},
  main:{paddingHorizontal:Spacing.lg,paddingTop:22},
  facts:{flexDirection:'row',flexWrap:'wrap',gap:8},
- fact:{flexDirection:'row',alignItems:'center',gap:5,paddingVertical:12,paddingHorizontal:12,backgroundColor:'#fff',borderRadius:14,borderWidth:1,borderColor:Colors.border},
+ fact:{flexDirection:'row',alignItems:'center',gap:5,paddingVertical:10,paddingHorizontal:14,backgroundColor:'#fff',borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border},
  factValue:{fontSize:13,fontWeight:'900',color:Colors.text},
  factHint:{fontSize:11,color:Colors.muted},
  dot:{height:8,width:8,borderRadius:4},
@@ -232,7 +232,7 @@ const styles=StyleSheet.create({
  panelTitle:{fontSize:16,color:Colors.text,fontWeight:'800'},
  vibeTitle:{fontSize:26,color:Colors.violet,fontWeight:'900',letterSpacing:-.7,marginTop:5},
  tags:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:15},
- tag:{backgroundColor:'rgba(255,255,255,.85)',borderRadius:11,paddingHorizontal:11,paddingVertical:8},
+ tag:{backgroundColor:'rgba(255,255,255,.85)',borderRadius:Radius.pill,paddingHorizontal:13,paddingVertical:9},
  tagText:{fontSize:12,color:Colors.violet,fontWeight:'700'},
  evidence:{fontSize:12,color:Colors.text,lineHeight:19,marginTop:13},
  disclosure:{fontSize:11,lineHeight:17,color:Colors.muted,marginTop:14},
@@ -240,7 +240,7 @@ const styles=StyleSheet.create({
  section:{backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:22,padding:18,marginBottom:15},
  sectionTitle:{fontSize:17,fontWeight:'900',color:Colors.text,letterSpacing:-.3},
  amenities:{flexDirection:'row',gap:8,flexWrap:'wrap',marginTop:16},
- amenity:{flexDirection:'row',alignItems:'center',gap:6,borderRadius:12,backgroundColor:'#F4F1FB',paddingHorizontal:12,paddingVertical:11},
+ amenity:{flexDirection:'row',alignItems:'center',gap:6,borderRadius:Radius.pill,backgroundColor:'#F4F1FB',paddingHorizontal:14,paddingVertical:11},
  amenityText:{fontSize:12,color:Colors.text,fontWeight:'700'},
  sectionToggle:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
  sectionToggleLabel:{flexDirection:'row',alignItems:'center',gap:9},
