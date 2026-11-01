@@ -37,27 +37,24 @@ async function requestPosition():Promise<CoordinatePoint>{
  */
 export function OnboardingLocationPreferences({selected,onToggle}:Props){
  const [reference,setReference]=useState<Reference|null>(null);
- const [locating,setLocating]=useState(true);
+ const [locating,setLocating]=useState(false);
  const [locationMessage,setLocationMessage]=useState('');
  const [referencePicker,setReferencePicker]=useState(false);
  const [referenceSearch,setReferenceSearch]=useState('');
  const [expanded,setExpanded]=useState(false);
  const [search,setSearch]=useState('');
 
- useEffect(()=>{
-   let active=true;
-   requestPosition().then(point=>{
-     if(active){setReference({point,source:'device',label:'Κοντά στην τοποθεσία σου'});setLocating(false);}
-   }).catch(()=>{
-     if(active){
-       setLocationMessage('Δεν υπάρχει πρόσβαση στην τοποθεσία. Διάλεξε περιοχή αναφοράς για να δεις τις 7 κοντινότερες.');
-       setReferencePicker(true);
-       setLocating(false);
-     }
-   });
-   return ()=>{active=false;};
- },[]);
-
+ const detectLocation=async()=>{
+   setLocating(true);setLocationMessage('');
+   try{
+     const point=await requestPosition();
+     setReference({point,source:'device',label:'Κοντά στην τοποθεσία σου'});
+     setReferencePicker(false);
+   }catch{
+     setLocationMessage('Δεν υπάρχει πρόσβαση στην τοποθεσία. Διάλεξε περιοχή αναφοράς.');
+     setReferencePicker(true);
+   }finally{setLocating(false);}
+ };
  const nearby=useMemo(()=>reference?closestAreas(reference.point,7):[],[reference]);
  const nearbyNames=useMemo(()=>new Set(nearby.map(area=>area.name)),[nearby]);
  const checked=useMemo(()=>new Set(selected.map(canonicalArea)),[selected]);
@@ -93,8 +90,8 @@ export function OnboardingLocationPreferences({selected,onToggle}:Props){
      <Text style={styles.label}>Περιοχές που προτιμάς</Text>
      {checked.size>0?<Text style={styles.count}>{checked.size} επιλεγμένες</Text>:null}
    </View>
-   {locating?<Text style={styles.info}>Εντοπίζουμε τις πιο κοντινές περιοχές με την άδειά σου…</Text>:null}
-   {!locating&&!reference?<Text style={styles.info}>{locationMessage}</Text>:null}
+   <Pressable onPress={detectLocation} disabled={locating} accessibilityRole="button"><Text style={styles.change}>{locating?'Εντοπισμός…':'⌖ Βρες 7 κοντινές περιοχές (προαιρετικό)'}</Text></Pressable>
+   {!reference?<Pressable onPress={()=>setReferencePicker(true)}><Text style={styles.info}>{locationMessage||'Εναλλακτικά, επίλεξε μια περιοχή αναφοράς ή άνοιξε όλες τις 30 περιοχές.'}</Text></Pressable>:null}
    {reference?<View style={styles.referenceRow}>
      <Text style={styles.referenceText}>
        {reference.source==='device'?'⌖ Με βάση την τοποθεσία σου':'⌖ Περιοχή αναφοράς: '+reference.label}
