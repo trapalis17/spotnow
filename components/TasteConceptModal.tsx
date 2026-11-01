@@ -25,7 +25,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
    setFeedback(next);
    trackDemoEvent('vibe_card_'+(decision==='like'?'liked':decision==='dislike'?'disliked':'skipped'),active.id);
    saveTasteFeedback(next).catch(()=>undefined);
-   const nextSession={startedAt:session.startedAt||Date.now(),count:session.count+1};
+   const nextSession=(!session.startedAt||Date.now()-session.startedAt>=DAY)?{startedAt:Date.now(),count:1}:{startedAt:session.startedAt,count:session.count+1};
    setSession(nextSession);AsyncStorage.setItem(sessionKey,JSON.stringify(nextSession)).catch(()=>undefined);
  };
  const pan=useMemo(()=>PanResponder.create({
