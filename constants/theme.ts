@@ -1,31 +1,18 @@
-/** Vibe light theme: semantic, readable colors shared across screens. */
+/** Vibe Design System 2.1 — light, editorial, legible. */
 export const Colors = {
-  background: '#F8F7FC',
-  backgroundAlt: '#F1EFF8',
-  card: '#FFFFFF',
-  cardSoft: '#F0EEF9',
-  panel: '#FFFEFF',
-  text: '#231B36',
-  muted: '#655D76',
-  lime: '#39741C',
-  limeSoft: '#C9FC8B',
-  violet: '#6645BF',
-  purple: '#6D47AF',
-  mint: '#177E69',
-  rose: '#B93674',
-  orange: '#AA5C1B',
-  border: 'rgba(55,35,95,0.13)',
-  success: '#187E4C',
-  warning: '#95610C',
-  danger: '#B73551',
+ background:'#FAF9FD', backgroundAlt:'#F3F0FA',card:'#FFFFFF',cardSoft:'#F5F2FC',panel:'#FFFFFF',
+ text:'#211A33', muted:'#706A80',subtle:'#938D9F', lime:'#355D17',limeSoft:'#DDF7A5',
+ violet:'#6D4DE0',purple:'#7956D5',mint:'#16775E',rose:'#CD4C83',orange:'#A65B31',
+ border:'rgba(62,42,99,0.11)',success:'#21764F',warning:'#936019',danger:'#B63C59',
 };
-export const Spacing = { xs:8,sm:12,md:16,lg:20,xl:24,xxl:32,xxxl:40 };
-export const Radius = { sm:12,md:18,lg:24,xl:32 };
-export const Gradients = {
-  hero: ['#5D44CD','#8D4BC3','#BC437F'] as const,
-  nightlife: ['#6544C6','#B14E9A'] as const,
-  cafe: ['#6650CC','#9252C5'] as const,
-  restaurant: ['#C65087','#8850BB'] as const,
-  secondary: ['#F1EDFF','#FFF2F7'] as const,
-  vibe: ['#C9FC8B','#91ECD3'] as const,
+export const Spacing={xs:8,sm:12,md:16,lg:20,xl:24,xxl:32,xxxl:40};
+export const Radius={sm:12,md:18,lg:24,xl:30};
+export const Type={hero:35,title:29,section:21,body:14,small:12,caption:11};
+export const Gradients={
+ hero:['#6246D8','#8B5DDC','#B871CA'] as const,
+ nightlife:['#473A87','#965DA6'] as const,
+ cafe:['#6857BA','#AB80C3'] as const,
+ restaurant:['#A65E97','#C98C99'] as const,
+ secondary:['#EFEAFF','#FBEFF7'] as const,
+ vibe:['#6D4DE0','#9577EE'] as const,
 };
