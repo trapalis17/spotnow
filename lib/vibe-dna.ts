@@ -17,33 +17,33 @@ export type TasteCard = {
  facets:Partial<Record<TasteFacet,string>>;
  unlockAt:number;
 };
-const img=(id:string)=>'https://images.unsplash.com/'+id+'?auto=format&fit=crop&w=900&q=80';
+const img=(id:string)=>'https://images.unsplash.com/'+id+'?auto=format&fit=crop&w=1000&q=85';
 const make=(id:string,title:string,subtitle:string,photo:string,
  tags:readonly TasteTag[],facets:TasteCard['facets'],colors:readonly [string,string],icon:string,unlockAt=0):TasteCard=>({
  id,title,subtitle,image:img(photo),tags,facets,colors,icon,unlockAt
 });
-/** Fixed photo URLs are optional decorative media; no external APIs or place lookups. */
+/** All photos are illustrative stock imagery, NOT verified pictures of these named venues. */
 export const TASTE_CARDS:readonly TasteCard[]=[
- make('real-six-dogs','Six d.o.g.s.','Μοναστηράκι · Bar, μουσική και κήπος','',
- ['alternative','live-music','garden','nightlife'],{category:'bar',experience:'live music',setting:'outdoor'},['#6144A3','#A060A2'],'musical-notes-outline'),
- make('real-clumsies','The Clumsies','Κέντρο Αθήνας · Cocktail bar','',
- ['cocktails','nightlife','social'],{category:'bar',experience:'cocktails'},['#3A317A','#BF6999'],'wine-outline'),
- make('real-neratzia','Neratzia Bistro','Κουκάκι · Café / bistro','',
- ['coffee','brunch','casual'],{category:'cafe',experience:'brunch'},['#7B7557','#B99670'],'cafe-outline'),
- make('real-it-restaurant','IT Restaurant','Κολωνάκι · Restaurant / café','',
- ['dining','brunch','coffee'],{category:'restaurant',experience:'dining'},['#8C6898','#D09BA9'],'restaurant-outline'),
- make('real-kalimeres','Kalimeres','Ψυρρή · All-day café / cocktail bar','',
- ['brunch','coffee','cocktails','social'],{category:'cafe',experience:'brunch'},['#A86A89','#D8A16A'],'cafe-outline'),
- make('real-laluk','Laluk Cafe-Bar','Κουκάκι · Coffee / wine bar','',
- ['coffee','cocktails','casual'],{category:'bar',experience:'coffee'},['#716B9B','#BD8C91'],'wine-outline'),
- make('real-me-kolonaki','Me Kolonaki','Κολωνάκι · Brunch / dining','',
- ['brunch','dining','daytime'],{category:'restaurant',experience:'brunch'},['#946C74','#D5AE86'],'restaurant-outline'),
- make('real-mayor','Mayor','Κολωνάκι · All-day bar restaurant','',
- ['dining','cocktails','social'],{category:'restaurant',experience:'dining'},['#4F6C87','#AA72B4'],'restaurant-outline'),
- make('real-nomad','Nomad','Χαλάνδρι · Specialty coffee / drinks','',
- ['coffee','specialty','cocktails'],{category:'cafe',experience:'specialty coffee'},['#657D80','#B59C81'],'cafe-outline'),
- make('real-gaston','Gaston','Νέα Σμύρνη · All-day café / bar / restaurant','',
- ['coffee','brunch','dining','cocktails'],{category:'cafe',experience:'brunch'},['#745D9A','#D1A9A6'],'cafe-outline')
+ make('real-six-dogs','Six d.o.g.s.','Μοναστηράκι · Bar, μουσική και κήπος','photo-1514933651103-005eec06c04b',
+ ['alternative','live-music','garden','nightlife'],{category:'bar',experience:'live music',setting:'outdoor'},['#6E4C3E','#B68B75'],'musical-notes-outline'),
+ make('real-clumsies','The Clumsies','Κέντρο Αθήνας · Cocktail bar','photo-1470337458703-46ad1756a187',
+ ['cocktails','nightlife','social'],{category:'bar',experience:'cocktails'},['#57423D','#AD7764'],'wine-outline'),
+ make('real-neratzia','Neratzia Bistro','Κουκάκι · Café / bistro','photo-1509042239860-f550ce710b93',
+ ['coffee','brunch','casual'],{category:'cafe',experience:'brunch'},['#867462','#C6AD93'],'cafe-outline'),
+ make('real-it-restaurant','IT Restaurant','Κολωνάκι · Restaurant / café','photo-1552566626-52f8b828add9',
+ ['dining','brunch','coffee'],{category:'restaurant',experience:'dining'},['#846250','#C89A7F'],'restaurant-outline'),
+ make('real-kalimeres','Kalimeres','Ψυρρή · All-day café / cocktail bar','photo-1525351484163-7529414344d8',
+ ['brunch','coffee','cocktails','social'],{category:'cafe',experience:'brunch'},['#A0735C','#DFC1A7'],'cafe-outline'),
+ make('real-laluk','Laluk Cafe-Bar','Κουκάκι · Coffee / wine bar','photo-1517248135467-4c7edcad34c4',
+ ['coffee','cocktails','casual'],{category:'bar',experience:'coffee'},['#71574F','#C3A18C'],'wine-outline'),
+ make('real-me-kolonaki','Me Kolonaki','Κολωνάκι · Brunch / dining','photo-1466978913421-dad2ebd01d17',
+ ['brunch','dining','daytime'],{category:'restaurant',experience:'brunch'},['#927464','#D3B49B'],'restaurant-outline'),
+ make('real-mayor','Mayor','Κολωνάκι · All-day bar restaurant','photo-1515003197210-e0cd71810b5f',
+ ['dining','cocktails','social'],{category:'restaurant',experience:'dining'},['#6D5B51','#B48D79'],'restaurant-outline'),
+ make('real-nomad','Nomad','Χαλάνδρι · Specialty coffee / drinks','photo-1447933601403-0c6688de566e',
+ ['coffee','specialty','cocktails'],{category:'cafe',experience:'specialty coffee'},['#64766D','#B4B4A0'],'cafe-outline'),
+ make('real-gaston','Gaston','Νέα Σμύρνη · All-day café / bar / restaurant','photo-1495474472287-4d71bcdd2085',
+ ['coffee','brunch','dining','cocktails'],{category:'cafe',experience:'brunch'},['#876D5F','#D5B69E'],'cafe-outline')
 ];
 
 export const TASTE_LABELS:Record<TasteTag,string>={
