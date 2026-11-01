@@ -91,7 +91,7 @@ export default function OnboardingScreen(){
   <Step number={3} title="Πού και με τι budget;">
    <OnboardingLocationPreferences selected={prefs.neighborhoods} onToggle={name=>toggle('neighborhoods',name)}/>
    <View style={styles.divider}/>
-   <Text style={styles.budgetLabel}>Budget ανά έξοδο</Text>
+   <Text style={styles.budgetLabel}>Budget ανά άτομο</Text>
    {budget.map(m=><PreferenceChip key={m} label={m===60?'60€+':`${m}€`} selected={prefs.budget===m} onPress={()=>{userEdited.current=true;setPrefs(p=>({...p,budget:m}));}}/>)}
   </Step>
   <PrimaryButton label={saving?'Αποθήκευση…':editing?'Αποθήκευση αλλαγών':'Βρες το vibe σου  ↗'} onPress={save}/>
