@@ -66,7 +66,7 @@ export default function GoogleVenueProfile(){
   </View>:null}
   {place?<View>
    <View style={styles.hero}>
-    <LinearGradient colors={place.category==='cafe'?['#945342','#B77A64']:place.category==='bar'?['#65483E','#B37966']:['#6F897E','#A66F5B']}
+    <LinearGradient colors={place.category==='cafe'?['#6352B3','#9784CC']:place.category==='bar'?['#5D4C92','#A18DD7']:['#739C94','#9481BF']}
       style={StyleSheet.absoluteFill}/>
     {photo?<Image style={StyleSheet.absoluteFill} source={{uri:photo}} resizeMode="cover"/>:null}
     <LinearGradient colors={['rgba(13,10,30,.27)','rgba(18,12,37,.25)','rgba(17,12,33,.91)']}
@@ -102,7 +102,7 @@ export default function GoogleVenueProfile(){
    <View style={styles.main}>
     <View style={styles.facts}>
      {place.rating!==undefined?<View style={styles.fact}>
-       <Ionicons name="star" size={17} color="#D7A256"/>
+       <Ionicons name="star" size={17} color="#C9AF6E"/>
        <Text style={styles.factValue}>{place.rating.toFixed(1)}</Text>
        {place.userRatingCount!==undefined?<Text style={styles.factHint}>({place.userRatingCount})</Text>:null}
      </View>:null}
@@ -111,7 +111,7 @@ export default function GoogleVenueProfile(){
        <Text style={styles.factHint}>Τιμές</Text>
      </View>:null}
      {place.openNow!==undefined?<View style={styles.fact}>
-       <View style={[styles.dot,{backgroundColor:place.openNow?'#638F69':'#9B8D84'}]}/>
+       <View style={[styles.dot,{backgroundColor:place.openNow?'#4A966C':'#938CA7'}]}/>
        <Text style={styles.factValue}>{place.openNow?'Ανοιχτό':'Κλειστό'}</Text>
      </View>:null}
     </View>
@@ -131,7 +131,7 @@ export default function GoogleVenueProfile(){
      </Pressable>:null}
     </View>
 
-    <LinearGradient colors={['#F7EAE0','#FBF5EE']} style={styles.vibePanel}>
+    <LinearGradient colors={['#F0EAFE','#FBF9FF']} style={styles.vibePanel}>
      <View style={styles.panelIcon}><Ionicons name="sparkles" size={22} color={Colors.violet}/></View>
      <Text style={styles.panelTitle}>The vibe</Text>
      <Text style={styles.vibeTitle}>{vibe?.label}</Text>
@@ -187,14 +187,14 @@ export default function GoogleVenueProfile(){
  </ScrollView>;
 }
 const styles=StyleSheet.create({
- visitCard:{borderRadius:20,backgroundColor:'#F8E7DB',padding:17,marginTop:19,marginBottom:16},
+ visitCard:{borderRadius:20,backgroundColor:'#F3EAFF',padding:17,marginTop:19,marginBottom:16},
  visitHeading:{fontSize:17,fontWeight:'900',color:Colors.text},
  visitBody:{fontSize:13,lineHeight:20,color:Colors.muted,marginVertical:9},
  visitButton:{backgroundColor:Colors.violet,borderRadius:13,padding:12,alignItems:'center'},
  visitButtonText:{fontSize:12,color:'#fff',fontWeight:'800'},
  feedbackRow:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:7},
  feedbackChoice:{borderWidth:1,borderColor:Colors.border,borderRadius:Radius.pill,paddingHorizontal:14,paddingVertical:11,backgroundColor:'#fff'},
- feedbackSelected:{borderColor:Colors.violet,backgroundColor:'#EBD5C7'},
+ feedbackSelected:{borderColor:Colors.violet,backgroundColor:'#E8DEF6'},
  feedbackText:{color:Colors.violet,fontWeight:'800',fontSize:11},
  page:{flex:1,backgroundColor:Colors.background},content:{paddingBottom:45},
  loading:{paddingTop:135,alignItems:'center',gap:20},
@@ -202,7 +202,7 @@ const styles=StyleSheet.create({
  errorCard:{margin:24,marginTop:120,backgroundColor:'#fff',padding:26,borderRadius:24,alignItems:'center'},
  errorText:{color:Colors.text,fontSize:16,textAlign:'center',marginBottom:18},
  retry:{backgroundColor:Colors.limeSoft,padding:15,paddingHorizontal:20,borderRadius:14},
- retryText:{fontWeight:'900',color:'#3E4C39'},
+ retryText:{fontWeight:'900',color:'#55683B'},
  backText:{color:Colors.violet,fontWeight:'800',marginTop:16},
  hero:{height:370,backgroundColor:'#A4614A',justifyContent:'space-between',overflow:'hidden'},
  heroTop:{flexDirection:'row',justifyContent:'space-between',paddingHorizontal:22,paddingTop:38},
@@ -240,7 +240,7 @@ const styles=StyleSheet.create({
  section:{backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:22,padding:18,marginBottom:15},
  sectionTitle:{fontSize:17,fontWeight:'900',color:Colors.text,letterSpacing:-.3},
  amenities:{flexDirection:'row',gap:8,flexWrap:'wrap',marginTop:16},
- amenity:{flexDirection:'row',alignItems:'center',gap:6,borderRadius:Radius.pill,backgroundColor:'#F7F1EA',paddingHorizontal:14,paddingVertical:11},
+ amenity:{flexDirection:'row',alignItems:'center',gap:6,borderRadius:Radius.pill,backgroundColor:'#F6F3FD',paddingHorizontal:14,paddingVertical:11},
  amenityText:{fontSize:12,color:Colors.text,fontWeight:'700'},
  sectionToggle:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
  sectionToggleLabel:{flexDirection:'row',alignItems:'center',gap:9},

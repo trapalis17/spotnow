@@ -41,7 +41,7 @@ const s=StyleSheet.create({
  top:{marginBottom:34},brand:{fontSize:34,fontWeight:'900',letterSpacing:-1.8,color:Colors.text},
  back:{alignSelf:'flex-start',paddingVertical:12,flexDirection:'row',gap:6,alignItems:'center',marginBottom:27},
  backText:{fontSize:13,fontWeight:'800',color:Colors.violet},
- icon:{width:55,height:55,backgroundColor:'#F4E8DE',borderRadius:18,alignItems:'center',justifyContent:'center',marginBottom:20},
+ icon:{width:55,height:55,backgroundColor:'#EDE7FB',borderRadius:18,alignItems:'center',justifyContent:'center',marginBottom:20},
  kicker:{fontSize:10,color:Colors.violet,fontWeight:'900',letterSpacing:1.4,marginBottom:9},
  title:{fontSize:Type.hero,fontWeight:'900',letterSpacing:-1.3,lineHeight:41,color:Colors.text},
  sub:{fontSize:14,color:Colors.muted,lineHeight:21,marginTop:10,marginBottom:28},

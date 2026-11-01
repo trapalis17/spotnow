@@ -39,7 +39,7 @@ export function VibeTasteSwipe({visible,initialView='cards',state,onVote,onReset
       image:place.demoPhoto??'',
       tags:place.tasteTags??[],
       colors:(place.category==='cafe'?['#A06D56','#D6B4A3']:
-        place.category==='bar'?['#78564A','#AC7564']:['#789486','#D0A99A']) as readonly [string,string],
+        place.category==='bar'?['#78564A','#AC7564']:['#88A8A0','#D0A99A']) as readonly [string,string],
       icon:(place.category==='cafe'?'cafe-outline':
         place.category==='bar'?'wine-outline':'restaurant-outline') as IconName,
     } as VenueCard));
@@ -215,12 +215,12 @@ export function VibeTasteSwipe({visible,initialView='cards',state,onVote,onReset
 const styles=StyleSheet.create({
  backdrop:{flex:1,backgroundColor:'rgba(20,12,37,.78)'},
  scroll:{paddingHorizontal:14,paddingTop:24,paddingBottom:28,alignItems:'center',justifyContent:'center'},
- sheet:{width:'100%',maxWidth:470,backgroundColor:'#FBF8F4',borderRadius:28,padding:17,overflow:'hidden'},
+ sheet:{width:'100%',maxWidth:470,backgroundColor:'#FAF8FF',borderRadius:28,padding:17,overflow:'hidden'},
  heading:{flexDirection:'row',justifyContent:'space-between',gap:8,alignItems:'center',marginBottom:14},
  titleGroup:{flex:1},eyebrow:{fontSize:10,fontWeight:'900',letterSpacing:1,color:Colors.violet},
  title:{fontSize:27,fontWeight:'900',letterSpacing:-1,color:Colors.text,marginTop:3},
  close:{backgroundColor:'#EEE6DF',height:40,width:40,borderRadius:13,alignItems:'center',justifyContent:'center'},
- tabs:{flexDirection:'row',backgroundColor:'#EEE5DC',padding:4,borderRadius:14,gap:5,marginBottom:15},
+ tabs:{flexDirection:'row',backgroundColor:'#EEEAF7',padding:4,borderRadius:14,gap:5,marginBottom:15},
  tab:{flex:1,paddingVertical:11,alignItems:'center',borderRadius:11},
  activeTab:{backgroundColor:Colors.violet},
  tabText:{fontSize:11,fontWeight:'900',color:Colors.text},
@@ -245,11 +245,11 @@ const styles=StyleSheet.create({
  tag:{borderRadius:30,backgroundColor:'rgba(255,255,255,.23)',borderWidth:1,borderColor:'rgba(255,255,255,.34)',paddingVertical:7,paddingHorizontal:10},
  tagText:{fontSize:10,fontWeight:'800',color:'#fff'},
  voteStamp:{position:'absolute',top:87,padding:12,borderWidth:3,borderRadius:14,transform:[{rotate:'-14deg'}],zIndex:2},
- likeStamp:{left:19,borderColor:'#DFE8D8'},dislikeStamp:{right:14,borderColor:'#F4E1D8'},
+ likeStamp:{left:19,borderColor:'#DDF3B2'},dislikeStamp:{right:14,borderColor:'#F4E1D8'},
  voteText:{fontSize:19,color:'#fff',fontWeight:'900'},
  controls:{flexDirection:'row',gap:12,justifyContent:'center',marginBottom:11},
  action:{flex:1,backgroundColor:'#fff',alignItems:'center',justifyContent:'center',gap:7,paddingVertical:12,borderRadius:17,borderWidth:1,borderColor:Colors.border},
- no:{backgroundColor:'#FBF4EF'},skip:{backgroundColor:'#F7F1EB'},yes:{backgroundColor:'#F1F6EC'},
+ no:{backgroundColor:'#FBF4EF'},skip:{backgroundColor:'#F6F2FC'},yes:{backgroundColor:'#F1F6EC'},
  actionLabel:{fontSize:11,fontWeight:'900',color:Colors.text},
  hint:{color:Colors.muted,fontSize:11,lineHeight:17,textAlign:'center',marginBottom:3},
  finished:{borderRadius:24,minHeight:295,backgroundColor:'#F0EAF9',alignItems:'center',justifyContent:'center',padding:22,gap:10,marginBottom:16},
@@ -268,7 +268,7 @@ const styles=StyleSheet.create({
  dnaHeading:{fontSize:15,color:Colors.text,fontWeight:'900',marginTop:6},
  dnaChips:{flexDirection:'row',flexWrap:'wrap',gap:8},
  positive:{backgroundColor:'#ECF2E8',borderRadius:14,paddingHorizontal:12,paddingVertical:10},
- positiveText:{fontSize:12,color:'#385A3F',fontWeight:'800'},
+ positiveText:{fontSize:12,color:'#55683B',fontWeight:'800'},
  negative:{backgroundColor:'#F8ECE8',borderRadius:14,paddingHorizontal:12,paddingVertical:10},
  negativeText:{fontSize:12,color:Colors.rose,fontWeight:'800'},
  emptyText:{color:Colors.muted,fontSize:12,lineHeight:18},
@@ -282,7 +282,7 @@ const styles=StyleSheet.create({
  confirmDelete:{flex:1,padding:12,borderRadius:12,backgroundColor:Colors.rose,alignItems:'center'},
  cancelText:{fontSize:12,fontWeight:'800',color:Colors.text},
  deleteText:{fontSize:12,fontWeight:'900',color:'#fff'},
- profileLink:{alignItems:'center',paddingVertical:11,marginBottom:4,borderRadius:13,backgroundColor:'#F7ECE4'},
+ profileLink:{alignItems:'center',paddingVertical:11,marginBottom:4,borderRadius:13,backgroundColor:'#F6F2FC'},
  profileText:{fontWeight:'900',fontSize:12,color:Colors.violet},
  backToSwipe:{padding:12,alignItems:'center'},backText:{color:Colors.violet,fontWeight:'900',fontSize:12}
 });

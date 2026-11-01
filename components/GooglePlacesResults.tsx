@@ -93,6 +93,6 @@ const styles=StyleSheet.create({
  error:{color:Colors.danger,lineHeight:22,marginVertical:12,fontSize:13},
  legal:{fontSize:10,lineHeight:17,color:Colors.muted,marginTop:6},
  link:{color:Colors.lime,fontSize:13,fontWeight:'900',marginVertical:15},
- showMore:{padding:15,backgroundColor:'#F4E7DB',borderRadius:999,alignItems:'center',marginBottom:13},
+ showMore:{padding:15,backgroundColor:'#EEE9FA',borderRadius:999,alignItems:'center',marginBottom:13},
  showMoreText:{color:Colors.violet,fontWeight:'900',fontSize:13},
 });

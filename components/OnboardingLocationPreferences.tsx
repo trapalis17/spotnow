@@ -146,7 +146,7 @@ const styles=StyleSheet.create({
  root:{width:'100%',marginBottom:10},
  head:{flexDirection:'row',alignItems:'center',gap:7,marginBottom:10,flexWrap:'wrap'},
  label:{color:Colors.text,fontWeight:'800',fontSize:13},
- count:{color:Colors.violet,fontSize:11,fontWeight:'800',marginLeft:'auto',backgroundColor:'#F4E7DB',borderRadius:Radius.pill,overflow:'hidden',paddingHorizontal:12,paddingVertical:6},
+ count:{color:Colors.violet,fontSize:11,fontWeight:'800',marginLeft:'auto',backgroundColor:'#EEE9FA',borderRadius:Radius.pill,overflow:'hidden',paddingHorizontal:12,paddingVertical:6},
  info:{fontSize:12,color:Colors.muted,lineHeight:19,marginVertical:9},
  referenceRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:12},
  referenceText:{fontSize:11,color:Colors.muted,flex:1},

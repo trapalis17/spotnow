@@ -25,10 +25,10 @@ const styles=StyleSheet.create({
  wrap:{borderRadius:22,overflow:'hidden',backgroundColor:'#fff',marginBottom:15,borderColor:Colors.border,borderWidth:1},
  top:{flexDirection:'row',alignItems:'center',gap:8,paddingHorizontal:15,paddingVertical:12},
  heading:{fontWeight:'900',fontSize:14,color:Colors.text},
- map:{height:305,backgroundColor:'#EEE6DC',overflow:'hidden',position:'relative'},
+ map:{height:305,backgroundColor:'#EEE9F7',overflow:'hidden',position:'relative'},
  road:{position:'absolute',left:-20,right:-20,height:19,backgroundColor:'#fff',opacity:.85},
  vertical:{position:'absolute',top:-15,bottom:-15,width:20,backgroundColor:'#fff',opacity:.84,transform:[{rotate:'14deg'}]},
- pin:{position:'absolute',width:35,height:35,borderRadius:18,borderWidth:2,borderColor:'#fff',backgroundColor:Colors.violet,alignItems:'center',justifyContent:'center',shadowColor:'#67443B',shadowOpacity:.2,shadowRadius:5,elevation:3},
- watermark:{position:'absolute',bottom:14,right:15,fontSize:10,color:'#A2958B',fontWeight:'900',letterSpacing:2},
+ pin:{position:'absolute',width:35,height:35,borderRadius:18,borderWidth:2,borderColor:'#fff',backgroundColor:Colors.violet,alignItems:'center',justifyContent:'center',shadowColor:'#574998',shadowOpacity:.2,shadowRadius:5,elevation:3},
+ watermark:{position:'absolute',bottom:14,right:15,fontSize:10,color:'#938CA7',fontWeight:'900',letterSpacing:2},
  caption:{fontSize:11,color:Colors.muted,padding:12,lineHeight:17}
 });
