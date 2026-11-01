@@ -33,6 +33,7 @@ export default function WelcomeScreen(){
  </ScrollView>;
 }
 const s=StyleSheet.create({
+ loading:{flex:1,backgroundColor:Colors.background,justifyContent:'center',alignItems:'center'},
  page:{flex:1,backgroundColor:Colors.background},content:{flexGrow:1,paddingHorizontal:Spacing.lg,paddingTop:32,paddingBottom:35,justifyContent:'space-between'},
  brandRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:28},
  brand:{fontSize:35,fontWeight:'900',letterSpacing:-1.9,color:Colors.text},
