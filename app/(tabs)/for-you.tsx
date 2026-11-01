@@ -87,7 +87,7 @@ export default function ForYouScreen(){
      <Text style={styles.heroSub}>Hey {displayName} ✳ Φτιάξαμε το δικό σου mix από καφέ, φαγητό και ποτό. Όσο μαθαίνουμε το vibe σου, τόσο αλλάζουν οι προτάσεις.</Text>
      <View style={styles.heroStats}>
        <View style={styles.glassStat}><Text style={styles.statNumber}>{picks.length}</Text><Text style={styles.statLabel}>matches</Text></View>
-       <View style={styles.glassStat}><Text style={styles.statNumber}>{dnaSummary.meaningfulCount}</Text><Text style={styles.statLabel}>swipe signals</Text></View>
+       <View style={styles.glassStat}><Text style={styles.statNumber}>{dnaSummary.meaningfulCount}</Text><Text style={styles.statLabel}>taste signals</Text></View>
        <View style={styles.glassStat}><Text style={styles.statNumber}>{budgetName}</Text><Text style={styles.statLabel}>budget</Text></View>
      </View>
    </LinearGradient>
