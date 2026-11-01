@@ -72,7 +72,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{visible
      </LinearGradient>
      <View style={s.cardBody}>
       <Text style={s.venueName}>{current.title}</Text>
-      <Text style={s.venueMeta}>{current.tags.slice(0,3).map(x=>'#'+x.replace(/-/g,'')).join('   ')}</Text>
+      <View style={s.tagRow}>{current.tags.slice(0,3).map(tag=><View key={tag} style={s.tagPill}><Text style={s.tagText}>{tag.replace(/-/g,' ')}</Text></View>)}</View>
      </View>
      <View style={s.actions}>
       <Pressable style={s.action} accessibilityRole="button" accessibilityLabel="Δεν μου αρέσει" onPress={()=>vote('dislike')}><Ionicons name="close" size={27} color={Colors.rose}/><Text style={s.actionText}>Pass</Text></Pressable>
@@ -104,8 +104,8 @@ const s=StyleSheet.create({
  header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:21,paddingTop:24,paddingBottom:19},
  brand:{fontSize:28,fontWeight:'900',color:Colors.text,letterSpacing:-1.4},headerSub:{fontSize:9,fontWeight:'900',letterSpacing:1,color:Colors.muted,marginTop:3},
  close:{width:42,height:42,borderRadius:14,backgroundColor:'#F0EDF6',alignItems:'center',justifyContent:'center'},
- tabs:{flexDirection:'row',backgroundColor:'#EFEAF8',padding:4,borderRadius:16,marginHorizontal:20,gap:4},
- tab:{flex:1,padding:12,borderRadius:13,alignItems:'center'},tabOn:{backgroundColor:'#fff'},
+ tabs:{flexDirection:'row',backgroundColor:'#EFEAF8',padding:4,borderRadius:Radius.pill,marginHorizontal:20,gap:4},
+ tab:{flex:1,padding:12,borderRadius:Radius.pill,alignItems:'center'},tabOn:{backgroundColor:'#fff'},
  tabText:{fontSize:13,fontWeight:'800',color:Colors.muted},tabTextOn:{color:Colors.violet},
  content:{paddingHorizontal:20,paddingTop:24,paddingBottom:50},
  topLine:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},kicker:{fontSize:10,letterSpacing:1.4,fontWeight:'900',color:Colors.violet},
@@ -124,7 +124,9 @@ const s=StyleSheet.create({
  venueKind:{fontSize:13,fontWeight:'800',color:'#fff'},
  cardBody:{paddingHorizontal:18,paddingTop:18,paddingBottom:7},
  venueName:{fontSize:25,fontWeight:'900',color:Colors.text,letterSpacing:-.6},
- venueMeta:{fontSize:12,color:Colors.violet,marginTop:8},
+ tagRow:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:11},
+ tagPill:{backgroundColor:'#F2ECFF',borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:7},
+ tagText:{color:Colors.violet,fontSize:12,fontWeight:'800'},
  actions:{flexDirection:'row',gap:9,margin:14,marginTop:19},
  action:{flex:1,minHeight:68,borderRadius:17,backgroundColor:'#F4F1F9',alignItems:'center',justifyContent:'center',gap:3},
  actionText:{color:Colors.text,fontSize:12,fontWeight:'800'},
