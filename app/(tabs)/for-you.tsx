@@ -111,11 +111,11 @@ const s=StyleSheet.create({
  dnaSub:{fontSize:12,color:Colors.muted,marginTop:5},
  dnaArrow:{backgroundColor:'#fff',width:37,height:37,borderRadius:12,alignItems:'center',justifyContent:'center'},
  filters:{gap:8,paddingBottom:15},
- chip:{paddingVertical:11,paddingHorizontal:17,backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:999},
+ chip:{paddingVertical:12,paddingHorizontal:18,backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:Radius.pill},
  chipSelected:{backgroundColor:Colors.violet,borderColor:Colors.violet},
  chipText:{fontSize:13,color:Colors.text,fontWeight:'800'},chipTextOn:{color:'#fff'},
  toggles:{flexDirection:'row',alignItems:'center',gap:8,marginBottom:17},
- filterButton:{flexDirection:'row',alignItems:'center',gap:6,borderRadius:12,paddingHorizontal:11,paddingVertical:11,backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border},
+ filterButton:{flexDirection:'row',alignItems:'center',gap:7,borderRadius:Radius.pill,paddingHorizontal:15,paddingVertical:12,backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border},
  filterOn:{backgroundColor:'#EFE9FF',borderColor:'#BFAAF6'},
  filterText:{fontSize:12,color:Colors.violet,fontWeight:'800'},
  edit:{marginLeft:'auto',padding:10,borderRadius:12,backgroundColor:Colors.cardSoft},
@@ -129,7 +129,7 @@ const s=StyleSheet.create({
  error:{fontSize:12,color:Colors.danger,marginVertical:13},
  empty:{alignItems:'center',backgroundColor:'#F1EDFC',borderRadius:Radius.lg,padding:27,gap:11},
  emptyTitle:{fontSize:18,fontWeight:'900',color:Colors.text},
- clear:{backgroundColor:Colors.violet,paddingVertical:12,paddingHorizontal:22,borderRadius:12,marginTop:6},
+ clear:{backgroundColor:Colors.violet,paddingVertical:12,paddingHorizontal:22,borderRadius:Radius.pill,marginTop:6},
  clearText:{fontSize:13,fontWeight:'800',color:'#fff'},
  footer:{fontSize:11,color:Colors.muted,lineHeight:18,marginTop:28,textAlign:'center'}
 });
