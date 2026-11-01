@@ -1,20 +1,32 @@
 import {useFocusEffect,useRouter} from 'expo-router';
 import {useCallback,useState} from 'react';
-import {Pressable,ScrollView,StyleSheet,Text,View} from 'react-native';
+import {Pressable,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Colors,Spacing} from '../../constants/theme';
-import {getSavedVenueIds,toggleSavedVenue} from '../../lib/storage';
+import {getSavedVenueIds,toggleSavedVenue,getCollections,saveCollections,type SavedCollection} from '../../lib/storage';
 import {getDemoPlaceById} from '../../lib/demo-places';
 import type {GooglePlace} from '../../lib/google-places';
 export default function SavedScreen(){
  const router=useRouter();
  const [ids,setIds]=useState<string[]>([]);
- useFocusEffect(useCallback(()=>{getSavedVenueIds().then(setIds).catch(()=>setIds([]));},[]));
+ const [collections,setCollections]=useState<SavedCollection[]>([]);
+ const [newName,setNewName]=useState('');
+ useFocusEffect(useCallback(()=>{getSavedVenueIds().then(setIds).catch(()=>setIds([]));getCollections().then(setCollections).catch(()=>undefined);},[]));
+ const updateCollections=(next:SavedCollection[])=>{setCollections(next);saveCollections(next).catch(()=>undefined);};
+ const addCollection=()=>{const name=newName.trim();if(!name)return;updateCollections([...collections,{id:'collection-'+Date.now().toString(36),name,venueIds:[]}]);setNewName('');};
+ const addToCollection=(collectionId:string,venueId:string)=>{
+   updateCollections(collections.map(c=>c.id!==collectionId?c:{...c,venueIds:c.venueIds.includes(venueId)?c.venueIds.filter(v=>v!==venueId):[...c.venueIds,venueId]}));
+ };
  const places=ids.filter(id=>id.startsWith('google-')).map(id=>getDemoPlaceById(id.slice(7))).filter((p):p is GooglePlace=>p!==null);
  return <ScrollView style={styles.page} contentContainerStyle={styles.content}>
   <Text style={styles.title}>Τα αγαπημένα σου <Text style={{color:Colors.rose}}>♥</Text></Text>
   <Text style={styles.subtitle}>{places.length?places.length+' demo spots που κράτησες.':'Τα μέρη που αγαπάς, όλα σε ένα σημείο.'}</Text>
+  <View style={styles.collectionPanel}>
+   <Text style={styles.collectionHeading}>My collections ✳</Text>
+   <View style={styles.newCollection}><TextInput value={newName} onChangeText={setNewName} placeholder="New collection name" style={styles.collectionInput} placeholderTextColor={Colors.muted}/><Pressable accessibilityRole="button" onPress={addCollection} style={styles.addButton}><Ionicons name="add" size={23} color="#fff"/></Pressable></View>
+   {collections.map(c=><View key={c.id} style={styles.collectionRow}><View style={{flex:1}}><Text style={styles.collectionName}>{c.name}</Text><Text style={styles.collectionCount}>{c.venueIds.length} spots</Text></View><Pressable accessibilityRole="button" accessibilityLabel={'Διαγραφή '+c.name} onPress={()=>updateCollections(collections.filter(x=>x.id!==c.id))}><Ionicons name="trash-outline" size={19} color={Colors.rose}/></Pressable></View>)}
+  </View>
   {!places.length?<LinearGradient colors={['#F0E9FF','#FDEBF4']} style={styles.empty}>
    <Ionicons name="heart-outline" size={42} color={Colors.rose}/>
    <Text style={styles.emptyTitle}>Δεν έχεις κρατήσει κάποιο μέρος ακόμη.</Text>
@@ -25,14 +37,26 @@ export default function SavedScreen(){
    onPress={()=>router.push({pathname:'/google-venue',params:{id:place.id}})}>
    <View style={styles.symbol}><Ionicons name={place.category==='cafe'?'cafe-outline':place.category==='bar'?'wine-outline':'restaurant-outline'} size={23} color={Colors.violet}/></View>
    <View style={styles.middle}><Text style={styles.name}>{place.name}</Text><Text style={styles.note}>{place.address}</Text></View>
+   <View style={{alignItems:'flex-end',gap:8}}>
+    {collections.map(c=><Pressable key={c.id} accessibilityRole="button" onPress={e=>{e.stopPropagation();addToCollection(c.id,'google-'+place.id);}}>
+       <Text style={{fontSize:10,color:Colors.violet,fontWeight:'800'}}>{c.venueIds.includes('google-'+place.id)?'✓ ':'+ '}{c.name}</Text>
+    </Pressable>)}
    <Pressable onPress={async(e)=>{e.stopPropagation();setIds(await toggleSavedVenue('google-'+place.id));}} accessibilityLabel="Αφαίρεση από αγαπημένα">
      <Ionicons name="heart" size={24} color={Colors.rose}/>
-   </Pressable>
+   </Pressable></View>
   </Pressable>)}
   {places.length?<Text style={styles.footer}>Τοπικά αποθηκευμένα αγαπημένα · Μόνο demo καταστήματα.</Text>:null}
  </ScrollView>;
 }
 const styles=StyleSheet.create({
+ collectionPanel:{backgroundColor:'#fff',padding:16,borderRadius:22,marginBottom:22,borderWidth:1,borderColor:Colors.border},
+ collectionHeading:{fontSize:19,fontWeight:'900',color:Colors.text,marginBottom:12},
+ newCollection:{flexDirection:'row',gap:8,marginBottom:11},
+ collectionInput:{flex:1,borderRadius:13,backgroundColor:'#F3F0F8',padding:12,color:Colors.text},
+ addButton:{width:44,borderRadius:12,backgroundColor:Colors.violet,alignItems:'center',justifyContent:'center'},
+ collectionRow:{flexDirection:'row',alignItems:'center',borderTopWidth:1,borderTopColor:Colors.border,paddingVertical:11},
+ collectionName:{fontSize:14,fontWeight:'800',color:Colors.text},
+ collectionCount:{fontSize:11,color:Colors.muted,marginTop:3},
  page:{flex:1,backgroundColor:Colors.background},
  content:{paddingHorizontal:Spacing.lg,paddingTop:39,paddingBottom:65},
  title:{fontSize:32,fontWeight:'900',color:Colors.text,letterSpacing:-1.3,lineHeight:40},
