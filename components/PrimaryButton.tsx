@@ -1,9 +1,10 @@
 import {Pressable,StyleSheet,Text,View} from 'react-native';
+import {LinearGradient} from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import {Colors,Radius} from '../constants/theme';
+import {Colors,Gradients,Radius} from '../constants/theme';
 export function PrimaryButton({label,onPress,compact=false}:{label:string;onPress:()=>void;compact?:boolean}){
  return <Pressable accessibilityRole="button" onPress={onPress} style={({pressed})=>[styles.primary,compact&&styles.compact,pressed&&styles.pressed]}>
-  <Text style={styles.primaryText}>{label}</Text><Ionicons name="arrow-forward" size={18} color="#fff"/>
+  <LinearGradient colors={Gradients.primary} start={{x:0,y:0}} end={{x:1,y:1}} style={StyleSheet.absoluteFill} pointerEvents="none"/><Text style={styles.primaryText}>{label}</Text><Ionicons name="arrow-forward" size={18} color="#fff"/>
  </Pressable>;
 }
 export function SecondaryButton({label,onPress}:{label:string;onPress:()=>void}){
@@ -12,7 +13,7 @@ export function SecondaryButton({label,onPress}:{label:string;onPress:()=>void})
  </Pressable>;
 }
 const styles=StyleSheet.create({
- primary:{minHeight:54,backgroundColor:Colors.violet,borderRadius:Radius.md,paddingHorizontal:19,paddingVertical:14,
+ primary:{overflow:'hidden',minHeight:54,backgroundColor:Colors.violet,borderRadius:Radius.md,paddingHorizontal:19,paddingVertical:14,
   flexDirection:'row',alignItems:'center',justifyContent:'center',gap:11},
  primaryText:{fontSize:15,fontWeight:'800',color:'#fff',letterSpacing:.1},
  compact:{minHeight:44,paddingVertical:11},

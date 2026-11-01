@@ -48,14 +48,14 @@ export default function DiscoverScreen(){
      <Text style={s.swipeTitle}>Κάθε swipe,<Text style={{color:Colors.violet}}> πιο εσύ.</Text></Text>
      <Text style={s.swipeDescription}>8 πραγματικά μαγαζιά. Πες μας τι σου αρέσει.</Text>
      <View style={s.swipeBottom}>
-       <Pressable onPress={()=>openTaste('cards')} accessibilityRole="button" style={s.swipeCTA}><Text style={s.swipeCTAText}>Start swiping</Text><Ionicons name="arrow-forward" size={17} color="#fff"/></Pressable>
+       <Pressable onPress={()=>openTaste('cards')} accessibilityRole="button" style={s.swipeCTA}><LinearGradient colors={Gradients.primary} start={{x:0,y:0}} end={{x:1,y:1}} style={s.swipeCTAInner}><Text style={s.swipeCTAText}>Start swiping</Text><Ionicons name="arrow-forward" size={17} color="#fff"/></LinearGradient></Pressable>
        <Pressable onPress={()=>openTaste('dna')} accessibilityRole="button" style={s.dnaCTA}><Text style={s.dnaText}>My DNA</Text><Ionicons name="finger-print-outline" size={17} color={Colors.violet}/></Pressable>
      </View>
    </LinearGradient>
    <View style={s.sectionRow}><View><Text style={s.sectionTitle}>Βρες το μέρος σου</Text><Text style={s.sectionCaption}>Προσαρμόζεις τις επιλογές σου</Text></View><Pressable onPress={()=>router.push('/(tabs)/for-you')} accessibilityRole="button"><Text style={s.textLink}>For you <Ionicons name="arrow-forward" size={13}/></Text></Pressable></View>
    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.categories}>
      {categories.map(c=><Pressable key={c.id} onPress={()=>setCategory(c.id)} accessibilityRole="button" accessibilityState={{selected:category===c.id}} style={[s.category,category===c.id&&s.categorySelected]}>
-       <Ionicons name={c.icon} size={16} color={category===c.id?'#fff':Colors.violet}/>
+       {category===c.id?<LinearGradient colors={Gradients.primary} style={StyleSheet.absoluteFill} pointerEvents="none"/>:null}<Ionicons name={c.icon} size={16} color={category===c.id?'#fff':Colors.violet}/>
        <Text style={[s.categoryText,category===c.id&&s.selectedText]}>{c.name}</Text>
      </Pressable>)}
    </ScrollView>
@@ -87,7 +87,7 @@ const s=StyleSheet.create({
  subtitle:{fontSize:14,color:Colors.muted,lineHeight:21,marginTop:7,marginBottom:23},
  search:{minHeight:54,backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:Radius.md,flexDirection:'row',alignItems:'center',paddingHorizontal:16,gap:10,marginBottom:18},
  input:{flex:1,color:Colors.text,fontSize:14,paddingVertical:13},
- swipeCard:{borderRadius:Radius.lg,padding:19,borderWidth:1,borderColor:'rgba(112,85,180,.10)',marginBottom:28},
+ swipeCard:{borderRadius:Radius.lg,padding:19,borderWidth:1,borderColor:Colors.border,marginBottom:28},
  swipeTop:{flexDirection:'row',alignItems:'center',gap:9,marginBottom:14},
  swipeIcon:{backgroundColor:'#fff',width:39,height:39,borderRadius:13,alignItems:'center',justifyContent:'center'},
  swipeEyebrow:{fontSize:10,fontWeight:'900',letterSpacing:1,color:Colors.violet,flex:1},
@@ -95,7 +95,8 @@ const s=StyleSheet.create({
  swipeTitle:{fontSize:25,lineHeight:31,fontWeight:'900',letterSpacing:-.6,color:Colors.text,maxWidth:'95%'},
  swipeDescription:{fontSize:13,color:Colors.muted,lineHeight:19,marginTop:8},
  swipeBottom:{flexDirection:'row',alignItems:'center',gap:9,marginTop:19},
- swipeCTA:{flex:1,backgroundColor:Colors.violet,paddingVertical:13,paddingHorizontal:15,borderRadius:14,flexDirection:'row',justifyContent:'center',alignItems:'center',gap:9},
+ swipeCTA:{flex:1,borderRadius:14,overflow:'hidden'},
+ swipeCTAInner:{paddingVertical:13,paddingHorizontal:15,flexDirection:'row',justifyContent:'center',alignItems:'center',gap:9},
  swipeCTAText:{color:'#fff',fontSize:13,fontWeight:'900'},
  dnaCTA:{backgroundColor:'rgba(255,255,255,.82)',paddingHorizontal:17,paddingVertical:13,borderRadius:14,flexDirection:'row',alignItems:'center',gap:6},
  dnaText:{color:Colors.violet,fontSize:13,fontWeight:'800'},
@@ -103,7 +104,7 @@ const s=StyleSheet.create({
  sectionTitle:{fontSize:Type.section,fontWeight:'900',color:Colors.text,letterSpacing:-.6},
  sectionCaption:{color:Colors.muted,fontSize:12,marginTop:4},textLink:{fontWeight:'800',fontSize:12,color:Colors.violet},
  categories:{gap:8,paddingBottom:18},
- category:{paddingHorizontal:16,paddingVertical:12,borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',gap:7},
+ category:{overflow:'hidden',paddingHorizontal:16,paddingVertical:12,borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',gap:7},
  categorySelected:{backgroundColor:Colors.violet,borderColor:Colors.violet},
  categoryText:{color:Colors.text,fontSize:13,fontWeight:'700'},selectedText:{color:'#fff'},
  filterBar:{flexDirection:'row',alignItems:'center',paddingVertical:13,gap:8},
@@ -112,9 +113,9 @@ const s=StyleSheet.create({
  nearText:{fontSize:12,fontWeight:'800',color:Colors.violet},
  areas:{gap:8,paddingBottom:22},
  area:{backgroundColor:'#fff',borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border,paddingVertical:11,paddingHorizontal:16},
- areaSelected:{backgroundColor:'#F3E2D7',borderColor:'#B9A5F7'},
+ areaSelected:{backgroundColor:'#EAE2FC',borderColor:'#C4B5F6'},
  areaText:{fontSize:12,color:Colors.muted,fontWeight:'700'},
- areaMore:{borderRadius:Radius.pill,backgroundColor:'#F7EAE0',paddingHorizontal:15,paddingVertical:11},resultsHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
- mode:{flexDirection:'row',gap:4,backgroundColor:'#F3EBE4',borderRadius:Radius.pill,padding:4},
+ areaMore:{borderRadius:Radius.pill,backgroundColor:'#F0EAFE',paddingHorizontal:15,paddingVertical:11},resultsHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
+ mode:{flexDirection:'row',gap:4,backgroundColor:'#F1EEFA',borderRadius:Radius.pill,padding:4},
  modeButton:{padding:10,borderRadius:Radius.pill},modeSelected:{backgroundColor:'#fff'}
 });

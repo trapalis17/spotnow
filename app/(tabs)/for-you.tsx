@@ -65,7 +65,7 @@ export default function ForYouScreen(){
    <Pressable style={s.dnaArrow} onPress={()=>router.push('/(tabs)')} accessibilityRole="button" accessibilityLabel="Πήγαινε στο Taste Swipe"><Ionicons name="arrow-forward" size={18} color={Colors.violet}/></Pressable>
   </LinearGradient>
   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filters}>
-   {categories.map(c=><Pressable key={c.id} onPress={()=>setCategory(c.id)} style={[s.chip,category===c.id&&s.chipSelected]} accessibilityRole="button" accessibilityState={{selected:category===c.id}}><Text style={[s.chipText,category===c.id&&s.chipTextOn]}>{c.label}</Text></Pressable>)}
+   {categories.map(c=><Pressable key={c.id} onPress={()=>setCategory(c.id)} style={[s.chip,category===c.id&&s.chipSelected]} accessibilityRole="button" accessibilityState={{selected:category===c.id}}>{category===c.id?<LinearGradient colors={Gradients.primary} style={StyleSheet.absoluteFill} pointerEvents="none"/>:null}<Text style={[s.chipText,category===c.id&&s.chipTextOn]}>{c.label}</Text></Pressable>)}
   </ScrollView>
   <View style={s.toggles}>
    <Pressable onPress={()=>setBudgetOnly(x=>!x)} accessibilityRole="button" accessibilityState={{selected:budgetOnly}} style={[s.filterButton,budgetOnly&&s.filterOn]}><Ionicons name={budgetOnly?'checkmark-circle':'wallet-outline'} size={15} color={Colors.violet}/><Text style={s.filterText}>My budget</Text></Pressable>
@@ -122,12 +122,12 @@ const s=StyleSheet.create({
  dnaSub:{fontSize:12,color:Colors.muted,marginTop:5},
  dnaArrow:{backgroundColor:'#fff',width:37,height:37,borderRadius:12,alignItems:'center',justifyContent:'center'},
  filters:{gap:8,paddingBottom:15},
- chip:{paddingVertical:12,paddingHorizontal:18,backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:Radius.pill},
+ chip:{overflow:'hidden',paddingVertical:12,paddingHorizontal:18,backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:Radius.pill},
  chipSelected:{backgroundColor:Colors.violet,borderColor:Colors.violet},
  chipText:{fontSize:13,color:Colors.text,fontWeight:'800'},chipTextOn:{color:'#fff'},
  toggles:{flexDirection:'row',alignItems:'center',gap:8,marginBottom:17},
  filterButton:{flexDirection:'row',alignItems:'center',gap:7,borderRadius:Radius.pill,paddingHorizontal:15,paddingVertical:12,backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border},
- filterOn:{backgroundColor:'#F4E5DA',borderColor:'#D8BAA9'},
+ filterOn:{backgroundColor:'#EEE9FF',borderColor:'#C8BBF6'},
  filterText:{fontSize:12,color:Colors.violet,fontWeight:'800'},
  edit:{marginLeft:'auto',padding:10,borderRadius:12,backgroundColor:Colors.cardSoft},
  section:{marginBottom:15,marginTop:9,flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10},
@@ -136,12 +136,12 @@ const s=StyleSheet.create({
  sectionHint:{fontSize:12,lineHeight:17,color:Colors.muted},
  horizontalCards:{paddingBottom:7,paddingRight:Spacing.lg},
  sectionMeta:{fontSize:9,color:Colors.violet,letterSpacing:.8,fontWeight:'900'},
- why:{flexDirection:'row',alignItems:'center',gap:9,padding:14,borderRadius:15,backgroundColor:'#F8F0E8',marginTop:9},
+ why:{flexDirection:'row',alignItems:'center',gap:9,padding:14,borderRadius:15,backgroundColor:'#F4EFFF',marginTop:9},
  whyText:{fontSize:12,lineHeight:18,color:Colors.text,flex:1},
  block:{marginTop:25},hint:{fontSize:13,color:Colors.muted,lineHeight:21},
  loading:{paddingVertical:32,alignItems:'center',gap:10},
  error:{fontSize:12,color:Colors.danger,marginVertical:13},
- empty:{alignItems:'center',backgroundColor:'#F8F0E8',borderRadius:Radius.lg,padding:27,gap:11},
+ empty:{alignItems:'center',backgroundColor:'#F4EFFF',borderRadius:Radius.lg,padding:27,gap:11},
  emptyTitle:{fontSize:18,fontWeight:'900',color:Colors.text},
  clear:{backgroundColor:Colors.violet,paddingVertical:12,paddingHorizontal:22,borderRadius:Radius.pill,marginTop:6},
  clearText:{fontSize:13,fontWeight:'800',color:'#fff'},

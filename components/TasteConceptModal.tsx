@@ -125,7 +125,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
     <View style={s.topLine}><Text style={s.kicker}>TODAY'S EDITION</Text>
      <Text style={s.count}>{8-remaining}<Text style={{color:Colors.subtle}}> / 8 spots</Text></Text>
     </View>
-    <View style={s.progress}><View style={[s.progressFill,{width:progress+'%'}]}/></View>
+    <View style={s.progress}><LinearGradient colors={Gradients.primary} start={{x:0,y:0}} end={{x:1,y:0}} style={[s.progressFill,{width:progress+'%'}]}/></View>
     <View style={s.intro}>
      <Text style={s.title}>Is this <Text style={{color:Colors.violet}}>your vibe?</Text></Text>
      <Text style={s.body}>Μια ματιά αρκεί. Κράτα ό,τι σου ταιριάζει.</Text>
@@ -139,7 +139,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
        {!photoFailed?<Image source={{uri:current.image}} style={StyleSheet.absoluteFill}
         resizeMode="cover" onError={()=>setPhotoFailed(true)}
         accessibilityLabel="Ενδεικτική φωτογραφία ατμόσφαιρας, όχι του συγκεκριμένου καταστήματος"/>:null}
-       <LinearGradient colors={['rgba(36,23,18,.22)','rgba(36,23,18,.08)','rgba(30,18,14,.85)']}
+       <LinearGradient colors={['rgba(35,27,79,.22)','rgba(35,27,79,.08)','rgba(27,19,58,.85)']}
         locations={[0,.34,1]} style={StyleSheet.absoluteFill}/>
        <View style={s.imageTop}>
         <View style={s.editionPill}><Ionicons name="sparkles-outline" size={13} color={Colors.text}/>
@@ -229,9 +229,9 @@ const s=StyleSheet.create({
  brand:{fontSize:29,fontWeight:'900',color:Colors.text,letterSpacing:-1.4},
  headerSub:{fontSize:9,fontWeight:'800',letterSpacing:1.05,color:Colors.muted,marginTop:3},
  close:{width:43,height:43,borderRadius:15,backgroundColor:Colors.cardSoft,alignItems:'center',justifyContent:'center'},
- tabs:{flexDirection:'row',backgroundColor:'#F3EAE3',padding:4,borderRadius:Radius.pill,marginHorizontal:20,gap:4},
+ tabs:{flexDirection:'row',backgroundColor:'#F0EBF9',padding:4,borderRadius:Radius.pill,marginHorizontal:20,gap:4},
  tab:{flex:1,paddingVertical:12,paddingHorizontal:8,borderRadius:Radius.pill,alignItems:'center'},
- tabOn:{backgroundColor:'#fff',shadowColor:'#544036',shadowOpacity:.07,shadowRadius:4,elevation:1},
+ tabOn:{backgroundColor:'#fff',shadowColor:'#34265E',shadowOpacity:.07,shadowRadius:4,elevation:1},
  tabText:{fontSize:12,fontWeight:'800',color:Colors.muted},
  tabTextOn:{color:Colors.violet},
  loading:{padding:30},
@@ -239,19 +239,19 @@ const s=StyleSheet.create({
  topLine:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
  kicker:{fontSize:10,letterSpacing:1.45,fontWeight:'900',color:Colors.violet},
  count:{fontSize:12,fontWeight:'900',color:Colors.text},
- progress:{height:5,backgroundColor:'#EADFD6',borderRadius:99,marginTop:11,marginBottom:20,overflow:'hidden'},
+ progress:{height:5,backgroundColor:'#E6E0F2',borderRadius:99,marginTop:11,marginBottom:20,overflow:'hidden'},
  progressFill:{height:'100%',backgroundColor:Colors.violet,borderRadius:99},
  intro:{marginBottom:0},
  title:{fontSize:29,fontWeight:'900',letterSpacing:-.95,color:Colors.text,lineHeight:36},
  body:{fontSize:13,color:Colors.muted,lineHeight:20,marginTop:6},
  card:{backgroundColor:'#fff',borderRadius:27,marginTop:19,overflow:'hidden',
-  shadowColor:'#483026',shadowOpacity:.13,shadowOffset:{width:0,height:10},shadowRadius:22,elevation:5},
+  shadowColor:'#35265D',shadowOpacity:.13,shadowOffset:{width:0,height:10},shadowRadius:22,elevation:5},
  venueImage:{height:348,justifyContent:'space-between',overflow:'hidden',backgroundColor:'#A88677'},
  imageTop:{padding:15,flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start'},
- editionPill:{backgroundColor:'rgba(255,251,247,.94)',borderRadius:Radius.pill,flexDirection:'row',
+ editionPill:{backgroundColor:'rgba(252,249,255,.95)',borderRadius:Radius.pill,flexDirection:'row',
   alignItems:'center',gap:5,paddingVertical:9,paddingHorizontal:12},
  editionText:{fontSize:10,fontWeight:'900',color:Colors.text,letterSpacing:.45},
- indexPill:{backgroundColor:'rgba(255,251,247,.24)',borderColor:'rgba(255,255,255,.55)',borderWidth:1,
+ indexPill:{backgroundColor:'rgba(246,241,255,.23)',borderColor:'rgba(255,255,255,.55)',borderWidth:1,
   borderRadius:Radius.pill,width:37,height:37,alignItems:'center',justifyContent:'center'},
  indexText:{color:'#fff',fontSize:11,fontWeight:'900'},
  imageBottom:{paddingHorizontal:19,paddingBottom:17},
@@ -267,14 +267,14 @@ const s=StyleSheet.create({
  cardLabel:{fontSize:10,color:Colors.violet,fontWeight:'900',letterSpacing:1.25},
  cardHint:{fontSize:10,color:Colors.muted,fontWeight:'700'},
  tagRow:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:12},
- tagPill:{backgroundColor:'#F6EEE8',borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8},
+ tagPill:{backgroundColor:'#F3EFFC',borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8},
  tagText:{color:Colors.violet,fontSize:12,fontWeight:'800'},
  actions:{flexDirection:'row',alignItems:'flex-start',justifyContent:'center',gap:29,marginTop:24},
  decision:{alignItems:'center',justifyContent:'center',gap:8,minWidth:72},
  decisionCircle:{width:58,height:58,borderRadius:29,alignItems:'center',justifyContent:'center',
   borderWidth:1,borderColor:Colors.border,backgroundColor:'#fff'},
- passCircle:{backgroundColor:'#FBF5F1'},
- skipCircle:{backgroundColor:'#F5F0E9'},
+ passCircle:{backgroundColor:'#F9F6FF'},
+ skipCircle:{backgroundColor:'#F4F2FA'},
  likeCircle:{width:68,height:68,borderRadius:34,borderWidth:0,marginTop:-5,
   shadowColor:Colors.violet,shadowOpacity:.18,shadowRadius:9,shadowOffset:{width:0,height:5},elevation:3},
  actionText:{fontSize:11,fontWeight:'800',color:Colors.muted},

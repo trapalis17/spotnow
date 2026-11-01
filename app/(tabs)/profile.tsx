@@ -69,7 +69,7 @@ const s=StyleSheet.create({
  dnaLead:{fontSize:14,color:Colors.text,fontWeight:'900'},
  dnaSub:{color:Colors.muted,fontSize:12,lineHeight:19,marginTop:3},
  metric:{marginBottom:14,gap:7},metricName:{fontSize:13,color:Colors.text,fontWeight:'700'},
- track:{backgroundColor:'#F3ECE4',borderRadius:12,height:7,overflow:'hidden'},
+ track:{backgroundColor:'#F2EFF9',borderRadius:12,height:7,overflow:'hidden'},
  fill:{backgroundColor:Colors.violet,height:'100%',borderRadius:12},
  dnaEmpty:{paddingVertical:10},dnaFoot:{marginTop:9,paddingTop:16,borderTopWidth:1,borderTopColor:Colors.border,flexDirection:'row',justifyContent:'space-between',alignItems:'center',gap:9},
  inlineLink:{flexDirection:'row',alignItems:'center',gap:7},linkText:{fontSize:12,color:Colors.violet,fontWeight:'900'},reset:{fontSize:11,color:Colors.muted,fontWeight:'800'},

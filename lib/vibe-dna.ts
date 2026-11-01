@@ -29,9 +29,9 @@ export const TASTE_CARDS:readonly TasteCard[]=[
  make('real-clumsies','The Clumsies','Κέντρο Αθήνας · Cocktail bar','photo-1470337458703-46ad1756a187',
  ['cocktails','nightlife','social'],{category:'bar',experience:'cocktails'},['#57423D','#AD7764'],'wine-outline'),
  make('real-neratzia','Neratzia Bistro','Κουκάκι · Café / bistro','photo-1509042239860-f550ce710b93',
- ['coffee','brunch','casual'],{category:'cafe',experience:'brunch'},['#867462','#C6AD93'],'cafe-outline'),
+ ['coffee','brunch','casual'],{category:'cafe',experience:'brunch'},['#867462','#B7ADD8'],'cafe-outline'),
  make('real-it-restaurant','IT Restaurant','Κολωνάκι · Restaurant / café','photo-1552566626-52f8b828add9',
- ['dining','brunch','coffee'],{category:'restaurant',experience:'dining'},['#846250','#C89A7F'],'restaurant-outline'),
+ ['dining','brunch','coffee'],{category:'restaurant',experience:'dining'},['#846250','#B9A0DB'],'restaurant-outline'),
  make('real-kalimeres','Kalimeres','Ψυρρή · All-day café / cocktail bar','photo-1525351484163-7529414344d8',
  ['brunch','coffee','cocktails','social'],{category:'cafe',experience:'brunch'},['#A0735C','#DFC1A7'],'cafe-outline'),
  make('real-laluk','Laluk Cafe-Bar','Κουκάκι · Coffee / wine bar','photo-1517248135467-4c7edcad34c4',
@@ -39,11 +39,11 @@ export const TASTE_CARDS:readonly TasteCard[]=[
  make('real-me-kolonaki','Me Kolonaki','Κολωνάκι · Brunch / dining','photo-1466978913421-dad2ebd01d17',
  ['brunch','dining','daytime'],{category:'restaurant',experience:'brunch'},['#927464','#D3B49B'],'restaurant-outline'),
  make('real-mayor','Mayor','Κολωνάκι · All-day bar restaurant','photo-1515003197210-e0cd71810b5f',
- ['dining','cocktails','social'],{category:'restaurant',experience:'dining'},['#6D5B51','#B48D79'],'restaurant-outline'),
+ ['dining','cocktails','social'],{category:'restaurant',experience:'dining'},['#766AA3','#9D8CC2'],'restaurant-outline'),
  make('real-nomad','Nomad','Χαλάνδρι · Specialty coffee / drinks','photo-1447933601403-0c6688de566e',
  ['coffee','specialty','cocktails'],{category:'cafe',experience:'specialty coffee'},['#64766D','#B4B4A0'],'cafe-outline'),
  make('real-gaston','Gaston','Νέα Σμύρνη · All-day café / bar / restaurant','photo-1495474472287-4d71bcdd2085',
- ['coffee','brunch','dining','cocktails'],{category:'cafe',experience:'brunch'},['#876D5F','#D5B69E'],'cafe-outline')
+ ['coffee','brunch','dining','cocktails'],{category:'cafe',experience:'brunch'},['#876D5F','#C6B2E5'],'cafe-outline')
 ];
 
 export const TASTE_LABELS:Record<TasteTag,string>={
