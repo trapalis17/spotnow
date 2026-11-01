@@ -37,3 +37,9 @@ test('For You editorial sections do not repeat venues and respect input filterin
  assert.ok(ids.every(id=>matches.some(x=>x.place.id===id)));
  assert.deepEqual(curateForYouSections([]),{topPick:undefined,perfect:[],hiddenGems:[],tryDifferent:[],more:[]});
 });
+
+test('taste swipe has distinct illustrative editorial stock photos and remains real-name demo only',()=>{
+ assert.ok(TASTE_CARDS.every(card=>card.image.includes('images.unsplash.com/photo-')));
+ assert.equal(new Set(TASTE_CARDS.map(card=>card.id)).size,TASTE_CARDS.length);
+ assert.ok(TASTE_CARDS.every(card=>card.tags.length>0));
+});
