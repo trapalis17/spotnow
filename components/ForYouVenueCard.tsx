@@ -10,9 +10,9 @@ type Props={
  saved:boolean;onPress:()=>void;onSave:()=>void;
 };
 const palette={
- cafe:['#6254B2','#AE86C3'] as const,
- restaurant:['#9D588F','#CE9EB5'] as const,
- bar:['#483D81','#986DB0'] as const
+ cafe:['#795A4C','#C49F8B'] as const,
+ restaurant:['#9E6559','#D1A79A'] as const,
+ bar:['#5D4945','#A8796E'] as const
 };
 const iconByCategory={
  cafe:'cafe-outline' as const,
@@ -35,7 +35,7 @@ function Photo({match,height,children}:{
   <LinearGradient colors={palette[place.category]} style={StyleSheet.absoluteFill}/>
   <Ionicons name={iconByCategory[place.category]} size={84} color="rgba(255,255,255,.25)" style={styles.fallbackIcon}/>
   <ImageBackground source={place.demoPhoto?{uri:place.demoPhoto}:undefined} resizeMode="cover" style={StyleSheet.absoluteFill} imageStyle={styles.photoImage}>
-    <LinearGradient colors={['rgba(17,12,32,.18)','rgba(17,12,32,.04)','rgba(17,12,32,.83)']}
+    <LinearGradient colors={['rgba(35,24,19,.18)','rgba(35,24,19,.04)','rgba(35,24,19,.83)']}
       locations={[0,.37,1]} style={StyleSheet.absoluteFill}/>
     {children}
   </ImageBackground>
@@ -50,7 +50,7 @@ export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props
    style={({pressed})=>[styles.featured,pressed&&styles.pressed]}>
    <Photo match={match} height={330}>
     <View style={styles.featuredTop}>
-     <View style={styles.topPick}><Ionicons name="sparkles" color="#231B36" size={14}/><Text style={styles.topPickText}>TOP PICK FOR YOU</Text></View>
+     <View style={styles.topPick}><Ionicons name="sparkles" color="#302621" size={14}/><Text style={styles.topPickText}>TOP PICK FOR YOU</Text></View>
      <SaveHeart saved={saved} onSave={onSave}/>
     </View>
     <View style={styles.featuredBottom}>
@@ -105,7 +105,7 @@ const styles=StyleSheet.create({
  photoImage:{},
  fallbackIcon:{position:'absolute',top:24,left:34},
  heart:{backgroundColor:'rgba(255,255,255,.94)',borderRadius:13,width:36,height:36,alignItems:'center',justifyContent:'center'},
- featured:{borderRadius:26,overflow:'hidden',backgroundColor:Colors.violet,marginBottom:6,shadowColor:'#3C2268',shadowOpacity:.16,
+ featured:{borderRadius:26,overflow:'hidden',backgroundColor:Colors.violet,marginBottom:6,shadowColor:'#4C352A',shadowOpacity:.16,
    shadowOffset:{width:0,height:10},shadowRadius:19,elevation:5},
  featuredTop:{flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start',padding:17},
  topPick:{flexDirection:'row',alignItems:'center',gap:6,backgroundColor:Colors.limeSoft,borderRadius:50,paddingHorizontal:12,paddingVertical:9},
@@ -124,7 +124,7 @@ const styles=StyleSheet.create({
  portraitMatch:{backgroundColor:'rgba(255,255,255,.96)',borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:4,height:36},
  portraitMatchText:{fontWeight:'900',fontSize:12,color:Colors.violet},
  portraitTags:{marginTop:'auto',paddingHorizontal:11,paddingBottom:11,flexDirection:'row',gap:6},
- photoTag:{backgroundColor:'rgba(20,10,35,.54)',borderRadius:20,paddingHorizontal:8,paddingVertical:6},
+ photoTag:{backgroundColor:'rgba(40,28,22,.54)',borderRadius:20,paddingHorizontal:8,paddingVertical:6},
  photoTagText:{color:'#fff',fontWeight:'700',fontSize:10},
  portraitBody:{padding:15,minHeight:106},
  portraitName:{fontSize:17,fontWeight:'900',color:Colors.text,letterSpacing:-.5},
@@ -140,5 +140,5 @@ const styles=StyleSheet.create({
  rowName:{flex:1,fontSize:16,fontWeight:'900',color:Colors.text,letterSpacing:-.3},
  rowWhy:{fontSize:12,color:Colors.muted,marginTop:7,lineHeight:18},
  rowFooter:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:9},
- rowPercent:{fontWeight:'900',color:Colors.violet,fontSize:11,backgroundColor:'#F2ECFF',paddingVertical:7,paddingHorizontal:11,borderRadius:Radius.pill,overflow:'hidden'}
+ rowPercent:{fontWeight:'900',color:Colors.violet,fontSize:11,backgroundColor:'#F2E5DB',paddingVertical:7,paddingHorizontal:11,borderRadius:Radius.pill,overflow:'hidden'}
 });

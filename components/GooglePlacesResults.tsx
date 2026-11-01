@@ -82,7 +82,7 @@ export function GooglePlacesResults({area,compact=false,prompt='',query='',filte
 }
 const styles=StyleSheet.create({
  venueGrid:{flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between',alignItems:'flex-start'},
- empty:{backgroundColor:'#F0ECFA',alignItems:'center',padding:28,borderRadius:20,gap:5,marginBottom:12},
+ empty:{backgroundColor:'#F8EEE8',alignItems:'center',padding:28,borderRadius:20,gap:5,marginBottom:12},
  emptyTitle:{fontSize:17,fontWeight:'900',color:Colors.text,marginTop:7},
  container:{marginTop:14},heading:{marginBottom:15,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
  eyebrow:{color:Colors.lime,fontSize:10,fontWeight:'900',letterSpacing:1.2,marginBottom:6},
@@ -93,6 +93,6 @@ const styles=StyleSheet.create({
  error:{color:Colors.danger,lineHeight:22,marginVertical:12,fontSize:13},
  legal:{fontSize:10,lineHeight:17,color:Colors.muted,marginTop:6},
  link:{color:Colors.lime,fontSize:13,fontWeight:'900',marginVertical:15},
- showMore:{padding:15,backgroundColor:'#EEE8FA',borderRadius:999,alignItems:'center',marginBottom:13},
+ showMore:{padding:15,backgroundColor:'#F4E7DB',borderRadius:999,alignItems:'center',marginBottom:13},
  showMoreText:{color:Colors.violet,fontWeight:'900',fontSize:13},
 });

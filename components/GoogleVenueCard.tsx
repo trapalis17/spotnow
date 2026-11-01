@@ -6,9 +6,9 @@ import type {PlaceMatch} from '../lib/place-intelligence';
 import {Colors,Radius} from '../constants/theme';
 
 const looks={
- cafe:{colors:['#D3C3EA','#8D6AB6'] as const,icon:'cafe-outline' as const,label:'Coffee'},
- restaurant:{colors:['#EAC4C8','#B16E9E'] as const,icon:'restaurant-outline' as const,label:'Food'},
- bar:{colors:['#B6AED9','#6B568E'] as const,icon:'wine-outline' as const,label:'Drinks'},
+ cafe:{colors:['#E1D2BF','#B58F7D'] as const,icon:'cafe-outline' as const,label:'Coffee'},
+ restaurant:{colors:['#EBD2C2','#B97D71'] as const,icon:'restaurant-outline' as const,label:'Food'},
+ bar:{colors:['#D8C1AE','#866655'] as const,icon:'wine-outline' as const,label:'Drinks'},
 };
 type CardVariant='featured'|'grid';
 type Props={match:PlaceMatch;onPress:()=>void;saved:boolean;onSave:()=>void;variant?:CardVariant};
@@ -64,11 +64,11 @@ export function GoogleVenueCard({match,onPress,saved,onSave,variant='featured'}:
 }
 const styles=StyleSheet.create({
  card:{backgroundColor:Colors.card,borderRadius:Radius.lg,overflow:'hidden',marginBottom:18,
-  shadowColor:'#271D42',shadowOffset:{width:0,height:6},shadowOpacity:.08,shadowRadius:17,elevation:2},
+  shadowColor:'#4C352A',shadowOffset:{width:0,height:6},shadowOpacity:.08,shadowRadius:17,elevation:2},
  gridCard:{width:'48.3%',borderRadius:Radius.md,marginBottom:13,
   shadowOpacity:.045,shadowRadius:10,elevation:1},
  pressed:{opacity:.9,transform:[{scale:.995}]},
- photo:{height:257,backgroundColor:'#D8CAED',justifyContent:'space-between',overflow:'hidden'},
+ photo:{height:257,backgroundColor:'#E9D5C6',justifyContent:'space-between',overflow:'hidden'},
  gridPhoto:{height:174},
  fallback:{position:'absolute',alignSelf:'center',top:'35%'},
  photoTop:{flexDirection:'row',alignItems:'flex-start',justifyContent:'space-between',padding:15},
@@ -91,7 +91,7 @@ const styles=StyleSheet.create({
  bottom:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10,marginTop:14},
  gridBottom:{marginTop:10},
  vibe:{flex:1,fontSize:13,fontWeight:'700',color:Colors.muted},
- matchPill:{flexDirection:'row',alignItems:'center',gap:5,backgroundColor:'#F0EAFE',
+ matchPill:{flexDirection:'row',alignItems:'center',gap:5,backgroundColor:'#F7EAE0',
   borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:9,alignSelf:'flex-start'},
  compactMatch:{paddingHorizontal:9,paddingVertical:7},
  matchText:{fontSize:12,fontWeight:'900',color:Colors.violet},

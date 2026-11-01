@@ -61,7 +61,7 @@ const styles=StyleSheet.create({
   sectionDetail:{color:Colors.muted,fontSize:12,marginTop:5},
   pill:{alignSelf:'flex-start',borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8},
   pillLime:{backgroundColor:Colors.limeSoft},
-  pillViolet:{backgroundColor:'#F0E9FF',borderWidth:1,borderColor:'rgba(103,68,174,0.20)'},
+  pillViolet:{backgroundColor:'#F3E2D7',borderWidth:1,borderColor:'rgba(103,68,174,0.20)'},
   pillMuted:{backgroundColor:'#F1EEF8'},
   pillText:{color:Colors.text,fontSize:10,fontWeight:'800',letterSpacing:0.4},
 });
