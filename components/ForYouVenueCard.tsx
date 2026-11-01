@@ -10,9 +10,9 @@ type Props={
  saved:boolean;onPress:()=>void;onSave:()=>void;
 };
 const palette={
- cafe:['#6552B3','#C485BC'] as const,
- restaurant:['#B84C84','#E5A585'] as const,
- bar:['#3A3B83','#AA57A8'] as const
+ cafe:['#6254B2','#AE86C3'] as const,
+ restaurant:['#9D588F','#CE9EB5'] as const,
+ bar:['#483D81','#986DB0'] as const
 };
 const iconByCategory={
  cafe:'cafe-outline' as const,
@@ -42,9 +42,9 @@ function Photo({match,height,children}:{
  </View>;
 }
 export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props){
- const {place,score,areaLabel,tasteReasons,tasteTags,matchConfidence}=match;
+ const {place,score,areaLabel,tasteReasons,matchConfidence}=match;
  const scoreLabel=score>0?('≈'+score+'%'):'More data needed';
- const confidenceLabel=matchConfidence==='high'?'More signals':matchConfidence==='medium'?'Early estimate':'Limited data';
+ const confidenceLabel=matchConfidence==='low'?' · Early estimate':'';
  if(variant==='featured')return <Pressable onPress={onPress} accessibilityRole="button"
    accessibilityLabel={place.name+' · '+(score>0?score+'% εκτιμώμενο Vibe Match':'Ανεπαρκή δεδομένα')}
    style={({pressed})=>[styles.featured,pressed&&styles.pressed]}>
@@ -58,7 +58,7 @@ export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props
      <Text style={styles.heroName} numberOfLines={2}>{place.name}</Text>
      <Text style={styles.heroReason} numberOfLines={2}>{tasteReasons[0]}</Text>
      <View style={styles.heroBottomRow}>
-       <View style={styles.heroMatch}><Ionicons name="sparkles" size={16} color={Colors.limeSoft}/><Text style={styles.heroMatchText}>{scoreLabel} Vibe Match · {confidenceLabel}</Text></View>
+       <View style={styles.heroMatch}><Ionicons name="sparkles" size={16} color={Colors.limeSoft}/><Text style={styles.heroMatchText}>{scoreLabel} match{confidenceLabel}</Text></View>
        <View style={styles.arrowCircle}><Ionicons name="arrow-forward" size={19} color={Colors.text}/></View>
      </View>
     </View>
@@ -72,9 +72,7 @@ export function ForYouVenueCard({match,variant='row',saved,onPress,onSave}:Props
      <View style={styles.portraitMatch}><Ionicons name="sparkles" color={Colors.violet} size={13}/><Text style={styles.portraitMatchText}>{scoreLabel}</Text></View>
      <SaveHeart saved={saved} onSave={onSave}/>
     </View>
-    <View style={styles.portraitTags}>
-     {tasteTags.slice(0,2).map(tag=><View style={styles.photoTag} key={tag}><Text style={styles.photoTagText}>#{tag.replace(/-/g,'')}</Text></View>)}
-    </View>
+
    </Photo>
    <View style={styles.portraitBody}>
      <Text style={styles.portraitName} numberOfLines={1}>{place.name}</Text>
@@ -107,7 +105,7 @@ const styles=StyleSheet.create({
  photoImage:{},
  fallbackIcon:{position:'absolute',top:24,left:34},
  heart:{backgroundColor:'rgba(255,255,255,.94)',borderRadius:13,width:36,height:36,alignItems:'center',justifyContent:'center'},
- featured:{borderRadius:28,overflow:'hidden',backgroundColor:Colors.violet,marginBottom:6,shadowColor:'#3C2268',shadowOpacity:.16,
+ featured:{borderRadius:26,overflow:'hidden',backgroundColor:Colors.violet,marginBottom:6,shadowColor:'#3C2268',shadowOpacity:.16,
    shadowOffset:{width:0,height:10},shadowRadius:19,elevation:5},
  featuredTop:{flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start',padding:17},
  topPick:{flexDirection:'row',alignItems:'center',gap:6,backgroundColor:Colors.limeSoft,borderRadius:50,paddingHorizontal:12,paddingVertical:9},
@@ -121,18 +119,18 @@ const styles=StyleSheet.create({
  heroMatch:{flexDirection:'row',gap:8,alignItems:'center',paddingHorizontal:12,paddingVertical:10,backgroundColor:'rgba(255,255,255,.17)',borderWidth:1,borderColor:'rgba(255,255,255,.25)',borderRadius:13},
  heroMatchText:{color:'#fff',fontSize:12,fontWeight:'900'},
  arrowCircle:{width:41,height:41,borderRadius:14,backgroundColor:Colors.limeSoft,alignItems:'center',justifyContent:'center'},
- portrait:{width:236,backgroundColor:'#fff',borderRadius:22,overflow:'hidden',borderWidth:1,borderColor:Colors.border,marginRight:12,marginBottom:6},
+ portrait:{width:225,backgroundColor:'#fff',borderRadius:22,overflow:'hidden',borderWidth:1,borderColor:Colors.border,marginRight:12,marginBottom:6},
  portraitTop:{flexDirection:'row',justifyContent:'space-between',padding:12},
  portraitMatch:{backgroundColor:'rgba(255,255,255,.96)',borderRadius:12,paddingHorizontal:9,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:4,height:36},
  portraitMatchText:{fontWeight:'900',fontSize:12,color:Colors.violet},
  portraitTags:{marginTop:'auto',paddingHorizontal:11,paddingBottom:11,flexDirection:'row',gap:6},
  photoTag:{backgroundColor:'rgba(20,10,35,.54)',borderRadius:20,paddingHorizontal:8,paddingVertical:6},
  photoTagText:{color:'#fff',fontWeight:'700',fontSize:10},
- portraitBody:{padding:14,minHeight:111},
+ portraitBody:{padding:15,minHeight:106},
  portraitName:{fontSize:17,fontWeight:'900',color:Colors.text,letterSpacing:-.5},
  areaRow:{flexDirection:'row',alignItems:'center',gap:4,marginTop:6},
- smallArea:{fontSize:11,color:Colors.muted,flex:1},
- smallWhy:{fontSize:11,lineHeight:17,color:Colors.violet,fontWeight:'700',marginTop:8},
+ smallArea:{fontSize:12,color:Colors.muted,flex:1},
+ smallWhy:{fontSize:12,lineHeight:18,color:Colors.violet,fontWeight:'700',marginTop:8},
  row:{flexDirection:'row',backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:21,overflow:'hidden',marginBottom:12,minHeight:119},
  rowPicture:{width:110},
  rowCategory:{position:'absolute',left:9,bottom:10,backgroundColor:'rgba(0,0,0,.50)',paddingHorizontal:9,paddingVertical:6,borderRadius:20},
@@ -140,7 +138,7 @@ const styles=StyleSheet.create({
  rowDetails:{flex:1,paddingHorizontal:13,paddingVertical:11,justifyContent:'center'},
  rowTitleLine:{flexDirection:'row',alignItems:'center',gap:5,justifyContent:'space-between'},
  rowName:{flex:1,fontSize:16,fontWeight:'900',color:Colors.text,letterSpacing:-.3},
- rowWhy:{fontSize:11,color:Colors.muted,marginTop:7,lineHeight:16},
+ rowWhy:{fontSize:12,color:Colors.muted,marginTop:7,lineHeight:18},
  rowFooter:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:9},
  rowPercent:{fontWeight:'900',color:Colors.violet,fontSize:11}
 });
