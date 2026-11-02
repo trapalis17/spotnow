@@ -9,6 +9,7 @@ import {trackDemoEvent} from '../../lib/demo-analytics';
 import {getDemoPlaces} from '../../lib/demo-places';
 import {getForYouMatches,filterForYouMatches,curateForYouSections,type ForYouCategory} from '../../lib/for-you';
 import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
+import {getPredictiveMood} from '../../lib/predictive-mood';
 import {DEFAULT_AREA,getSelectedArea,type SearchArea} from '../../lib/places';
 import {defaultPreferences,getTasteFeedback,getPreferences,getSavedVenueIds,getUser,toggleSavedVenue,getVisitFeedback,type VisitFeedback} from '../../lib/storage';
 import type {UserPreferences,UserProfile} from '../../types';
@@ -30,9 +31,11 @@ export default function ForYouScreen(){
  const [onlyMyAreas,setOnlyMyAreas]=useState(false);
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState('');
+ const [moodEnabled,setMoodEnabled]=useState(false);
+ const [localNow,setLocalNow]=useState(()=>new Date());
  const saveLock=useRef(new Set<string>());
  useFocusEffect(useCallback(()=>{
-  let active=true;setLoading(true);setError('');
+  let active=true;setLoading(true);setError('');setLocalNow(new Date());
   Promise.all([getPreferences(),getTasteFeedback(),getSelectedArea(),getSavedVenueIds(),getUser(),getVisitFeedback()])
    .then(([p,t,a,s,u,v])=>{if(active){setPreferences(p);setTaste(t);setArea(a);setSavedIds(s);setUser(u);setVisits(v);}})
    .catch(()=>{if(active)setError('Δεν φορτώθηκαν όλες οι επιλογές. Εμφανίζονται τα διαθέσιμα demo δεδομένα.');})
@@ -41,7 +44,19 @@ export default function ForYouScreen(){
  },[]));
  const places=useMemo(()=>getDemoPlaces(area),[area]);
  const matches=useMemo(()=>getForYouMatches(places,preferences,area,taste,savedIds,visits),[places,preferences,area,taste,savedIds,visits]);
- const picks=useMemo(()=>filterForYouMatches(matches,category,budgetOnly,onlyMyAreas),[matches,category,budgetOnly,onlyMyAreas]);
+ const predictedMood=useMemo(()=>getPredictiveMood(localNow,preferences,taste,savedIds,visits),[localNow,preferences,taste,savedIds,visits]);
+ const filteredPicks=useMemo(()=>filterForYouMatches(matches,category,budgetOnly,onlyMyAreas),[matches,category,budgetOnly,onlyMyAreas]);
+ const picks=useMemo(()=>{
+  if(!moodEnabled)return filteredPicks;
+  const sameCategory=filteredPicks.filter(m=>m.place.category===predictedMood.category);
+  const matching=sameCategory.filter(m=>m.tasteTags.some(tag=>predictedMood.tags.includes(tag)));
+  return matching.length?matching:sameCategory;
+ },[filteredPicks,moodEnabled,predictedMood]);
+ const applyMood=()=>{
+  if(moodEnabled){setMoodEnabled(false);setCategory('all');return;}
+  setCategory(predictedMood.category);setMoodEnabled(true);
+  trackDemoEvent('predictive_mood_filter_opened',predictedMood.key);
+ };
  const dna=useMemo(()=>getDnaSummary(taste),[taste]);
  const sections=useMemo(()=>curateForYouSections(picks),[picks]);
  const {topPick:featured,perfect,hiddenGems,tryDifferent,more}=sections;
@@ -59,13 +74,30 @@ export default function ForYouScreen(){
   <Text style={s.kicker}>CURATED FOR {name.toUpperCase()}</Text>
   <Text style={s.title}>Your kind of<Text style={{color:Colors.violet}}> places.</Text></Text>
   <Text style={s.sub}>Καλύτερες επιλογές, όσο μαθαίνουμε το vibe σου.</Text>
+  <LinearGradient colors={['#5A48BD','#856CE2','#B29DF1'] as const} start={{x:0,y:0}} end={{x:1,y:1}} style={s.moodBanner}>
+   <View style={s.moodGlow}/>
+   <View style={s.moodTop}>
+    <View style={s.moodBadge}><Ionicons name="sparkles" size={14} color="#5B47D6"/><Text style={s.moodBadgeLabel}>PREDICTIVE MOOD</Text></View>
+    <View style={s.moodIcon}><Ionicons name={predictedMood.icon} size={23} color="#fff"/></View>
+   </View>
+   <Text style={s.moodTitle}>{predictedMood.title}</Text>
+   <Text style={s.moodDescription}>{predictedMood.explanation}</Text>
+   <View style={s.moodBottom}>
+    <Pressable onPress={applyMood} accessibilityRole="button" accessibilityState={{selected:moodEnabled}}
+     accessibilityLabel={moodEnabled?'Επαναφορά όλων των προτάσεων':'Προβολή προτάσεων για το προβλεπόμενο mood'}
+     style={s.moodCTA}><Text style={s.moodCTAText}>{moodEnabled?'Show all spots':'Explore this mood'}</Text>
+     <Ionicons name={moodEnabled?'refresh-outline':'arrow-forward'} color={Colors.violet} size={17}/></Pressable>
+    <Text style={s.moodSignal}>{predictedMood.signalLabel}</Text>
+   </View>
+   <Text style={s.moodDisclaimer}>Local, rule-based suggestion · Not a trained AI prediction</Text>
+  </LinearGradient>
   <LinearGradient colors={Gradients.secondary} style={s.dna}>
    <View style={s.dnaSymbol}><Ionicons name="finger-print-outline" size={24} color={Colors.violet}/></View>
    <View style={s.dnaContent}><Text style={s.dnaTitle}>Your Vibe DNA</Text><Text style={s.dnaSub}>{dna.meaningfulCount?dna.meaningfulCount+' taste signals · evolving':'Έτοιμο να μάθει το γούστο σου'}</Text></View>
    <Pressable style={s.dnaArrow} onPress={()=>router.push('/(tabs)')} accessibilityRole="button" accessibilityLabel="Πήγαινε στο Taste Swipe"><Ionicons name="arrow-forward" size={18} color={Colors.violet}/></Pressable>
   </LinearGradient>
   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filters}>
-   {categories.map(c=><Pressable key={c.id} onPress={()=>setCategory(c.id)} style={[s.chip,category===c.id&&s.chipSelected]} accessibilityRole="button" accessibilityState={{selected:category===c.id}}>{category===c.id?<LinearGradient colors={Gradients.primary} style={StyleSheet.absoluteFill} pointerEvents="none"/>:null}<Text style={[s.chipText,category===c.id&&s.chipTextOn]}>{c.label}</Text></Pressable>)}
+   {categories.map(c=><Pressable key={c.id} onPress={()=>{setCategory(c.id);setMoodEnabled(false);}} style={[s.chip,category===c.id&&s.chipSelected]} accessibilityRole="button" accessibilityState={{selected:category===c.id}}>{category===c.id?<LinearGradient colors={Gradients.primary} style={StyleSheet.absoluteFill} pointerEvents="none"/>:null}<Text style={[s.chipText,category===c.id&&s.chipTextOn]}>{c.label}</Text></Pressable>)}
   </ScrollView>
   <View style={s.toggles}>
    <Pressable onPress={()=>setBudgetOnly(x=>!x)} accessibilityRole="button" accessibilityState={{selected:budgetOnly}} style={[s.filterButton,budgetOnly&&s.filterOn]}><Ionicons name={budgetOnly?'checkmark-circle':'wallet-outline'} size={15} color={Colors.violet}/><Text style={s.filterText}>My budget</Text></Pressable>
@@ -75,7 +107,7 @@ export default function ForYouScreen(){
   {loading?<View style={s.loading}><ActivityIndicator color={Colors.violet}/><Text style={s.hint}>Finding your next spot…</Text></View>:null}
   {error?<Text style={s.error}>{error}</Text>:null}
   {!loading&&featured?<View>
-   <View style={s.section}><Text style={s.sectionTitle}>Your top pick</Text><Text style={s.sectionMeta}>HIGHEST MATCH</Text></View>
+   <View style={s.section}><Text style={s.sectionTitle}>{moodEnabled?'Spots for this mood':'Your top pick'}</Text><Text style={s.sectionMeta}>{moodEnabled?'MOOD PICKS':'HIGHEST MATCH'}</Text></View>
    {render(featured,'featured')}
    <View style={s.why}><Ionicons name="sparkles-outline" size={17} color={Colors.violet}/><Text style={s.whyText}>{featured.tasteReasons[0]}</Text></View>
   </View>:null}
@@ -103,7 +135,7 @@ export default function ForYouScreen(){
     <Ionicons name="options-outline" size={37} color={Colors.violet}/>
     <Text style={s.emptyTitle}>No matches with these filters</Text>
     <Text style={s.hint}>Άνοιξε λίγο τις επιλογές σου για να δεις περισσότερα μέρη.</Text>
-    <Pressable style={s.clear} onPress={()=>{setCategory('all');setBudgetOnly(false);setOnlyMyAreas(false);}} accessibilityRole="button"><Text style={s.clearText}>Clear filters</Text></Pressable>
+    <Pressable style={s.clear} onPress={()=>{setCategory('all');setBudgetOnly(false);setOnlyMyAreas(false);setMoodEnabled(false);}} accessibilityRole="button"><Text style={s.clearText}>Clear filters</Text></Pressable>
   </View>:null}
   <Text style={s.footer}>Demo recommendations · Φανταστικά καταστήματα. Το Hidden gems σημαίνει προτάσεις εκτός των προτιμώμενων περιοχών σου, όχι επιβεβαιωμένη δημοτικότητα.</Text>
  </ScrollView>;
@@ -115,7 +147,20 @@ const s=StyleSheet.create({
  topPill:{color:Colors.violet,fontSize:10,fontWeight:'900',letterSpacing:1,backgroundColor:Colors.cardSoft,paddingHorizontal:13,paddingVertical:10,borderRadius:999},
  kicker:{fontSize:10,fontWeight:'900',letterSpacing:1.4,color:Colors.violet,marginBottom:8},
  title:{fontSize:Type.hero,fontWeight:'900',lineHeight:41,letterSpacing:-1.3,color:Colors.text},
- sub:{fontSize:14,color:Colors.muted,lineHeight:21,marginTop:7,marginBottom:22},
+ sub:{fontSize:14,color:Colors.muted,lineHeight:21,marginTop:7,marginBottom:17},
+ moodBanner:{borderRadius:27,marginBottom:18,padding:19,overflow:'hidden',minHeight:230},
+ moodGlow:{position:'absolute',width:220,height:220,borderRadius:110,right:-88,top:-92,backgroundColor:'rgba(245,233,255,.13)'},
+ moodTop:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
+ moodBadge:{backgroundColor:'rgba(255,255,255,.94)',paddingVertical:8,paddingHorizontal:11,borderRadius:Radius.pill,flexDirection:'row',alignItems:'center',gap:6},
+ moodBadgeLabel:{color:Colors.violet,fontWeight:'900',fontSize:9,letterSpacing:.9},
+ moodIcon:{width:42,height:42,borderWidth:1,borderColor:'rgba(255,255,255,.29)',borderRadius:15,backgroundColor:'rgba(255,255,255,.15)',alignItems:'center',justifyContent:'center'},
+ moodTitle:{fontSize:27,lineHeight:32,fontWeight:'900',letterSpacing:-.9,color:'#fff',marginTop:16,maxWidth:'93%'},
+ moodDescription:{fontSize:12.5,color:'rgba(255,255,255,.94)',lineHeight:19,marginTop:9,maxWidth:'96%'},
+ moodBottom:{flexDirection:'row',alignItems:'center',flexWrap:'wrap',gap:10,marginTop:17},
+ moodCTA:{backgroundColor:'#fff',borderRadius:13,paddingVertical:12,paddingHorizontal:14,flexDirection:'row',alignItems:'center',gap:8},
+ moodCTAText:{color:Colors.violet,fontSize:12,fontWeight:'900'},
+ moodSignal:{fontSize:10,fontWeight:'800',color:'rgba(255,255,255,.95)',flexShrink:1},
+ moodDisclaimer:{fontSize:9,color:'rgba(255,255,255,.77)',lineHeight:13,marginTop:15},
  dna:{borderRadius:Radius.lg,padding:15,flexDirection:'row',alignItems:'center',gap:12,marginBottom:22},
  dnaSymbol:{width:46,height:46,backgroundColor:'#fff',alignItems:'center',justifyContent:'center',borderRadius:15},
  dnaContent:{flex:1},dnaTitle:{fontSize:15,fontWeight:'900',color:Colors.text},
