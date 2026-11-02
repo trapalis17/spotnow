@@ -1,31 +1,27 @@
-/** Vibe light theme: semantic, readable colors shared across screens. */
-export const Colors = {
-  background: '#F8F7FC',
-  backgroundAlt: '#F1EFF8',
-  card: '#FFFFFF',
-  cardSoft: '#F0EEF9',
-  panel: '#FFFEFF',
-  text: '#231B36',
-  muted: '#655D76',
-  lime: '#39741C',
-  limeSoft: '#C9FC8B',
-  violet: '#6645BF',
-  purple: '#6D47AF',
-  mint: '#177E69',
-  rose: '#B93674',
-  orange: '#AA5C1B',
-  border: 'rgba(55,35,95,0.13)',
-  success: '#187E4C',
-  warning: '#95610C',
-  danger: '#B73551',
+/** Vibe Design System 4.0 — Digital Lavender with selective gradients.
+ * Previous violet/purple aliases remain for compatibility with existing screens.
+ * Deep violet is used for readable text; light lavender is reserved for visuals.
+ */
+export const Colors={
+ background:'#FAF8FF',backgroundAlt:'#F6F2FF',card:'#FFFFFF',cardSoft:'#F4F0FF',panel:'#FFFFFF',
+ text:'#29243C',muted:'#6F6885',subtle:'#938CA7',
+ violet:'#5B47D6',purple:'#5942C1',lavender:'#8B7CFF',lilac:'#EAE2FC',pink:'#F3D6FF',
+ // Compatibility tokens used by legacy screens; all now lavender based.
+ clay:'#8B7CFF',oat:'#FAF8FF',sand:'#EAE2FC',sage:'#DDF3B2',
+ lime:'#506B35',limeSoft:'#DDF3B2',mint:'#44766A',rose:'#C75D93',orange:'#976B40',
+ border:'rgba(91,71,214,0.12)',success:'#2C7C5C',warning:'#936A2D',danger:'#C54575',
 };
-export const Spacing = { xs:8,sm:12,md:16,lg:20,xl:24,xxl:32,xxxl:40 };
-export const Radius = { sm:12,md:18,lg:24,xl:32 };
-export const Gradients = {
-  hero: ['#5D44CD','#8D4BC3','#BC437F'] as const,
-  nightlife: ['#6544C6','#B14E9A'] as const,
-  cafe: ['#6650CC','#9252C5'] as const,
-  restaurant: ['#C65087','#8850BB'] as const,
-  secondary: ['#F1EDFF','#FFF2F7'] as const,
-  vibe: ['#C9FC8B','#91ECD3'] as const,
+export const Spacing={xs:8,sm:12,md:16,lg:20,xl:24,xxl:32,xxxl:40};
+export const Radius={sm:12,md:18,lg:24,xl:30,pill:999};
+export const Type={hero:35,title:29,section:21,body:14,small:12,caption:11};
+export const Gradients={
+ hero:['#5847C9','#7B63DC','#A58EE9'] as const,
+ primary:['#614BCF','#9279EC'] as const,
+ nightlife:['#4F4694','#8D7ABF'] as const,
+ cafe:['#7264B7','#BBA7D9'] as const,
+ restaurant:['#9072BE','#C6ACDF'] as const,
+ secondary:['#F2EEFF','#FBF4FF'] as const,
+ soft:['#F8F5FF','#FDFBFF'] as const,
+ vibe:['#614BCF','#9D83E8'] as const,
+ glow:['#A88BFF','#F3D6FF'] as const,
 };

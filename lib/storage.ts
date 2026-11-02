@@ -176,3 +176,26 @@ export function saveDailyVenueSwipeState(state:DailyVenueSwipeState):Promise<voi
    AsyncStorage.setItem(DAILY_VENUES_KEY,JSON.stringify(safe)));
  return venueDeckQueue;
 }
+
+/** Prototype-only, on-device custom collections. */
+export type SavedCollection={id:string;name:string;venueIds:string[]};
+const COLLECTIONS_KEY='vibe:collections:v1';
+export async function getCollections():Promise<SavedCollection[]>{
+ try{
+  const value=await AsyncStorage.getItem(COLLECTIONS_KEY);
+  const parsed=value?JSON.parse(value):[];
+  return Array.isArray(parsed)?parsed.filter((c:any)=>typeof c.id==='string'&&typeof c.name==='string'&&Array.isArray(c.venueIds)):[];
+ }catch{return [];}
+}
+export async function saveCollections(collections:SavedCollection[]):Promise<void>{
+ await AsyncStorage.setItem(COLLECTIONS_KEY,JSON.stringify(collections));
+}
+export type VisitFeedback='yes'|'kind-of'|'no';
+const VISIT_FEEDBACK_KEY='vibe:visit-feedback:v1';
+export async function getVisitFeedback():Promise<Record<string,VisitFeedback>>{
+ try{const raw=await AsyncStorage.getItem(VISIT_FEEDBACK_KEY);return raw?JSON.parse(raw):{};}catch{return {};}
+}
+export async function saveVisitFeedback(id:string,value:VisitFeedback):Promise<void>{
+ const current=await getVisitFeedback();
+ await AsyncStorage.setItem(VISIT_FEEDBACK_KEY,JSON.stringify({...current,[id]:value}));
+}

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Gradients } from '../constants/theme';
+import { Colors, Gradients, Radius } from '../constants/theme';
 
 export function Eyebrow({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
   return <Text style={[styles.eyebrow, dark && { color:'#29203E' }]}>{children}</Text>;
@@ -59,9 +59,9 @@ const styles=StyleSheet.create({
   section:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginVertical:17,gap:10},
   sectionTitle:{color:Colors.text,fontSize:22,fontWeight:'900',letterSpacing:-0.7},
   sectionDetail:{color:Colors.muted,fontSize:12,marginTop:5},
-  pill:{alignSelf:'flex-start',borderRadius:999,paddingHorizontal:11,paddingVertical:7},
+  pill:{alignSelf:'flex-start',borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8},
   pillLime:{backgroundColor:Colors.limeSoft},
-  pillViolet:{backgroundColor:'#F0E9FF',borderWidth:1,borderColor:'rgba(103,68,174,0.20)'},
+  pillViolet:{backgroundColor:'#EAE2FC',borderWidth:1,borderColor:'rgba(103,68,174,0.20)'},
   pillMuted:{backgroundColor:'#F1EEF8'},
   pillText:{color:Colors.text,fontSize:10,fontWeight:'800',letterSpacing:0.4},
 });

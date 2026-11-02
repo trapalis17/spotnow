@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Spacing } from '../constants/theme';
+import { Colors, Spacing, Radius } from '../constants/theme';
 import { isGooglePlaceId } from '../lib/google-places';
 import { getDemoPlaceById } from '../lib/demo-places';
 import type { GooglePlace } from '../lib/google-places';
 import { inferPlaceVibe } from '../lib/place-intelligence';
-import { getSavedVenueIds, toggleSavedVenue } from '../lib/storage';
+import { getSavedVenueIds, toggleSavedVenue, getVisitFeedback, saveVisitFeedback, type VisitFeedback } from '../lib/storage';
 import { GooglePinsMap } from '../components/GooglePinsMap';
 
 const priceText:Record<string,string>={
@@ -39,6 +39,8 @@ export default function GoogleVenueProfile(){
  const [saved,setSaved]=useState(false);
  const [showHours,setShowHours]=useState(false);
  const [showMap,setShowMap]=useState(false);
+ const [confirmedVisit,setConfirmedVisit]=useState(false);
+ const [visitFeedback,setVisitFeedback]=useState<VisitFeedback|null>(null);
  const [retry,setRetry]=useState(0);
  useEffect(()=>{
   const placeId=typeof id==='string'?id:'';
@@ -48,6 +50,7 @@ export default function GoogleVenueProfile(){
   setLoading(false);
   setShowHours(false);setShowMap(false);
   getSavedVenueIds().then(ids=>setSaved(ids.includes('google-'+placeId))).catch(()=>undefined);
+  getVisitFeedback().then(items=>setVisitFeedback(items[placeId]??null)).catch(()=>undefined);
  },[id,retry]);
  const open=(_url?:string|null)=>{Alert.alert('Demo preview','Οι οδηγίες και τα εξωτερικά links θα συνδεθούν σε επόμενο στάδιο.');};
  const vibe=place?inferPlaceVibe(place):null;
@@ -63,7 +66,7 @@ export default function GoogleVenueProfile(){
   </View>:null}
   {place?<View>
    <View style={styles.hero}>
-    <LinearGradient colors={place.category==='cafe'?['#5942B7','#B15FB8']:place.category==='bar'?['#423273','#B04490']:['#3B758A','#7B4AB2']}
+    <LinearGradient colors={place.category==='cafe'?['#6352B3','#9784CC']:place.category==='bar'?['#5D4C92','#A18DD7']:['#739C94','#9481BF']}
       style={StyleSheet.absoluteFill}/>
     {photo?<Image style={StyleSheet.absoluteFill} source={{uri:photo}} resizeMode="cover"/>:null}
     <LinearGradient colors={['rgba(13,10,30,.27)','rgba(18,12,37,.25)','rgba(17,12,33,.91)']}
@@ -99,7 +102,7 @@ export default function GoogleVenueProfile(){
    <View style={styles.main}>
     <View style={styles.facts}>
      {place.rating!==undefined?<View style={styles.fact}>
-       <Ionicons name="star" size={17} color="#ECAB29"/>
+       <Ionicons name="star" size={17} color="#C9AF6E"/>
        <Text style={styles.factValue}>{place.rating.toFixed(1)}</Text>
        {place.userRatingCount!==undefined?<Text style={styles.factHint}>({place.userRatingCount})</Text>:null}
      </View>:null}
@@ -108,7 +111,7 @@ export default function GoogleVenueProfile(){
        <Text style={styles.factHint}>Τιμές</Text>
      </View>:null}
      {place.openNow!==undefined?<View style={styles.fact}>
-       <View style={[styles.dot,{backgroundColor:place.openNow?'#1A9960':'#9B96A4'}]}/>
+       <View style={[styles.dot,{backgroundColor:place.openNow?'#4A966C':'#938CA7'}]}/>
        <Text style={styles.factValue}>{place.openNow?'Ανοιχτό':'Κλειστό'}</Text>
      </View>:null}
     </View>
@@ -128,9 +131,9 @@ export default function GoogleVenueProfile(){
      </Pressable>:null}
     </View>
 
-    <LinearGradient colors={['#F0EAFE','#F7F1FF']} style={styles.vibePanel}>
+    <LinearGradient colors={['#F0EAFE','#FBF9FF']} style={styles.vibePanel}>
      <View style={styles.panelIcon}><Ionicons name="sparkles" size={22} color={Colors.violet}/></View>
-     <Text style={styles.panelTitle}>Τι vibe έχει;</Text>
+     <Text style={styles.panelTitle}>The vibe</Text>
      <Text style={styles.vibeTitle}>{vibe?.label}</Text>
      <View style={styles.tags}>
        {vibe?.tags.slice(0,5).map(tag=><View key={tag} style={styles.tag}><Text style={styles.tagText}>{tag}</Text></View>)}
@@ -141,7 +144,7 @@ export default function GoogleVenueProfile(){
 
     {place.editorialSummary?<Text style={styles.summary}>{place.editorialSummary}</Text>:null}
     {amenities.length||place.accessibility?.length?<View style={styles.section}>
-      <Text style={styles.sectionTitle}>Τι θα βρεις εδώ</Text>
+      <Text style={styles.sectionTitle}>Highlights</Text>
       <View style={styles.amenities}>
        {amenities.map(({key,name,icon})=><View key={key} style={styles.amenity}>
         <Ionicons name={icon} size={17} color={Colors.violet}/>
@@ -153,7 +156,7 @@ export default function GoogleVenueProfile(){
 
     {place.weekdayDescriptions?.length?<View style={styles.section}>
       <Pressable style={styles.sectionToggle} onPress={()=>setShowHours(v=>!v)} accessibilityRole="button" accessibilityState={{expanded:showHours}}>
-       <View style={styles.sectionToggleLabel}><Ionicons name="time-outline" size={21} color={Colors.violet}/><Text style={styles.sectionTitle}>Ωράριο λειτουργίας</Text></View>
+       <View style={styles.sectionToggleLabel}><Ionicons name="time-outline" size={21} color={Colors.violet}/><Text style={styles.sectionTitle}>Opening hours</Text></View>
        <Ionicons name={showHours?'chevron-up':'chevron-down'} size={20} color={Colors.text}/>
       </Pressable>
       {showHours?<View style={styles.hours}>{place.weekdayDescriptions.map((line,i)=>
@@ -161,7 +164,7 @@ export default function GoogleVenueProfile(){
      </View>:null}
 
     <View style={styles.section}>
-     <View style={styles.sectionToggleLabel}><Ionicons name="location-outline" size={21} color={Colors.violet}/><Text style={styles.sectionTitle}>Τοποθεσία</Text></View>
+     <View style={styles.sectionToggleLabel}><Ionicons name="location-outline" size={21} color={Colors.violet}/><Text style={styles.sectionTitle}>Location</Text></View>
      <Text style={styles.street}>{place.address??'Προβολή στο Google Maps'}</Text>
      <Pressable style={styles.mapToggle} onPress={()=>setShowMap(v=>!v)} accessibilityRole="button">
       <Text style={styles.mapToggleText}>{showMap?'Κλείσιμο χάρτη':'Δες το στον χάρτη'}</Text>
@@ -170,26 +173,43 @@ export default function GoogleVenueProfile(){
      {showMap?<GooglePinsMap area={{id:'venue',label:place.name,latitude:place.latitude,longitude:place.longitude}}
        places={[place]} onSelect={()=>open(place.googleMapsUrl)}/>:null}
     </View>
+    <View style={styles.visitCard}>
+      <Text style={styles.visitHeading}>Was it your vibe? ✳</Text>
+      <Text style={styles.visitBody}>Έχεις επισκεφθεί το συγκεκριμένο demo spot; Το feedback είναι προαιρετικό και αποθηκεύεται μόνο στη συσκευή.</Text>
+      {!confirmedVisit&&!visitFeedback?<Pressable style={styles.visitButton} onPress={()=>setConfirmedVisit(true)}><Text style={styles.visitButtonText}>Ναι, το επισκέφθηκα</Text></Pressable>:null}
+      {confirmedVisit||visitFeedback?<View style={styles.feedbackRow}>
+        {([['yes','Loved it'],['kind-of','Kind of'],['no','Not really']] as const).map(([key,label])=><Pressable key={key} onPress={()=>{setVisitFeedback(key);saveVisitFeedback(place.id,key).catch(()=>undefined);}} style={[styles.feedbackChoice,visitFeedback===key&&styles.feedbackSelected]}><Text style={styles.feedbackText}>{label}</Text></Pressable>)}
+      </View>:null}
+    </View>
     <Text style={styles.googleCredit}>Demo καταχώριση — τα χαρακτηριστικά είναι ενδεικτικά, όχι πραγματικά δεδομένα.</Text>
    </View>
   </View>:null}
  </ScrollView>;
 }
 const styles=StyleSheet.create({
+ visitCard:{borderRadius:20,backgroundColor:'#F3EAFF',padding:17,marginTop:19,marginBottom:16},
+ visitHeading:{fontSize:17,fontWeight:'900',color:Colors.text},
+ visitBody:{fontSize:13,lineHeight:20,color:Colors.muted,marginVertical:9},
+ visitButton:{backgroundColor:Colors.violet,borderRadius:13,padding:12,alignItems:'center'},
+ visitButtonText:{fontSize:12,color:'#fff',fontWeight:'800'},
+ feedbackRow:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:7},
+ feedbackChoice:{borderWidth:1,borderColor:Colors.border,borderRadius:Radius.pill,paddingHorizontal:14,paddingVertical:11,backgroundColor:'#fff'},
+ feedbackSelected:{borderColor:Colors.violet,backgroundColor:'#E8DEF6'},
+ feedbackText:{color:Colors.violet,fontWeight:'800',fontSize:11},
  page:{flex:1,backgroundColor:Colors.background},content:{paddingBottom:45},
  loading:{paddingTop:135,alignItems:'center',gap:20},
  message:{color:Colors.muted,fontSize:14},
  errorCard:{margin:24,marginTop:120,backgroundColor:'#fff',padding:26,borderRadius:24,alignItems:'center'},
  errorText:{color:Colors.text,fontSize:16,textAlign:'center',marginBottom:18},
  retry:{backgroundColor:Colors.limeSoft,padding:15,paddingHorizontal:20,borderRadius:14},
- retryText:{fontWeight:'900',color:'#24341C'},
+ retryText:{fontWeight:'900',color:'#55683B'},
  backText:{color:Colors.violet,fontWeight:'800',marginTop:16},
- hero:{height:370,backgroundColor:'#6645BF',justifyContent:'space-between',overflow:'hidden'},
+ hero:{height:370,backgroundColor:'#A4614A',justifyContent:'space-between',overflow:'hidden'},
  heroTop:{flexDirection:'row',justifyContent:'space-between',paddingHorizontal:22,paddingTop:38},
  circleButton:{height:45,width:45,borderRadius:16,alignItems:'center',justifyContent:'center',backgroundColor:'rgba(21,14,42,.48)'},
  heroBottom:{paddingHorizontal:24,paddingBottom:29},
  heroSymbol:{position:'absolute',right:26,top:75,transform:[{rotate:'-15deg'}]},
- categoryBadge:{alignSelf:'flex-start',backgroundColor:'rgba(255,255,255,.24)',paddingHorizontal:13,paddingVertical:7,borderRadius:11,borderWidth:1,borderColor:'rgba(255,255,255,.38)',marginBottom:14},
+ categoryBadge:{alignSelf:'flex-start',backgroundColor:'rgba(255,255,255,.24)',paddingHorizontal:14,paddingVertical:8,borderRadius:Radius.pill,borderWidth:1,borderColor:'rgba(255,255,255,.38)',marginBottom:14},
  categoryBadgeText:{color:'#fff',fontSize:12,fontWeight:'900'},
  name:{color:'#fff',fontSize:34,fontWeight:'900',letterSpacing:-1.35,lineHeight:40},
  heroAddressRow:{flexDirection:'row',gap:7,alignItems:'flex-start',marginTop:11},
@@ -198,7 +218,7 @@ const styles=StyleSheet.create({
  credit:{fontSize:10,color:Colors.muted,marginTop:3},
  main:{paddingHorizontal:Spacing.lg,paddingTop:22},
  facts:{flexDirection:'row',flexWrap:'wrap',gap:8},
- fact:{flexDirection:'row',alignItems:'center',gap:5,paddingVertical:12,paddingHorizontal:12,backgroundColor:'#fff',borderRadius:14,borderWidth:1,borderColor:Colors.border},
+ fact:{flexDirection:'row',alignItems:'center',gap:5,paddingVertical:10,paddingHorizontal:14,backgroundColor:'#fff',borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border},
  factValue:{fontSize:13,fontWeight:'900',color:Colors.text},
  factHint:{fontSize:11,color:Colors.muted},
  dot:{height:8,width:8,borderRadius:4},
@@ -212,7 +232,7 @@ const styles=StyleSheet.create({
  panelTitle:{fontSize:16,color:Colors.text,fontWeight:'800'},
  vibeTitle:{fontSize:26,color:Colors.violet,fontWeight:'900',letterSpacing:-.7,marginTop:5},
  tags:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:15},
- tag:{backgroundColor:'rgba(255,255,255,.85)',borderRadius:11,paddingHorizontal:11,paddingVertical:8},
+ tag:{backgroundColor:'rgba(255,255,255,.85)',borderRadius:Radius.pill,paddingHorizontal:13,paddingVertical:9},
  tagText:{fontSize:12,color:Colors.violet,fontWeight:'700'},
  evidence:{fontSize:12,color:Colors.text,lineHeight:19,marginTop:13},
  disclosure:{fontSize:11,lineHeight:17,color:Colors.muted,marginTop:14},
@@ -220,14 +240,14 @@ const styles=StyleSheet.create({
  section:{backgroundColor:'#fff',borderWidth:1,borderColor:Colors.border,borderRadius:22,padding:18,marginBottom:15},
  sectionTitle:{fontSize:17,fontWeight:'900',color:Colors.text,letterSpacing:-.3},
  amenities:{flexDirection:'row',gap:8,flexWrap:'wrap',marginTop:16},
- amenity:{flexDirection:'row',alignItems:'center',gap:6,borderRadius:12,backgroundColor:'#F4F1FB',paddingHorizontal:12,paddingVertical:11},
+ amenity:{flexDirection:'row',alignItems:'center',gap:6,borderRadius:Radius.pill,backgroundColor:'#F6F3FD',paddingHorizontal:14,paddingVertical:11},
  amenityText:{fontSize:12,color:Colors.text,fontWeight:'700'},
  sectionToggle:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
  sectionToggleLabel:{flexDirection:'row',alignItems:'center',gap:9},
  hours:{marginTop:17,paddingTop:13,borderTopWidth:1,borderTopColor:Colors.border},
  hourText:{fontSize:13,color:Colors.text,lineHeight:25},
  street:{fontSize:13,color:Colors.muted,lineHeight:20,marginTop:9},
- mapToggle:{backgroundColor:'#F1EDFF',paddingHorizontal:15,paddingVertical:13,borderRadius:13,marginTop:15,marginBottom:5,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
+ mapToggle:{backgroundColor:'#F5E7DC',paddingHorizontal:15,paddingVertical:13,borderRadius:13,marginTop:15,marginBottom:5,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
  mapToggleText:{fontSize:13,color:Colors.violet,fontWeight:'900'},
  googleCredit:{fontSize:11,color:Colors.muted,lineHeight:18,paddingHorizontal:4,marginTop:6}
 });

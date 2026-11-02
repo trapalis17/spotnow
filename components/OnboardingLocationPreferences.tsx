@@ -3,7 +3,7 @@ import {Platform,Pressable,StyleSheet,Text,TextInput,View} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Location from 'expo-location';
 import {PreferenceChip} from './PreferenceChip';
-import {Colors} from '../constants/theme';
+import {Colors,Radius} from '../constants/theme';
 import {
   REGIONS,NEIGHBORHOODS,canonicalArea,closestAreas,normalizeSearch,
   type CoordinatePoint,type Neighborhood,
@@ -37,27 +37,24 @@ async function requestPosition():Promise<CoordinatePoint>{
  */
 export function OnboardingLocationPreferences({selected,onToggle}:Props){
  const [reference,setReference]=useState<Reference|null>(null);
- const [locating,setLocating]=useState(true);
+ const [locating,setLocating]=useState(false);
  const [locationMessage,setLocationMessage]=useState('');
  const [referencePicker,setReferencePicker]=useState(false);
  const [referenceSearch,setReferenceSearch]=useState('');
  const [expanded,setExpanded]=useState(false);
  const [search,setSearch]=useState('');
 
- useEffect(()=>{
-   let active=true;
-   requestPosition().then(point=>{
-     if(active){setReference({point,source:'device',label:'Κοντά στην τοποθεσία σου'});setLocating(false);}
-   }).catch(()=>{
-     if(active){
-       setLocationMessage('Δεν υπάρχει πρόσβαση στην τοποθεσία. Διάλεξε περιοχή αναφοράς για να δεις τις 7 κοντινότερες.');
-       setReferencePicker(true);
-       setLocating(false);
-     }
-   });
-   return ()=>{active=false;};
- },[]);
-
+ const detectLocation=async()=>{
+   setLocating(true);setLocationMessage('');
+   try{
+     const point=await requestPosition();
+     setReference({point,source:'device',label:'Κοντά στην τοποθεσία σου'});
+     setReferencePicker(false);
+   }catch{
+     setLocationMessage('Δεν υπάρχει πρόσβαση στην τοποθεσία. Διάλεξε περιοχή αναφοράς.');
+     setReferencePicker(true);
+   }finally{setLocating(false);}
+ };
  const nearby=useMemo(()=>reference?closestAreas(reference.point,7):[],[reference]);
  const nearbyNames=useMemo(()=>new Set(nearby.map(area=>area.name)),[nearby]);
  const checked=useMemo(()=>new Set(selected.map(canonicalArea)),[selected]);
@@ -93,8 +90,8 @@ export function OnboardingLocationPreferences({selected,onToggle}:Props){
      <Text style={styles.label}>Περιοχές που προτιμάς</Text>
      {checked.size>0?<Text style={styles.count}>{checked.size} επιλεγμένες</Text>:null}
    </View>
-   {locating?<Text style={styles.info}>Εντοπίζουμε τις πιο κοντινές περιοχές με την άδειά σου…</Text>:null}
-   {!locating&&!reference?<Text style={styles.info}>{locationMessage}</Text>:null}
+   <Pressable onPress={detectLocation} disabled={locating} accessibilityRole="button"><Text style={styles.change}>{locating?'Εντοπισμός…':'⌖ Βρες 7 κοντινές περιοχές (προαιρετικό)'}</Text></Pressable>
+   {!reference?<Pressable onPress={()=>setReferencePicker(true)}><Text style={styles.info}>{locationMessage||'Εναλλακτικά, επίλεξε μια περιοχή αναφοράς ή άνοιξε όλες τις 30 περιοχές.'}</Text></Pressable>:null}
    {reference?<View style={styles.referenceRow}>
      <Text style={styles.referenceText}>
        {reference.source==='device'?'⌖ Με βάση την τοποθεσία σου':'⌖ Περιοχή αναφοράς: '+reference.label}
@@ -149,14 +146,14 @@ const styles=StyleSheet.create({
  root:{width:'100%',marginBottom:10},
  head:{flexDirection:'row',alignItems:'center',gap:7,marginBottom:10,flexWrap:'wrap'},
  label:{color:Colors.text,fontWeight:'800',fontSize:13},
- count:{color:Colors.violet,fontSize:11,fontWeight:'800',marginLeft:'auto'},
+ count:{color:Colors.violet,fontSize:11,fontWeight:'800',marginLeft:'auto',backgroundColor:'#EEE9FA',borderRadius:Radius.pill,overflow:'hidden',paddingHorizontal:12,paddingVertical:6},
  info:{fontSize:12,color:Colors.muted,lineHeight:19,marginVertical:9},
  referenceRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:12},
  referenceText:{fontSize:11,color:Colors.muted,flex:1},
  change:{fontSize:11,color:Colors.violet,fontWeight:'900',padding:6},
  smallHeading:{fontSize:12,color:Colors.muted,fontWeight:'700',marginBottom:11},
  chips:{flexDirection:'row',flexWrap:'wrap'},
- more:{backgroundColor:'#F1EDFF',borderRadius:14,borderColor:Colors.border,borderWidth:1,
+ more:{backgroundColor:'#F5E7DC',borderRadius:Radius.pill,borderColor:Colors.border,borderWidth:1,
    paddingVertical:13,paddingHorizontal:15,alignItems:'center',marginTop:5,marginBottom:12},
  moreText:{color:Colors.violet,fontWeight:'900',fontSize:12},
  expanded:{width:'100%',paddingTop:1},
@@ -165,7 +162,7 @@ const styles=StyleSheet.create({
  search:{flex:1,color:Colors.text,fontSize:13,paddingVertical:12},
  group:{marginBottom:13},
  region:{color:Colors.violet,fontSize:12,fontWeight:'900',marginBottom:10},
- manual:{backgroundColor:'#F8F6FC',borderRadius:17,padding:12,marginBottom:15},
+ manual:{backgroundColor:'#FBF7F3',borderRadius:17,padding:12,marginBottom:15},
  manualLabel:{fontSize:11,color:Colors.muted,fontWeight:'700',marginBottom:9},
  input:{backgroundColor:Colors.card,borderWidth:1,borderColor:Colors.border,borderRadius:13,
    paddingHorizontal:12,paddingVertical:12,color:Colors.text,fontSize:13,marginBottom:11}

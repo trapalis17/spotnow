@@ -20,14 +20,15 @@ export default function TabLayout(){
  </View>;
  if(session==='signed-out')return <Redirect href="/"/>;
  return <Tabs screenOptions={{
-   headerShown:false,tabBarActiveTintColor:Colors.violet,tabBarInactiveTintColor:'#827A90',
-   tabBarLabelStyle:{fontWeight:'800',fontSize:11,marginTop:2},
-   tabBarStyle:{backgroundColor:'#FFFFFF',borderTopWidth:1,borderTopColor:Colors.border,height:68,paddingTop:7,paddingBottom:9},
+   headerShown:false,tabBarActiveTintColor:Colors.violet,tabBarInactiveTintColor:Colors.muted,
+   tabBarLabelStyle:{fontWeight:'800',fontSize:11,marginTop:3},
+   tabBarStyle:{backgroundColor:'#FFFFFF',borderTopWidth:1,borderTopColor:Colors.border,height:76,paddingTop:11,paddingBottom:13},
+   tabBarItemStyle:{borderRadius:16},
  }}>
-   <Tabs.Screen name="index" options={{title:'Ανακάλυψε',tabBarIcon:({color,size})=><Ionicons name="compass-outline" color={typeof color==='string'?color:Colors.violet} size={size}/>}}/>
-   <Tabs.Screen name="for-you" options={{title:"Για σένα",tabBarIcon:({color,size})=><Ionicons name="sparkles-outline" color={typeof color==="string"?color:Colors.violet} size={size}/>}}/>
-   <Tabs.Screen name="saved" options={{title:'Αγαπημένα',tabBarIcon:({color,size})=><Ionicons name="heart-outline" color={typeof color==='string'?color:Colors.violet} size={size}/>}}/>
-   <Tabs.Screen name="profile" options={{title:'Προφίλ',tabBarIcon:({color,size})=><Ionicons name="person-circle-outline" color={typeof color==='string'?color:Colors.violet} size={size}/>}}/>
+   <Tabs.Screen name="index" options={{title:'Discover',tabBarIcon:({color,size})=><Ionicons name="compass-outline" color={typeof color==='string'?color:Colors.violet} size={size}/>}}/>
+   <Tabs.Screen name="for-you" options={{title:"For You",tabBarIcon:({color,size})=><Ionicons name="sparkles-outline" color={typeof color==="string"?color:Colors.violet} size={size}/>}}/>
+   <Tabs.Screen name="saved" options={{title:'Saved',tabBarIcon:({color,size})=><Ionicons name="heart-outline" color={typeof color==='string'?color:Colors.violet} size={size}/>}}/>
+   <Tabs.Screen name="profile" options={{title:'Profile',tabBarIcon:({color,size})=><Ionicons name="person-circle-outline" color={typeof color==='string'?color:Colors.violet} size={size}/>}}/>
    <Tabs.Screen name="explore" options={{href:null}}/>
  </Tabs>;
 }
