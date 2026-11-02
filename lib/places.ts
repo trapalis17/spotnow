@@ -1,6 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-/** Static area selector. No geolocation, live venues or network calls. */
+import {NEIGHBORHOODS} from './attica-neighborhoods';
+/** Static area selector; coordinates are only used to order curated local demo venues. */
 export type SearchArea = { id: string; label: string; latitude: number; longitude: number; radius?: number };
+/** Each approved Attica neighborhood has a stable ID so demo venue links can reopen. */
+export const NEIGHBORHOOD_AREAS:SearchArea[]=NEIGHBORHOODS.map((n,i)=>({
+ id:'attica-'+String(i+1).padStart(2,'0'),label:n.name,
+ latitude:n.latitude,longitude:n.longitude
+}));
+export function getNeighborhoodSearchArea(name:string):SearchArea|undefined{
+ return NEIGHBORHOOD_AREAS.find(a=>a.label===name);
+}
 export const AREAS: SearchArea[] = [
   { id: 'athens', label: 'Αθήνα', latitude: 37.9755, longitude: 23.7348 },
   { id: 'palaio-faliro', label: 'Παλαιό Φάληρο', latitude: 37.9291, longitude: 23.6954 },
@@ -22,6 +31,7 @@ export const AREAS: SearchArea[] = [
   { id: 'kavala', label: 'Καβάλα', latitude: 40.9376, longitude: 24.4129 },
   { id: 'tripoli', label: 'Τρίπολη', latitude: 37.5083, longitude: 22.3797 },
   { id: 'lamia', label: 'Λαμία', latitude: 38.8996, longitude: 22.4341 },
+  ...NEIGHBORHOOD_AREAS,
 ];
 export const DEFAULT_AREA = AREAS[0];
 export function distanceKm(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }): number {

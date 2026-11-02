@@ -4,7 +4,7 @@ import {Pressable,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {PrimaryButton,SecondaryButton} from '../components/PrimaryButton';
 import {Colors,Spacing,Radius,Type} from '../constants/theme';
-import {getPreferences,setOnboarded,setUser} from '../lib/storage';
+import {defaultPreferences,setOnboarded,setPreferences,setUser} from '../lib/storage';
 
 export default function RegisterScreen(){
  const router=useRouter();
@@ -14,23 +14,29 @@ export default function RegisterScreen(){
   if(busy)return;
   if(!name.trim()||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())){setError('Συμπλήρωσε όνομα και έγκυρο email.');return;}
   setBusy(true);setError('');
-  try{const preferences=await getPreferences();await setUser({name:name.trim(),email:email.trim(),preferences});await setOnboarded(true);router.replace('/(tabs)');}
+  try{
+   // Create a local demo profile BEFORE collecting taste preferences.
+   await setOnboarded(false);
+   await setPreferences(defaultPreferences);
+   await setUser({name:name.trim(),email:email.trim(),preferences:defaultPreferences});
+   router.replace('/onboarding');
+  }
   catch{setError('Δεν αποθηκεύτηκε το demo προφίλ. Δοκίμασε ξανά.');}finally{setBusy(false);}
  };
  return <ScrollView style={s.page} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
   <View style={s.top}><Text style={s.brand}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text></View>
   <Pressable onPress={()=>router.back()} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" color={Colors.violet} size={18}/><Text style={s.backText}>Back</Text></Pressable>
   <View style={s.icon}><Ionicons name="sparkles-outline" size={28} color={Colors.violet}/></View>
-  <Text style={s.kicker}>ONE LAST STEP</Text>
-  <Text style={s.title}>Welcome to<Text style={{color:Colors.violet}}> Vibe.</Text></Text>
-  <Text style={s.sub}>Το δικό σου profile, έτοιμο για ανακάλυψη.</Text>
+  <Text style={s.kicker}>JOIN THE VIBE</Text>
+  <Text style={s.title}>Join the<Text style={{color:Colors.violet}}> Vibe.</Text></Text>
+  <Text style={s.sub}>Δημιούργησε πρώτα το demo προφίλ σου και μετά διάλεξε τα vibes σου.</Text>
   <Text style={s.label}>Your name</Text>
   <TextInput style={s.input} value={name} onChangeText={setName} placeholder="How should we call you?" autoCapitalize="words" placeholderTextColor={Colors.subtle}/>
   <Text style={s.label}>Email address</Text>
   <TextInput style={s.input} value={email} onChangeText={setEmail} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoComplete="email" placeholderTextColor={Colors.subtle}/>
   <View style={s.note}><Ionicons name="shield-checkmark-outline" size={19} color={Colors.violet}/><Text style={s.noteText}>Το προφίλ είναι demo. Οι επιλογές σου μένουν σε αυτή τη συσκευή.</Text></View>
   {error?<Text style={s.error}>{error}</Text>:null}
-  <PrimaryButton label={busy?'Creating profile…':'Explore Vibe'} onPress={register}/>
+  <PrimaryButton label={busy?'Creating profile…':'Create account & continue'} onPress={register}/>
   <View style={s.footer}><SecondaryButton label="Already have a profile?" onPress={()=>router.push('/login')}/></View>
   <Text style={s.foot}>No backend · No real registration</Text>
  </ScrollView>;

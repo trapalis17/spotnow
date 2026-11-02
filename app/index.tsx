@@ -5,11 +5,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {PrimaryButton,SecondaryButton} from '../components/PrimaryButton';
 import {Colors,Gradients,Spacing,Radius,Type} from '../constants/theme';
-import {getUser} from '../lib/storage';
+import {getUser,isOnboarded} from '../lib/storage';
 
 export default function WelcomeScreen(){
  const router=useRouter();const [checking,setChecking]=useState(true);
- useEffect(()=>{getUser().then(x=>{if(x)router.replace('/(tabs)');else setChecking(false);}).catch(()=>setChecking(false));},[router]);
+ useEffect(()=>{let active=true;Promise.all([getUser(),isOnboarded()]).then(([user,done])=>{if(!active)return;if(user)router.replace(done?'/(tabs)':'/onboarding');else setChecking(false);}).catch(()=>{if(active)setChecking(false);});return ()=>{active=false;};},[router]);
  if(checking)return <View style={s.loading}><ActivityIndicator color={Colors.violet}/></View>;
  return <ScrollView style={s.page} contentContainerStyle={s.content}>
   <View style={s.brandRow}><Text style={s.brand}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text><Text style={s.demoLabel}>PREVIEW 2.0</Text></View>
@@ -26,7 +26,7 @@ export default function WelcomeScreen(){
    </View>
   </View>
   <View style={s.actions}>
-   <PrimaryButton label="Get started" onPress={()=>router.push('/onboarding')}/>
+   <PrimaryButton label="Get started" onPress={()=>router.push('/register')}/>
    <View style={{height:11}}/><SecondaryButton label="I already have an account" onPress={()=>router.push('/login')}/>
    <Text style={s.foot}>Interactive frontend demo · No real account or booking</Text>
   </View>

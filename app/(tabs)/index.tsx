@@ -1,14 +1,14 @@
 import {useCallback,useState} from 'react';
 import {useFocusEffect,useRouter} from 'expo-router';
-import {Alert,Pressable,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native';
+import {Pressable,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {GooglePlacesResults} from '../../components/GooglePlacesResults';
+import {DiscoverAreaPicker} from '../../components/DiscoverAreaPicker';
 import {TasteConceptModal} from '../../components/TasteConceptModal';
 import {getTasteFeedback} from '../../lib/storage';
 import {Colors,Gradients,Spacing,Radius,Type} from '../../constants/theme';
 import {useSearchArea} from '../../hooks/useSearchArea';
-import {AREAS} from '../../lib/places';
 
 type Category='all'|'cafe'|'restaurant'|'bar';
 const categories:{id:Category;name:string;icon:'apps-outline'|'cafe-outline'|'restaurant-outline'|'wine-outline'}[]=[
@@ -17,11 +17,10 @@ const categories:{id:Category;name:string;icon:'apps-outline'|'cafe-outline'|'re
 ];
 export default function DiscoverScreen(){
  const router=useRouter();
- const {area,changeArea,useDeviceLocation}=useSearchArea();
+ const {area,changeArea}=useSearchArea();
  const [category,setCategory]=useState<Category>('all');
  const [query,setQuery]=useState('');
  const [mode,setMode]=useState<'list'|'map'>('list');
- const [allAreas,setAllAreas]=useState(false);
  const [tasteOpen,setTasteOpen]=useState(false);
  const [tasteView,setTasteView]=useState<'cards'|'dna'>('cards');
  const [tasteCount,setTasteCount]=useState(0);
@@ -36,11 +35,6 @@ export default function DiscoverScreen(){
    <Text style={s.kicker}>DISCOVER YOUR NEXT FAVORITE</Text>
    <Text style={s.title}>Βρες το επόμενο<Text style={{color:Colors.violet}}> spot σου.</Text></Text>
    <Text style={s.subtitle}>Μέρη που ταιριάζουν στο δικό σου vibe.</Text>
-   <View style={s.search}>
-     <Ionicons name="search-outline" color={Colors.violet} size={20}/>
-     <TextInput value={query} onChangeText={setQuery} style={s.input} placeholder="Όνομα, brunch, ήσυχο καφέ…" placeholderTextColor={Colors.subtle} returnKeyType="search" accessibilityLabel="Αναζήτηση μαγαζιών"/>
-     {query?<Pressable onPress={()=>setQuery('')} accessibilityRole="button" accessibilityLabel="Καθαρισμός"><Ionicons name="close-circle" size={20} color={Colors.muted}/></Pressable>:null}
-   </View>
    <LinearGradient colors={Gradients.secondary} start={{x:0,y:0}} end={{x:1,y:1}} style={s.swipeCard}>
      <View style={s.swipeTop}><View style={s.swipeIcon}><Ionicons name="heart-outline" size={21} color={Colors.violet}/></View>
        <Text style={s.swipeEyebrow}>VIBE SWIPE</Text><Text style={s.swipeCounter}>{tasteCount} rated</Text>
@@ -52,22 +46,19 @@ export default function DiscoverScreen(){
        <Pressable onPress={()=>openTaste('dna')} accessibilityRole="button" style={s.dnaCTA}><Text style={s.dnaText}>My DNA</Text><Ionicons name="finger-print-outline" size={17} color={Colors.violet}/></Pressable>
      </View>
    </LinearGradient>
-   <View style={s.sectionRow}><View><Text style={s.sectionTitle}>Βρες το μέρος σου</Text><Text style={s.sectionCaption}>Προσαρμόζεις τις επιλογές σου</Text></View><Pressable onPress={()=>router.push('/(tabs)/for-you')} accessibilityRole="button"><Text style={s.textLink}>For you <Ionicons name="arrow-forward" size={13}/></Text></Pressable></View>
+   <View style={s.search}>
+     <Ionicons name="search-outline" color={Colors.violet} size={20}/>
+     <TextInput value={query} onChangeText={setQuery} style={s.input} placeholder="Όνομα, brunch, ήσυχο καφέ…" placeholderTextColor={Colors.subtle} returnKeyType="search" accessibilityLabel="Αναζήτηση μαγαζιών"/>
+     {query?<Pressable onPress={()=>setQuery('')} accessibilityRole="button" accessibilityLabel="Καθαρισμός"><Ionicons name="close-circle" size={20} color={Colors.muted}/></Pressable>:null}
+   </View>
+   <View style={s.sectionRow}><View><Text style={s.sectionTitle}>Βρες το μέρος σου</Text><Text style={s.sectionCaption}>Προσαρμόζεις τις επιλογές σου</Text></View></View>
    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.categories}>
      {categories.map(c=><Pressable key={c.id} onPress={()=>setCategory(c.id)} accessibilityRole="button" accessibilityState={{selected:category===c.id}} style={[s.category,category===c.id&&s.categorySelected]}>
        {category===c.id?<LinearGradient colors={Gradients.primary} style={StyleSheet.absoluteFill} pointerEvents="none"/>:null}<Ionicons name={c.icon} size={16} color={category===c.id?'#fff':Colors.violet}/>
        <Text style={[s.categoryText,category===c.id&&s.selectedText]}>{c.name}</Text>
      </Pressable>)}
    </ScrollView>
-   <View style={s.filterBar}>
-     <Ionicons name="location-outline" size={18} color={Colors.violet}/>
-     <Text numberOfLines={1} style={s.locationLabel}>{area.label}</Text>
-     <Pressable style={s.near} onPress={()=>useDeviceLocation().catch(e=>Alert.alert('Τοποθεσία',e instanceof Error?e.message:'Δεν είναι διαθέσιμη η τοποθεσία.'))} accessibilityRole="button"><Ionicons name="navigate-outline" color={Colors.violet} size={15}/><Text style={s.nearText}>Κοντά μου</Text></Pressable>
-   </View>
-   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.areas}>
-     {(allAreas?AREAS:AREAS.slice(0,5)).map(a=><Pressable key={a.id} onPress={()=>changeArea(a)} style={[s.area,area.id===a.id&&s.areaSelected]} accessibilityRole="button" accessibilityState={{selected:area.id===a.id}}><Text style={[s.areaText,area.id===a.id&&{color:Colors.violet}]}>{a.label}</Text></Pressable>)}
-     <Pressable onPress={()=>setAllAreas(v=>!v)} style={s.areaMore}><Text style={s.textLink}>{allAreas?'Λιγότερα −':'Περισσότερα +'}</Text></Pressable>
-   </ScrollView>
+   <DiscoverAreaPicker area={area} onChange={changeArea}/>
    <View style={s.resultsHead}><Text style={s.sectionTitle}>Spots to explore</Text>
     <View style={s.mode}>
       <Pressable style={[s.modeButton,mode==='list'&&s.modeSelected]} onPress={()=>setMode('list')} accessibilityRole="button"><Ionicons name="list-outline" size={19} color={mode==='list'?Colors.violet:Colors.muted}/></Pressable>
@@ -107,15 +98,6 @@ const s=StyleSheet.create({
  category:{overflow:'hidden',paddingHorizontal:16,paddingVertical:12,borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',gap:7},
  categorySelected:{backgroundColor:Colors.violet,borderColor:Colors.violet},
  categoryText:{color:Colors.text,fontSize:13,fontWeight:'700'},selectedText:{color:'#fff'},
- filterBar:{flexDirection:'row',alignItems:'center',paddingVertical:13,gap:8},
- locationLabel:{flex:1,color:Colors.text,fontWeight:'800',fontSize:14},
- near:{flexDirection:'row',alignItems:'center',gap:5,paddingVertical:9,paddingHorizontal:14,backgroundColor:Colors.cardSoft,borderRadius:Radius.pill},
- nearText:{fontSize:12,fontWeight:'800',color:Colors.violet},
- areas:{gap:8,paddingBottom:22},
- area:{backgroundColor:'#fff',borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border,paddingVertical:11,paddingHorizontal:16},
- areaSelected:{backgroundColor:'#EAE2FC',borderColor:'#C4B5F6'},
- areaText:{fontSize:12,color:Colors.muted,fontWeight:'700'},
- areaMore:{borderRadius:Radius.pill,backgroundColor:'#F0EAFE',paddingHorizontal:15,paddingVertical:11},resultsHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
  mode:{flexDirection:'row',gap:4,backgroundColor:'#F1EEFA',borderRadius:Radius.pill,padding:4},
  modeButton:{padding:10,borderRadius:Radius.pill},modeSelected:{backgroundColor:'#fff'}
 });

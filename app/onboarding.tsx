@@ -6,7 +6,7 @@ import {PreferenceChip} from '@/components/PreferenceChip';
 import {OnboardingLocationPreferences} from '@/components/OnboardingLocationPreferences';
 import {canonicalArea,NEIGHBORHOODS} from '@/lib/attica-neighborhoods';
 import {Colors,Spacing,Radius,Type} from '@/constants/theme';
-import {defaultPreferences,getPreferences,setOnboarded,setPreferences} from '@/lib/storage';
+import {defaultPreferences,getPreferences,getUser,setOnboarded,setPreferences} from '@/lib/storage';
 
 const moods=['cozy','romantic','quiet','lively','creative','social'];
 const outings=['coffee with friends','date night','brunch','night out','study session','casual drinks'];
@@ -29,7 +29,7 @@ export default function OnboardingScreen(){
  const [saveError,setSaveError]=useState('');
  const [prefs,setPrefs]=useState(()=>({...defaultPreferences,neighborhoods:validAreas(defaultPreferences.neighborhoods),budget:validBudget(defaultPreferences.budget)}));
  const userEdited=useRef(false);
- useEffect(()=>{let active=true;getPreferences().then(p=>{if(active&&!userEdited.current)setPrefs({...p,neighborhoods:validAreas(p.neighborhoods??[]),budget:validBudget(p.budget)});}).catch(()=>undefined);return ()=>{active=false;};},[]);
+ useEffect(()=>{let active=true;getPreferences().then(p=>{if(active&&!userEdited.current)setPrefs({...p,neighborhoods:validAreas(p.neighborhoods??[]),budget:validBudget(p.budget)});}).catch(()=>undefined);if(!editing)getUser().then(u=>{if(active&&!u)router.replace('/register');}).catch(()=>{if(active)router.replace('/register');});return ()=>{active=false;};},[editing,router]);
  const toggle=(key:'moods'|'outings'|'neighborhoods',value:string)=>{
   userEdited.current=true;
   setPrefs(p=>{if(key==='neighborhoods'){const exists=p.neighborhoods.some(n=>canonicalArea(n)===value);return {...p,neighborhoods:exists?p.neighborhoods.filter(n=>canonicalArea(n)!==value):[...p.neighborhoods,value]};}
@@ -39,7 +39,7 @@ export default function OnboardingScreen(){
   if(saving)return;setSaving(true);setSaveError('');
   try{
    await setPreferences({...prefs,neighborhoods:validAreas(prefs.neighborhoods),budget:validBudget(prefs.budget)});
-   if(editing)router.replace(returnTo);else {await setOnboarded(true);router.replace('/register');}
+   if(editing)router.replace(returnTo);else {await setOnboarded(true);router.replace('/(tabs)');}
   }catch{setSaveError('Δεν αποθηκεύτηκαν οι επιλογές σου. Δοκίμασε ξανά.');}finally{setSaving(false);}
  };
  const next=()=>page<2?setPage(page+1):void save();
@@ -68,7 +68,7 @@ export default function OnboardingScreen(){
   <View style={s.bottom}>
    {page>0?<Pressable style={s.back} onPress={()=>setPage(x=>x-1)} accessibilityRole="button"><Ionicons name="arrow-back" size={19} color={Colors.violet}/><Text style={s.backText}>Back</Text></Pressable>:null}
    <Pressable style={s.next} onPress={next} accessibilityRole="button" disabled={saving}>
-    <Text style={s.nextText}>{saving?'Saving…':page===2?editing?'Save preferences':'Create my vibe':'Continue'}</Text><Ionicons name="arrow-forward" color="#fff" size={19}/>
+    <Text style={s.nextText}>{saving?'Saving…':page===2?editing?'Save preferences':'Explore Vibe':'Continue'}</Text><Ionicons name="arrow-forward" color="#fff" size={19}/>
    </Pressable>
   </View>
  </View>;

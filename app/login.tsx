@@ -4,7 +4,7 @@ import {Pressable,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {PrimaryButton,SecondaryButton} from '../components/PrimaryButton';
 import {Colors,Spacing,Radius,Type} from '../constants/theme';
-import {getDemoAccount,getPreferences,setUser} from '../lib/storage';
+import {getDemoAccount,getPreferences,isOnboarded,setUser} from '../lib/storage';
 
 export default function LoginScreen(){
  const router=useRouter();
@@ -14,10 +14,11 @@ export default function LoginScreen(){
   if(busy)return;const input=email.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)){setError('Βάλε ένα έγκυρο email.');return;}
   setBusy(true);setError('');
   try{
-   const [account,preferences]=await Promise.all([getDemoAccount(),getPreferences()]);
-   if(account&&account.email.toLowerCase()!==input.toLowerCase()){setError('Αυτό το demo προφίλ έχει διαφορετικό email.');return;}
-   await setUser({name:account?.name||input.split('@')[0],email:account?.email||input,preferences});
-   router.replace('/(tabs)');
+   const [account,preferences,done]=await Promise.all([getDemoAccount(),getPreferences(),isOnboarded()]);
+   if(!account){setError('Δεν υπάρχει demo λογαριασμός. Επίλεξε Create a new profile.');return;}
+   if(account.email.toLowerCase()!==input.toLowerCase()){setError('Αυτό το demo προφίλ έχει διαφορετικό email.');return;}
+   await setUser({...account,preferences});
+   router.replace(done?'/(tabs)':'/onboarding');
   }catch{setError('Δεν ολοκληρώθηκε η είσοδος. Προσπάθησε ξανά.');}finally{setBusy(false);}
  };
  return <ScrollView style={s.page} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
@@ -32,7 +33,7 @@ export default function LoginScreen(){
   <View style={s.note}><Ionicons name="information-circle-outline" size={19} color={Colors.violet}/><Text style={s.noteText}>Demo login με email μόνο. Δεν υπάρχει ακόμη πραγματικός έλεγχος λογαριασμού.</Text></View>
   {error?<Text style={s.error}>{error}</Text>:null}
   <PrimaryButton label={busy?'Signing in…':'Continue'} onPress={login}/>
-  <View style={s.footer}><SecondaryButton label="Create a new profile" onPress={()=>router.push('/onboarding')}/></View>
+  <View style={s.footer}><SecondaryButton label="Create a new profile" onPress={()=>router.push('/register')}/></View>
   <Text style={s.foot}>Local interactive prototype · No password required</Text>
  </ScrollView>;
 }
