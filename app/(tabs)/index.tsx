@@ -98,6 +98,7 @@ const s=StyleSheet.create({
  category:{overflow:'hidden',paddingHorizontal:16,paddingVertical:12,borderRadius:Radius.pill,borderWidth:1,borderColor:Colors.border,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',gap:7},
  categorySelected:{backgroundColor:Colors.violet,borderColor:Colors.violet},
  categoryText:{color:Colors.text,fontSize:13,fontWeight:'700'},selectedText:{color:'#fff'},
+ resultsHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
  mode:{flexDirection:'row',gap:4,backgroundColor:'#F1EEFA',borderRadius:Radius.pill,padding:4},
  modeButton:{padding:10,borderRadius:Radius.pill},modeSelected:{backgroundColor:'#fff'}
 });
