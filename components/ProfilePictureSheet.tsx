@@ -59,7 +59,7 @@ export function ProfilePictureSheet({visible,picture,busy,error,onClose,onSelect
 }
 const s=StyleSheet.create({
  overlay:{flex:1,justifyContent:'flex-end'},
- scrim:{...StyleSheet.absoluteFillObject,backgroundColor:'rgba(22,15,48,.55)'},
+ scrim:{position:'absolute',top:0,bottom:0,left:0,right:0,backgroundColor:'rgba(22,15,48,.55)'},
  sheet:{backgroundColor:Colors.background,borderTopLeftRadius:30,borderTopRightRadius:30,
   maxHeight:'92%',paddingTop:10,paddingHorizontal:Spacing.lg},
  grabber:{alignSelf:'center',height:5,width:40,borderRadius:5,backgroundColor:'#D2C5ED',marginBottom:17},
