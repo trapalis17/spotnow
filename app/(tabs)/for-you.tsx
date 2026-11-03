@@ -53,6 +53,9 @@ export default function ForYouScreen(){
  const sections=useMemo(()=>curateForYouSections(picks),[picks]);
  const {topPick:featured,perfect,hiddenGems,tryDifferent,more}=sections;
  const name=user?.name?.trim().split(' ')[0]||'you';
+ const momentTitle=localNow.getHours()>=19||localNow.getHours()<5?'Tonight\u2019s vibe.':
+  localNow.getHours()<12?'A morning kind of vibe.':
+  localNow.getHours()<18?'An afternoon kind of vibe.':'Your evening vibe.';
  const openVenue=(id:string)=>{trackDemoEvent('recommendation_opened',id);router.push({pathname:'/google-venue',params:{id}});};
  const save=async(id:string)=>{
   if(saveLock.current.has(id))return;saveLock.current.add(id);
@@ -66,46 +69,48 @@ export default function ForYouScreen(){
   <Text style={s.kicker}>CURATED FOR {name.toUpperCase()}</Text>
   <Text style={s.title}>Your kind of<Text style={{color:Colors.violet}}> places.</Text></Text>
   <Text style={s.sub}>Καλύτερες επιλογές, όσο μαθαίνουμε το vibe σου.</Text>
-  <LinearGradient colors={['#5141AE','#7E65D5','#B29DF1'] as const}
+  <LinearGradient colors={['#F1EAFF','#FBF9FF','#EDE5FF'] as const}
    start={{x:0,y:0}} end={{x:1,y:1}} style={s.moodBanner}>
-   <View style={s.moodGlow}/>
-   <View style={s.moodTop}>
-    <View style={s.moodBadge}><Ionicons name="sparkles" size={14} color={Colors.violet}/>
-     <Text style={s.moodBadgeLabel}>PREDICTIVE MOOD</Text></View>
-    <View style={s.moodIcon}><Ionicons name="analytics-outline" size={22} color="#fff"/></View>
+   <View style={s.moodHeader}>
+    <View style={s.moodLabelRow}>
+     <View style={s.moodStar}><Ionicons name="sparkles" size={14} color={Colors.violet}/></View>
+     <Text style={s.moodEyebrow}>PREDICTIVE MOOD</Text>
+    </View>
+    <View style={s.moodAccent}><View style={s.moodAccentDot}/><Text style={s.moodAccentText}>FOR YOU</Text></View>
    </View>
-   <Text style={s.moodTitle}>Your next spot, predicted.</Text>
-   <Text style={s.moodDescription}>{prediction?.headline??'Ανακαλύπτουμε το επόμενο μέρος που μπορεί να σου ταιριάζει.'}</Text>
-   {!loading&&prediction?<View style={s.predictedCard}>
+   <Text style={s.moodTitle}>{momentTitle}</Text>
+   {!loading&&prediction?<View style={s.venueFrame}>
     <Pressable onPress={()=>{trackDemoEvent('prediction_opened',prediction.place.id);openVenue(prediction.place.id);}}
-     accessibilityRole="button" accessibilityLabel={'Προτεινόμενο μαγαζί: '+prediction.place.name} style={s.predictedMain}>
-     <View style={s.predictedPhoto}>
-      <ImageBackground source={prediction.place.demoPhoto?{uri:prediction.place.demoPhoto}:undefined}
-       resizeMode="cover" style={StyleSheet.absoluteFill}>
-       <LinearGradient colors={['rgba(42,30,86,.12)','rgba(42,30,86,.18)']} style={StyleSheet.absoluteFill}/>
-      </ImageBackground>
-      <View style={s.predictedPhotoBadge}><Ionicons name="sparkles" size={12} color={Colors.violet}/><Text style={s.predictedPhotoBadgeText}>YOUR PICK</Text></View>
-     </View>
-     <View style={s.predictedInfo}>
-      <Text style={s.predictedCategory}>{prediction.place.category==='cafe'?'COFFEE & BRUNCH':prediction.place.category==='bar'?'DRINKS & NIGHTLIFE':'FOOD & DINING'}</Text>
-      <Text style={s.predictedName} numberOfLines={2}>{prediction.place.name}</Text>
-      <View style={s.predictedAreaRow}><Ionicons name="location-outline" color={Colors.muted} size={13}/><Text style={s.predictedArea} numberOfLines={1}>{prediction.areaLabel}</Text></View>
-      <View style={s.predictedOpen}><Text style={s.predictedOpenText}>See this spot</Text><Ionicons name="arrow-forward" color={Colors.violet} size={15}/></View>
-     </View>
+     accessibilityRole="button" accessibilityLabel={'Δες το προτεινόμενο μαγαζί '+prediction.place.name}
+     style={({pressed})=>[s.venuePress,pressed&&s.venuePressed]}>
+     <ImageBackground source={prediction.place.demoPhoto?{uri:prediction.place.demoPhoto}:undefined}
+      resizeMode="cover" style={s.venueCover} imageStyle={s.venueCoverImage}>
+      <LinearGradient colors={['rgba(25,18,53,.10)','rgba(25,18,53,.13)','rgba(17,12,35,.88)']}
+       locations={[0,.43,1]} style={StyleSheet.absoluteFill}/>
+      <View style={s.coverTop}>
+       <View style={s.coverPill}><Ionicons name="sparkles" size={12} color="#fff"/><Text style={s.coverPillText}>YOUR SPOT</Text></View>
+      </View>
+      <View style={s.coverBottom}>
+       <View style={s.coverCopy}>
+        <Text style={s.coverCategory}>{prediction.place.category==='cafe'?'COFFEE & BRUNCH':prediction.place.category==='bar'?'BAR & DRINKS':'FOOD & DINING'}</Text>
+        <Text style={s.coverName} numberOfLines={2}>{prediction.place.name}</Text>
+        <View style={s.coverAreaRow}><Ionicons name="location-outline" size={15} color="rgba(255,255,255,.86)"/>
+         <Text style={s.coverArea} numberOfLines={1}>{prediction.areaLabel}</Text>
+        </View>
+       </View>
+       <View style={s.coverArrow}><Ionicons name="arrow-up-forward" size={22} color={Colors.violet}/></View>
+      </View>
+     </ImageBackground>
     </Pressable>
-    <View style={s.predictedReason}>
-     <Ionicons name="bulb-outline" size={16} color={Colors.violet}/>
-     <Text style={s.predictedReasonText}>{prediction.reason}</Text>
-    </View>
-    <View style={s.predictedFooter}>
-     <Text style={s.predictedEvidence}>{prediction.signalLabel}</Text>
-     <Pressable onPress={()=>save(prediction.place.id)} accessibilityRole="button"
-      accessibilityLabel={savedIds.includes('google-'+prediction.place.id)?'Αφαίρεση από αποθηκευμένα':'Αποθήκευση προτεινόμενου μαγαζιού'}
-      style={s.predictedSave}><Ionicons name={savedIds.includes('google-'+prediction.place.id)?'heart':'heart-outline'} size={18} color={Colors.rose}/></Pressable>
-    </View>
-   </View>:loading?<View style={s.loadingPredict}><ActivityIndicator size="small" color="#fff"/><Text style={s.loadingPredictText}>Finding your next spot…</Text></View>:
-    <Text style={s.moodDescription}>Δεν βρέθηκε διαθέσιμο demo μαγαζί.</Text>}
-   <Text style={s.moodDisclaimer}>Εκτίμηση από τοπικά demo δεδομένα και συνήθειες · Όχι εκπαιδευμένο ML ή βεβαιότητα επίσκεψης.</Text>
+    <Pressable onPress={()=>save(prediction.place.id)} accessibilityRole="button"
+     accessibilityLabel={savedIds.includes('google-'+prediction.place.id)?'Αφαίρεση από αποθηκευμένα':'Αποθήκευση προτεινόμενου μαγαζιού'}
+     style={s.coverSave}>
+     <Ionicons name={savedIds.includes('google-'+prediction.place.id)?'heart':'heart-outline'} size={20}
+      color={savedIds.includes('google-'+prediction.place.id)?Colors.rose:Colors.text}/>
+    </Pressable>
+   </View>:loading?<View style={s.moodLoading}><ActivityIndicator color={Colors.violet}/>
+    <Text style={s.moodLoadingText}>Finding your spot…</Text>
+   </View>:<View style={s.moodLoading}><Text style={s.moodLoadingText}>No spot available right now.</Text></View>}
   </LinearGradient>
   <LinearGradient colors={Gradients.secondary} style={s.dna}>
    <View style={s.dnaSymbol}><Ionicons name="finger-print-outline" size={24} color={Colors.violet}/></View>
@@ -164,38 +169,40 @@ const s=StyleSheet.create({
  kicker:{fontSize:10,fontWeight:'900',letterSpacing:1.4,color:Colors.violet,marginBottom:8},
  title:{fontSize:Type.hero,fontWeight:'900',lineHeight:41,letterSpacing:-1.3,color:Colors.text},
  sub:{fontSize:14,color:Colors.muted,lineHeight:21,marginTop:7,marginBottom:17},
- moodBanner:{borderRadius:27,marginBottom:18,padding:19,overflow:'hidden',minHeight:290},
- moodGlow:{position:'absolute',width:220,height:220,borderRadius:110,right:-88,top:-92,backgroundColor:'rgba(245,233,255,.13)'},
- moodTop:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
- moodBadge:{backgroundColor:'rgba(255,255,255,.94)',paddingVertical:8,paddingHorizontal:11,borderRadius:Radius.pill,flexDirection:'row',alignItems:'center',gap:6},
- moodBadgeLabel:{color:Colors.violet,fontWeight:'900',fontSize:9,letterSpacing:.9},
- moodIcon:{width:42,height:42,borderWidth:1,borderColor:'rgba(255,255,255,.29)',borderRadius:15,backgroundColor:'rgba(255,255,255,.15)',alignItems:'center',justifyContent:'center'},
- moodTitle:{fontSize:26,lineHeight:32,fontWeight:'900',letterSpacing:-.9,color:'#fff',marginTop:16,maxWidth:'95%'},
- moodDescription:{fontSize:12.5,color:'rgba(255,255,255,.94)',lineHeight:19,marginTop:9,maxWidth:'96%'},
- moodBottom:{flexDirection:'row',alignItems:'center',flexWrap:'wrap',gap:10,marginTop:17},
- moodCTA:{backgroundColor:'#fff',borderRadius:13,paddingVertical:12,paddingHorizontal:14,flexDirection:'row',alignItems:'center',gap:8},
- moodCTAText:{color:Colors.violet,fontSize:12,fontWeight:'900'},
- moodSignal:{fontSize:10,fontWeight:'800',color:'rgba(255,255,255,.95)',flexShrink:1},
- moodDisclaimer:{fontSize:9,color:'rgba(255,255,255,.84)',lineHeight:14,marginTop:14},
- predictedCard:{marginTop:15,borderRadius:20,backgroundColor:'#fff',overflow:'hidden'},
- predictedMain:{flexDirection:'row',padding:10,gap:11,minHeight:140},
- predictedPhoto:{width:118,minHeight:126,borderRadius:14,overflow:'hidden',backgroundColor:Colors.lilac},
- predictedPhotoBadge:{position:'absolute',left:7,bottom:8,backgroundColor:'rgba(255,255,255,.95)',paddingHorizontal:8,paddingVertical:6,borderRadius:Radius.pill,flexDirection:'row',alignItems:'center',gap:3},
- predictedPhotoBadgeText:{fontSize:8,fontWeight:'900',color:Colors.violet},
- predictedInfo:{flex:1,paddingVertical:6,justifyContent:'center'},
- predictedCategory:{fontSize:9,color:Colors.violet,letterSpacing:.8,fontWeight:'900'},
- predictedName:{fontSize:19,lineHeight:23,color:Colors.text,fontWeight:'900',marginTop:6},
- predictedAreaRow:{flexDirection:'row',gap:4,alignItems:'center',marginTop:8},
- predictedArea:{fontSize:11,color:Colors.muted,flex:1},
- predictedOpen:{marginTop:12,flexDirection:'row',gap:6,alignItems:'center'},
- predictedOpenText:{fontSize:11,color:Colors.violet,fontWeight:'900'},
- predictedReason:{flexDirection:'row',gap:9,paddingHorizontal:15,paddingVertical:12,backgroundColor:Colors.cardSoft,alignItems:'flex-start'},
- predictedReasonText:{flex:1,color:Colors.text,fontSize:12,lineHeight:18,fontWeight:'700'},
- predictedFooter:{flexDirection:'row',gap:9,alignItems:'center',paddingHorizontal:15,paddingVertical:11},
- predictedEvidence:{flex:1,color:Colors.muted,fontSize:10,fontWeight:'800'},
- predictedSave:{height:30,width:30,borderRadius:10,backgroundColor:'#FDF1F9',alignItems:'center',justifyContent:'center'},
- loadingPredict:{flexDirection:'row',alignItems:'center',gap:10,padding:18},
- loadingPredictText:{fontSize:12,color:'#fff'},
+ moodBanner:{borderRadius:Radius.xl,marginBottom:18,padding:15,overflow:'hidden',borderWidth:1,borderColor:'#E8DCFF'},
+ moodHeader:{paddingHorizontal:5,paddingTop:3,flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8},
+ moodLabelRow:{flexDirection:'row',alignItems:'center',gap:8},
+ moodStar:{height:29,width:29,borderRadius:10,backgroundColor:'#fff',alignItems:'center',justifyContent:'center'},
+ moodEyebrow:{fontSize:10,fontWeight:'900',letterSpacing:1,color:Colors.violet},
+ moodAccent:{flexDirection:'row',alignItems:'center',gap:5,paddingHorizontal:9,paddingVertical:7,
+  backgroundColor:'rgba(255,255,255,.60)',borderRadius:Radius.pill},
+ moodAccentDot:{width:6,height:6,borderRadius:3,backgroundColor:Colors.violet},
+ moodAccentText:{fontSize:9,fontWeight:'900',letterSpacing:.7,color:Colors.violet},
+ moodTitle:{fontSize:27,fontWeight:'900',letterSpacing:-1.0,lineHeight:33,color:Colors.text,
+  marginTop:14,marginBottom:15,marginLeft:5},
+ venueFrame:{position:'relative',borderRadius:22,overflow:'hidden',backgroundColor:Colors.lilac},
+ venuePress:{width:'100%',overflow:'hidden'},
+ venuePressed:{opacity:.93},
+ venueCover:{height:280,justifyContent:'space-between',padding:18},
+ venueCoverImage:{borderRadius:22},
+ coverTop:{flexDirection:'row',justifyContent:'flex-start'},
+ coverPill:{flexDirection:'row',alignItems:'center',gap:6,backgroundColor:'rgba(35,24,60,.47)',
+  borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8,
+  borderWidth:1,borderColor:'rgba(255,255,255,.28)'},
+ coverPillText:{color:'#fff',fontSize:10,fontWeight:'900',letterSpacing:.7},
+ coverBottom:{flexDirection:'row',alignItems:'flex-end',gap:11},
+ coverCopy:{flex:1},
+ coverCategory:{fontSize:10,color:'rgba(255,255,255,.87)',fontWeight:'900',letterSpacing:1,marginBottom:7},
+ coverName:{fontSize:30,lineHeight:33,fontWeight:'900',color:'#fff',letterSpacing:-1.0},
+ coverAreaRow:{flexDirection:'row',alignItems:'center',gap:5,marginTop:8},
+ coverArea:{fontSize:12,color:'rgba(255,255,255,.93)',fontWeight:'700',flexShrink:1},
+ coverArrow:{width:45,height:45,backgroundColor:'#fff',alignItems:'center',justifyContent:'center',
+  borderRadius:15,marginBottom:1},
+ coverSave:{position:'absolute',right:15,top:15,width:39,height:39,borderRadius:13,
+  backgroundColor:'rgba(255,255,255,.95)',alignItems:'center',justifyContent:'center'},
+ moodLoading:{height:155,borderRadius:20,backgroundColor:'rgba(255,255,255,.65)',
+  flexDirection:'row',alignItems:'center',justifyContent:'center',gap:10},
+ moodLoadingText:{fontSize:13,color:Colors.muted,fontWeight:'700'},
  dna:{borderRadius:Radius.lg,padding:15,flexDirection:'row',alignItems:'center',gap:12,marginBottom:22},
  dnaSymbol:{width:46,height:46,backgroundColor:'#fff',alignItems:'center',justifyContent:'center',borderRadius:15},
  dnaContent:{flex:1},dnaTitle:{fontSize:15,fontWeight:'900',color:Colors.text},
