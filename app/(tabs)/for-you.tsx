@@ -98,7 +98,7 @@ export default function ForYouScreen(){
          <Text style={s.coverArea} numberOfLines={1}>{prediction.areaLabel}</Text>
         </View>
        </View>
-       <View style={s.coverArrow}><Ionicons name="arrow-up-forward" size={22} color={Colors.violet}/></View>
+       <View style={s.coverArrow}><Ionicons name="arrow-forward" size={22} color={Colors.violet}/></View>
       </View>
      </ImageBackground>
     </Pressable>
