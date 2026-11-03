@@ -9,12 +9,12 @@ test('Vibe Type is not invented before any user taste or behavior',()=>{
  assert.equal(getVibeIdentity(empty,{}),null);
 });
 test('Profile identity uses exactly the six agreed one-word titles',()=>{
- const cases=[
+ const cases:[UserPreferences,string][]=[
   [{...empty,moods:['social','lively'],outings:['coffee with friends']},'socialite'],
   [{...empty,moods:['romantic'],outings:['date night']},'romantic'],
   [{...empty,moods:['lively'],outings:['night out'],timeSlots:['evening']},'nocturnal'],
   [{...empty,moods:['creative'],music:['indie']},'tastemaker'],
- ] as const;
+ ];
  for(const [p,expected] of cases)assert.equal(getVibeIdentity(p,{})?.key,expected);
 });
 test('Returning repeatedly to the same venue can lead to regular',()=>{
