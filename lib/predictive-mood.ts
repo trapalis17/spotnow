@@ -99,3 +99,90 @@ export function getPredictiveMood(
   :`Μια αρχική ιδέα ${context} με βάση την ημέρα και την ώρα. ${winner.caption}`;
  return {...winner,explanation,signalLabel,personalized:hasPersonalSignals};
 }
+
+/** Predict a specific candidate venue from contextual fit plus on-device behavior.
+ * This is an interpretable ranking estimate, NOT a trained probability model.
+ * Crucially, it doesn't depend on active For You category filters.
+ */
+import type {ForYouMatch} from './for-you';
+import type {DemoEvent} from './demo-analytics';
+import {getVenueDnaWeights} from './daily-venue-swipe';
+
+export type PredictedVenue={
+ place:ForYouMatch['place'];
+ areaLabel:string;
+ headline:string;
+ reason:string;
+ signalLabel:string;
+ evidenceLevel:'starter'|'learning'|'personalized';
+ score:number;
+};
+
+const venueId=(id:string)=>id.replace(/^google-/,'');
+const normalizeDate=(timestamp:number)=>new Date(timestamp);
+const samePeriod=(a:number,b:number)=>Math.floor(a/4)===Math.floor(b/4);
+const relevantEventNames=new Set(['recommendation_opened','prediction_opened','venue_save_toggled']);
+
+export function predictNextVenue(
+ now:Date,matches:readonly ForYouMatch[],preferences:UserPreferences,
+ taste:TasteFeedback,savedIds:readonly string[]=[],visits:Record<string,VisitFeedback>={},
+ venueVotes:TasteFeedback={},events:readonly DemoEvent[]=[]
+):PredictedVenue|null{
+ if(!matches.length)return null;
+ const mood=getPredictiveMood(now,preferences,taste,savedIds,visits);
+ const hour=now.getHours(),weekend=now.getDay()===0||now.getDay()===6;
+ const preferred=new Set(tastesFromSignup(preferences));
+ const dna=getTasteWeights(taste),swipeDna=getVenueDnaWeights(venueVotes);
+ const saved=new Set(savedIds.map(venueId));
+ const recentEvents=events.filter(e=>relevantEventNames.has(e.name)&&!!e.context&&
+  Number.isFinite(e.timestamp)&&e.timestamp<=now.getTime()&&now.getTime()-e.timestamp<90*86400000);
+ const contextual=recentEvents.filter(e=>{
+  const when=normalizeDate(e.timestamp);
+  const isWeekend=when.getDay()===0||when.getDay()===6;
+  return samePeriod(when.getHours(),hour)&&isWeekend===weekend;
+ });
+ const meaningfulTaste=Object.values(taste).filter(v=>v!=='skip').length;
+ const meaningfulVotes=Object.values(venueVotes).filter(v=>v!=='skip').length;
+ const signalCount=meaningfulTaste+meaningfulVotes+Object.keys(visits).length+recentEvents.length;
+ const favorites=matches.map(match=>{
+  const {place}=match;
+  if(venueVotes[place.id]==='dislike'||visits[place.id]==='no')return {match,score:-Infinity,habit:0};
+  const tags=place.tasteTags??[];
+  const categoryHour=place.category===mood.category?11:-3;
+  const tagFit=tags.filter(t=>mood.tags.includes(t)).length*2.5;
+  const tasteFit=tags.reduce((acc,tag)=>acc+(preferred.has(tag)?2.4:0)+
+    Math.max(-6,Math.min(6,(dna[tag]+swipeDna[tag])*9)),0);
+  const usage=contextual.reduce((acc,event)=>{
+   if(venueId(event.context??'')!==place.id)return acc;
+   const ageDays=(now.getTime()-event.timestamp)/86400000;
+   return acc+Math.max(.5,1-ageDays/140)*(event.name==='prediction_opened'?3.5:5);
+  },0);
+  const allTimeHabit=recentEvents.reduce((acc,event)=>
+   venueId(event.context??'')===place.id?acc+1.1:acc,0);
+  const savedBonus=saved.has(place.id)?2:0;
+  const visitBonus=visits[place.id]==='yes'?5:visits[place.id]==='kind-of'?1:0;
+  const swipeBonus=venueVotes[place.id]==='like'?6:0;
+  const budgetPenalty=match.inBudget?0:-22;
+  const areaBonus=match.preferredArea?5:0;
+  const distancePenalty=Math.min(14,Math.max(0,match.nearbyKm-3)*1.4);
+  return {match,habit:usage,score:categoryHour+tagFit+tasteFit+
+   usage+allTimeHabit+savedBonus+visitBonus+swipeBonus+areaBonus-
+   distancePenalty+budgetPenalty+match.rankScore*.13};
+ }).filter(x=>Number.isFinite(x.score)).sort((a,b)=>b.score-a.score||
+  a.match.nearbyKm-b.match.nearbyKm||a.match.place.id.localeCompare(b.match.place.id));
+ const best=favorites[0];
+ if(!best)return null;
+ const place=best.match.place;
+ const timeLabel=hour>=19||hour<5?'απόψε':hour<12?'αυτό το πρωί':hour<17?'σήμερα':'το απόγευμα';
+ const fromHabit=best.habit>=3;
+ const fromTaste=Boolean((place.tasteTags??[]).some(tag=>preferred.has(tag)||dna[tag]>0||swipeDna[tag]>0));
+ const reason=fromHabit?'Έχεις δείξει ενδιαφέρον για αυτό το μέρος σε παρόμοιες ώρες.':
+  visits[place.id]==='yes'?'Έχεις αξιολογήσει θετικά αυτό το μέρος και ταιριάζει στη σημερινή σου έξοδο.':
+  fromTaste?'Ταιριάζει με τα vibes που επιλέγεις και τη σημερινή ώρα.':
+  'Μια αρχική εκτίμηση από την ώρα, την περιοχή και το είδος εξόδου.';
+ const evidenceLevel:PredictedVenue['evidenceLevel']=signalCount>=10?'personalized':signalCount>=3?'learning':'starter';
+ const headline='Ίσως σου ταιριάζει '+timeLabel+' — με βάση '+(fromHabit?'τις συνήθειές σου.':signalCount?'το γούστο σου.':'την ώρα και την περιοχή.');
+ const signalLabel=evidenceLevel==='starter'?'EARLY ESTIMATE · LIMITED HISTORY':
+  evidenceLevel==='learning'?'LEARNING YOUR HABITS · LOCAL DATA':'PERSONALIZED FROM YOUR ACTIVITY';
+ return {place,areaLabel:best.match.areaLabel,headline,reason,signalLabel,evidenceLevel,score:best.score};
+}

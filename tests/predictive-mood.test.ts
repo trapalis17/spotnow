@@ -28,3 +28,41 @@ test('Predictive Mood respects no signals and returns a stable suggestion',()=>{
  assert.equal(getPredictiveMood(now,empty,{}).key,'coffee');
  assert.deepEqual(getPredictiveMood(now,defaultPreferences,{}),getPredictiveMood(now,defaultPreferences,{}));
 });
+
+import {getDemoPlaces} from '../lib/demo-places';
+import {DEFAULT_AREA} from '../lib/places';
+import {getForYouMatches} from '../lib/for-you';
+import {predictNextVenue} from '../lib/predictive-mood';
+import type {DemoEvent} from '../lib/demo-analytics';
+
+test('Venue prediction returns a specific demo shop with an explainable reason',()=>{
+ const now=new Date(2026,10,7,22,0,0);
+ const matches=getForYouMatches(getDemoPlaces(DEFAULT_AREA),defaultPreferences,DEFAULT_AREA,{});
+ const result=predictNextVenue(now,matches,defaultPreferences,{});
+ assert.ok(result?.place.id.startsWith('demo_'));
+ assert.ok(result?.reason.length);
+ assert.ok(result?.headline.length);
+ assert.equal(result?.evidenceLevel,'starter');
+});
+test('Repeated same-period activity changes predicted venue instead of filtering',()=>{
+ const now=new Date(2026,10,7,21,0,0);
+ const p={...empty,budget:60};
+ const matches=getForYouMatches(getDemoPlaces(DEFAULT_AREA),p,DEFAULT_AREA,{});
+ const defaultChoice=predictNextVenue(now,matches,p,{});
+ const rival=matches.find(x=>x.place.id!==defaultChoice?.place.id&&x.place.category==='bar');
+ assert.ok(rival);
+ const events:DemoEvent[]=Array.from({length:18},(_,i)=>({
+  name:'recommendation_opened',context:rival!.place.id,
+  timestamp:new Date(2026,10,6-(i%3),21,0,0).getTime()
+ }));
+ const predicted=predictNextVenue(now,matches,p,{},[],{}, {},events);
+ assert.equal(predicted?.place.id,rival!.place.id);
+ assert.match(predicted!.reason,/παρόμοιες ώρες/);
+});
+test('Disliked and negatively reviewed venues are excluded from specific prediction',()=>{
+ const now=new Date(2026,10,7,22);
+ const matches=getForYouMatches(getDemoPlaces(DEFAULT_AREA),defaultPreferences,DEFAULT_AREA,{});
+ const first=predictNextVenue(now,matches,defaultPreferences,{})!;
+ assert.notEqual(predictNextVenue(now,matches,defaultPreferences,{},[],{}, {[first.place.id]:'dislike'})?.place.id,first.place.id);
+ assert.notEqual(predictNextVenue(now,matches,defaultPreferences,{},[],{[first.place.id]:'no'})?.place.id,first.place.id);
+});
