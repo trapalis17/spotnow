@@ -1,9 +1,14 @@
 import {useFocusEffect,useRouter} from 'expo-router';
 import {useCallback,useState} from 'react';
 import {Alert,Pressable,ScrollView,StyleSheet,Text,View} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Colors,Gradients,Spacing,Radius,Type} from '../../constants/theme';
+import {VibeAvatar} from '../../components/VibeAvatar';
+import {ProfilePictureSheet} from '../../components/ProfilePictureSheet';
+import {defaultProfilePicture,getProfilePicture,saveProfilePicture,resetProfilePicture,photoFromBase64,type ProfilePicture,type VibeAvatarId} from '../../lib/profile-picture';
 import {
  clearUser,getPreferences,getUser,getTasteFeedback,clearTasteFeedback,
  getSavedVenueIds,getCollections,getDailyVenueSwipeState,getVisitFeedback
@@ -28,10 +33,19 @@ export default function ProfileScreen(){
  const [collectionCount,setCollectionCount]=useState(0);
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
+ const [picture,setPicture]=useState<ProfilePicture>(defaultProfilePicture('vibe'));
+ const [pictureSheetOpen,setPictureSheetOpen]=useState(false);
+ const [pictureBusy,setPictureBusy]=useState(false);
+ const [pictureError,setPictureError]=useState('');
 
  useFocusEffect(useCallback(()=>{
   let alive=true;
-  getUser().then(u=>{if(alive)setUser(u);}).catch(()=>undefined);
+  getUser().then(async u=>{
+   if(!alive)return;
+   setUser(u);
+   if(u){const p=await getProfilePicture(u.email);if(alive)setPicture(p);}
+   else setPicture(defaultProfilePicture('vibe'));
+  }).catch(()=>undefined);
   getPreferences().then(p=>{if(alive)setPrefs(p);}).catch(()=>undefined);
   getTasteFeedback().then(t=>{if(alive)setTaste(t);}).catch(()=>undefined);
   getSavedVenueIds().then(ids=>{
@@ -56,6 +70,40 @@ export default function ProfileScreen(){
   {text:'Cancel',style:'cancel'},
   {text:'Reset',style:'destructive',onPress:()=>clearTasteFeedback().then(()=>setTaste({})).catch(()=>setError('Δεν έγινε επαναφορά του Vibe DNA.'))}
  ]);
+ const chooseAvatar=async(id:VibeAvatarId)=>{
+  if(!user||pictureBusy)return;
+  setPictureBusy(true);setPictureError('');
+  try{const next:ProfilePicture={kind:'avatar',id};
+   await saveProfilePicture(user.email,next);setPicture(next);setPictureSheetOpen(false);
+  }catch{setPictureError('Δεν αποθηκεύτηκε το avatar. Δοκίμασε ξανά.');}
+  finally{setPictureBusy(false);}
+ };
+ const uploadPhoto=async()=>{
+  if(!user||pictureBusy)return;
+  setPictureBusy(true);setPictureError('');
+  try{
+   const picked=await ImagePicker.launchImageLibraryAsync({
+    mediaTypes:['images'],allowsEditing:true,aspect:[1,1],quality:.8
+   });
+   if(picked.canceled||!picked.assets?.[0])return;
+   // Keep a small, cropped JPEG so the photo survives reloads in local AsyncStorage.
+   const compressed=await ImageManipulator.manipulateAsync(picked.assets[0].uri,
+    [{resize:{width:380}}],
+    {compress:.68,format:ImageManipulator.SaveFormat.JPEG,base64:true});
+   if(!compressed.base64)throw new Error('Unable to encode photo');
+   const next=photoFromBase64(compressed.base64);
+   await saveProfilePicture(user.email,next);
+   setPicture(next);setPictureSheetOpen(false);
+  }catch{setPictureError('Δεν αποθηκεύτηκε η φωτογραφία. Δοκίμασε μια άλλη εικόνα.');}
+  finally{setPictureBusy(false);}
+ };
+ const resetAvatar=async()=>{
+  if(!user||pictureBusy)return;
+  setPictureBusy(true);setPictureError('');
+  try{const next=await resetProfilePicture(user.email);setPicture(next);setPictureSheetOpen(false);}
+  catch{setPictureError('Δεν έγινε επαναφορά της φωτογραφίας.');}
+  finally{setPictureBusy(false);}
+ };
  const logout=async()=>{
   if(busy)return;setBusy(true);setError('');
   try{await clearUser();router.replace('/');}
@@ -75,9 +123,11 @@ export default function ProfileScreen(){
 
   <LinearGradient colors={Gradients.secondary} start={{x:0,y:0}} end={{x:1,y:1}} style={s.hero}>
    <View style={s.identityRow}>
-    <LinearGradient colors={Gradients.primary} style={s.avatar}>
-     <Text style={s.initial}>{display.slice(0,1).toUpperCase()}</Text>
-    </LinearGradient>
+    <Pressable onPress={()=>{setPictureError('');setPictureSheetOpen(true);}}
+     accessibilityRole="button" accessibilityLabel="Άλλαξε εικόνα προφίλ" style={s.avatarPress}>
+     <VibeAvatar picture={picture} size={66}/>
+     <View style={s.avatarEdit}><Ionicons name="camera-outline" size={12} color="#fff"/></View>
+    </Pressable>
     <View style={s.heroUser}>
      <Text style={s.userName} numberOfLines={1}>{display}</Text>
      <Text style={s.userEmail} numberOfLines={1}>{user?.email||'Local demo account'}</Text>
@@ -182,6 +232,9 @@ export default function ProfileScreen(){
   </Pressable>
   {error?<Text style={s.error}>{error}</Text>:null}
   <Text style={s.foot}>Demo profile · Preferences are stored on this device only.</Text>
+  <ProfilePictureSheet visible={pictureSheetOpen} picture={picture} busy={pictureBusy}
+   error={pictureError} onClose={()=>{if(!pictureBusy)setPictureSheetOpen(false);}}
+   onSelect={chooseAvatar} onUpload={uploadPhoto} onReset={resetAvatar}/>
  </ScrollView>;
 }
 
@@ -195,8 +248,9 @@ const s=StyleSheet.create({
  subtitle:{fontSize:14,color:Colors.muted,marginTop:7,marginBottom:20},
  hero:{borderRadius:Radius.lg,borderWidth:1,borderColor:Colors.border,padding:18,marginBottom:5},
  identityRow:{flexDirection:'row',alignItems:'center',gap:13},
- avatar:{width:66,height:66,borderRadius:21,alignItems:'center',justifyContent:'center'},
- initial:{fontSize:29,fontWeight:'900',color:'#fff'},
+ avatarPress:{height:72,width:72,justifyContent:'center',alignItems:'center'},
+ avatarEdit:{position:'absolute',right:0,bottom:0,height:25,width:25,backgroundColor:Colors.violet,
+  borderRadius:9,borderWidth:2,borderColor:'#fff',alignItems:'center',justifyContent:'center'},
  heroUser:{flex:1},userName:{fontSize:22,fontWeight:'900',color:Colors.text,letterSpacing:-.5},
  userEmail:{fontSize:12,color:Colors.muted,marginTop:5},
  memberTag:{fontSize:10,color:Colors.violet,letterSpacing:.8,fontWeight:'900',marginTop:9},

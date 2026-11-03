@@ -13,6 +13,14 @@
         {
           "locationWhenInUsePermission": "Το Vibe ζητά την τοποθεσία σου μόνο για να προτείνει τις 7 κοντινότερες περιοχές κατά την εγγραφή."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Vibe to choose a photo for your local profile.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {
