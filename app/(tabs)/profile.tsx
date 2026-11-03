@@ -6,10 +6,13 @@ import {LinearGradient} from 'expo-linear-gradient';
 import {Colors,Gradients,Spacing,Radius,Type} from '../../constants/theme';
 import {
  clearUser,getPreferences,getUser,getTasteFeedback,clearTasteFeedback,
- getSavedVenueIds,getCollections
+ getSavedVenueIds,getCollections,getDailyVenueSwipeState,getVisitFeedback
 } from '../../lib/storage';
 import {getDemoPlaceById} from '../../lib/demo-places';
 import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
+import {getVibeIdentity} from '../../lib/vibe-identity';
+import {getDemoEvents,type DemoEvent} from '../../lib/demo-analytics';
+import type {VisitFeedback} from '../../lib/storage';
 import type {UserPreferences,UserProfile} from '../../types';
 
 export default function ProfileScreen(){
@@ -17,6 +20,10 @@ export default function ProfileScreen(){
  const [user,setUser]=useState<UserProfile|null>(null);
  const [prefs,setPrefs]=useState<UserPreferences|null>(null);
  const [taste,setTaste]=useState<TasteFeedback>({});
+ const [venueVotes,setVenueVotes]=useState<TasteFeedback>({});
+ const [visits,setVisits]=useState<Record<string,VisitFeedback>>({});
+ const [savedIds,setSavedIds]=useState<string[]>([]);
+ const [events,setEvents]=useState<DemoEvent[]>([]);
  const [savedCount,setSavedCount]=useState(0);
  const [collectionCount,setCollectionCount]=useState(0);
  const [busy,setBusy]=useState(false);
@@ -28,13 +35,20 @@ export default function ProfileScreen(){
   getPreferences().then(p=>{if(alive)setPrefs(p);}).catch(()=>undefined);
   getTasteFeedback().then(t=>{if(alive)setTaste(t);}).catch(()=>undefined);
   getSavedVenueIds().then(ids=>{
-   if(alive)setSavedCount(ids.filter(id=>id.startsWith('google-')&&getDemoPlaceById(id.slice(7))!==null).length);
+   if(alive){
+    setSavedIds(ids);
+    setSavedCount(ids.filter(id=>id.startsWith('google-')&&getDemoPlaceById(id.slice(7))!==null).length);
+   }
   }).catch(()=>undefined);
+  getDailyVenueSwipeState().then(d=>{if(alive)setVenueVotes(d.votes);}).catch(()=>undefined);
+  getVisitFeedback().then(v=>{if(alive)setVisits(v);}).catch(()=>undefined);
+  getDemoEvents().then(e=>{if(alive)setEvents(e);}).catch(()=>undefined);
   getCollections().then(c=>{if(alive)setCollectionCount(c.length);}).catch(()=>undefined);
   return ()=>{alive=false;};
  },[]));
 
  const dna=getDnaSummary(taste);
+ const vibeType=getVibeIdentity(prefs,taste,venueVotes,savedIds,visits,events);
  const display=user?.name?.trim()||'Vibe explorer';
  const budget=prefs?.budget?prefs.budget>=60?'60€+':prefs.budget+'€':'—';
  const edit=()=>router.push({pathname:'/onboarding',params:{mode:'edit',from:'profile'}});
@@ -67,7 +81,21 @@ export default function ProfileScreen(){
     <View style={s.heroUser}>
      <Text style={s.userName} numberOfLines={1}>{display}</Text>
      <Text style={s.userEmail} numberOfLines={1}>{user?.email||'Local demo account'}</Text>
-     <Text style={s.memberTag}>✳ VIBE EXPLORER</Text>
+     <Text style={s.memberTag}>✳ VIBE MEMBER</Text>
+    </View>
+   </View>
+   <View style={s.vibeIdentityCard}>
+    <View style={s.vibeIdentityHead}><Ionicons name="sparkles-outline" size={15} color={Colors.violet}/>
+     <Text style={s.vibeIdentityEyebrow}>YOUR VIBE TYPE</Text>
+    </View>
+    <View style={s.vibeIdentityBody}>
+     <View style={s.vibeIdentityCopy}>
+      <Text style={s.vibeIdentityTitle} numberOfLines={1}>{vibeType?.title??'discovering'}</Text>
+      <Text style={s.vibeIdentitySub}>{vibeType?.subtitle??'Find your vibe with every swipe.'}</Text>
+     </View>
+     <LinearGradient colors={Gradients.primary} style={s.vibeIdentityIcon}>
+      <Ionicons name={vibeType?.icon??'finger-print-outline'} color="#fff" size={26}/>
+     </LinearGradient>
     </View>
    </View>
    <View style={s.stats}>
@@ -172,6 +200,16 @@ const s=StyleSheet.create({
  heroUser:{flex:1},userName:{fontSize:22,fontWeight:'900',color:Colors.text,letterSpacing:-.5},
  userEmail:{fontSize:12,color:Colors.muted,marginTop:5},
  memberTag:{fontSize:10,color:Colors.violet,letterSpacing:.8,fontWeight:'900',marginTop:9},
+ vibeIdentityCard:{marginTop:19,backgroundColor:'rgba(255,255,255,.86)',borderRadius:20,
+  borderWidth:1,borderColor:'rgba(91,71,214,.10)',paddingHorizontal:17,paddingVertical:16},
+ vibeIdentityHead:{flexDirection:'row',alignItems:'center',gap:7},
+ vibeIdentityEyebrow:{color:Colors.violet,fontSize:10,fontWeight:'900',letterSpacing:1.3},
+ vibeIdentityBody:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:12,marginTop:9},
+ vibeIdentityCopy:{flex:1},
+ vibeIdentityTitle:{color:Colors.text,fontWeight:'900',fontSize:29,letterSpacing:-.9,lineHeight:35},
+ vibeIdentitySub:{fontSize:12,color:Colors.muted,marginTop:3},
+ vibeIdentityIcon:{height:53,width:53,borderRadius:17,alignItems:'center',justifyContent:'center'},
+
  stats:{marginTop:20,borderRadius:17,backgroundColor:'rgba(255,255,255,.75)',flexDirection:'row',paddingVertical:13,alignItems:'center'},
  stat:{flex:1,alignItems:'center',gap:4},statValue:{fontSize:24,fontWeight:'900',color:Colors.violet},
  statLabel:{color:Colors.muted,fontSize:11,fontWeight:'800'},
