@@ -53,7 +53,7 @@ test('Repeated same-period activity changes predicted venue instead of filtering
  assert.ok(rival);
  const events:DemoEvent[]=Array.from({length:18},(_,i)=>({
   name:'recommendation_opened',context:rival!.place.id,
-  timestamp:new Date(2026,10,6-(i%3),21,0,0).getTime()
+  timestamp:new Date(2026,9,31-(i%3)*7,21,0,0).getTime()
  }));
  const predicted=predictNextVenue(now,matches,p,{},[],{}, {},events);
  assert.equal(predicted?.place.id,rival!.place.id);
