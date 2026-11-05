@@ -12,7 +12,7 @@ export default function WelcomeScreen(){
  useEffect(()=>{let active=true;Promise.all([getUser(),isOnboarded()]).then(([user,done])=>{if(!active)return;if(user)router.replace(done?'/(tabs)':'/onboarding');else setChecking(false);}).catch(()=>{if(active)setChecking(false);});return ()=>{active=false;};},[router]);
  if(checking)return <View style={s.loading}><ActivityIndicator color={Colors.violet}/></View>;
  return <ScrollView style={s.page} contentContainerStyle={s.content}>
-  <View style={s.brandRow}><Text style={s.brand}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text><Text style={s.demoLabel}>PREVIEW 2.0</Text></View>
+  <View style={s.brandRow}><Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text><Text style={s.demoLabel}>PREVIEW 2.0</Text></View>
   <View style={s.center}>
    <LinearGradient colors={Gradients.hero} start={{x:0,y:0}} end={{x:1,y:1}} style={s.hero}>
     <View style={s.orb}/><View style={s.heroSymbol}><Ionicons name="sparkles-outline" size={31} color="#fff"/></View>

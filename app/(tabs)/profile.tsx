@@ -63,7 +63,7 @@ export default function ProfileScreen(){
 
  const dna=getDnaSummary(taste);
  const vibeType=getVibeIdentity(prefs,taste,venueVotes,savedIds,visits,events);
- const display=user?.name?.trim()||'Vibe explorer';
+ const display=user?.name?.trim()||'Spotnow member';
  const budget=prefs?.budget?prefs.budget>=60?'60€+':prefs.budget+'€':'—';
  const edit=()=>router.push({pathname:'/onboarding',params:{mode:'edit',from:'profile'}});
  const reset=()=>Alert.alert('Reset Vibe DNA?','Θα διαγραφούν οι επιλογές γούστου που έχεις κάνει. Το ημερήσιο όριο των 8 swipes δεν μηδενίζεται.',[
@@ -112,7 +112,7 @@ export default function ProfileScreen(){
  };
  return <ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
   <View style={s.top}>
-   <Text style={s.logo}>vibe<Text style={{color:Colors.lavender}}>✳</Text></Text>
+   <Text style={s.logo}>spot<Text style={{color:Colors.lavender}}>now✳</Text></Text>
    <Pressable onPress={edit} accessibilityRole="button" accessibilityLabel="Επεξεργασία προτιμήσεων" style={s.topAction}>
     <Ionicons name="options-outline" color={Colors.violet} size={21}/>
    </Pressable>
@@ -131,7 +131,7 @@ export default function ProfileScreen(){
     <View style={s.heroUser}>
      <Text style={s.userName} numberOfLines={1}>{display}</Text>
      <Text style={s.userEmail} numberOfLines={1}>{user?.email||'Local demo account'}</Text>
-     <Text style={s.memberTag}>✳ VIBE MEMBER</Text>
+     <Text style={s.memberTag}>✳ SPOTNOW MEMBER</Text>
     </View>
    </View>
    <View style={s.vibeIdentityCard}>

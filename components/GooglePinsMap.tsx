@@ -16,7 +16,7 @@ export function GooglePinsMap({area,places,onSelect}:{area:SearchArea;places:Goo
        style={[styles.pin,{left:18+(i%3)*95,top:20+Math.floor(i/3)*61}]}>
        <Ionicons name={p.category==='cafe'?'cafe':p.category==='bar'?'wine':'restaurant'} color="#fff" size={15}/>
      </Pressable>)}
-     <Text style={styles.watermark}>VIBE / MOCK MAP</Text>
+     <Text style={styles.watermark}>SPOTNOW / MOCK MAP</Text>
    </View>
    <Text style={styles.caption}>Ενδεικτικές πινέζες — χωρίς GPS ή εξωτερικό χάρτη. Πάτησε μια πινέζα.</Text>
  </View>;

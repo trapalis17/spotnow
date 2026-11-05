@@ -46,7 +46,7 @@ export default function OnboardingScreen(){
  return <View style={s.page}>
   <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
    <View style={s.header}>
-    <Text style={s.logo}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text>
+    <Text style={s.logo}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text>
     {editing?<Pressable onPress={()=>router.replace(returnTo)} accessibilityRole="button"><Ionicons name="close" color={Colors.text} size={24}/></Pressable>:null}
    </View>
    <View style={s.progressHeader}><Text style={s.kicker}>{editing?'EDIT YOUR VIBE':'LET’S GET TO KNOW YOU'}</Text><Text style={s.counter}>0{page+1} / 03</Text></View>
@@ -68,7 +68,7 @@ export default function OnboardingScreen(){
   <View style={s.bottom}>
    {page>0?<Pressable style={s.back} onPress={()=>setPage(x=>x-1)} accessibilityRole="button"><Ionicons name="arrow-back" size={19} color={Colors.violet}/><Text style={s.backText}>Back</Text></Pressable>:null}
    <Pressable style={s.next} onPress={next} accessibilityRole="button" disabled={saving}>
-    <Text style={s.nextText}>{saving?'Saving…':page===2?editing?'Save preferences':'Explore Vibe':'Continue'}</Text><Ionicons name="arrow-forward" color="#fff" size={19}/>
+    <Text style={s.nextText}>{saving?'Saving…':page===2?editing?'Save preferences':'Explore spots':'Continue'}</Text><Ionicons name="arrow-forward" color="#fff" size={19}/>
    </Pressable>
   </View>
  </View>;

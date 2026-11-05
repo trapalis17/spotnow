@@ -29,7 +29,7 @@ export default function DiscoverScreen(){
  const openTaste=(view:'cards'|'dna')=>{setTasteView(view);setTasteOpen(true);};
  return <ScrollView style={s.page} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
    <View style={s.topBar}>
-     <Text style={s.logo}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text>
+     <Text style={s.logo}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text>
      <Pressable onPress={()=>router.push('/(tabs)/profile')} style={s.avatar} accessibilityRole="button" accessibilityLabel="Άνοιγμα προφίλ"><Ionicons name="person-outline" size={20} color={Colors.violet}/></Pressable>
    </View>
    <Text style={s.kicker}>DISCOVER YOUR NEXT FAVORITE</Text>

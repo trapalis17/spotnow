@@ -1,5 +1,5 @@
 {
-  "name": "vibe-frontend",
+  "name": "spotnow-frontend",
   "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",
@@ -42,5 +42,5 @@
     "typescript": "~6.0.0",
     "babel-preset-expo": "~58.0.20"
   },
-  "description": "Interactive frontend-only Vibe prototype"
+  "description": "Interactive frontend-only spotnow prototype"
 }

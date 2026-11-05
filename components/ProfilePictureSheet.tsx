@@ -34,12 +34,12 @@ export function ProfilePictureSheet({visible,picture,busy,error,onClose,onSelect
       <Ionicons name="arrow-forward" size={19} color={Colors.violet}/>
      </Pressable>
      {error?<Text style={s.error}>{error}</Text>:null}
-     <View style={s.avatarHeader}><Text style={s.avatarHeading}>Or choose a Vibe avatar</Text><Text style={s.avatarCount}>12 STYLES</Text></View>
+     <View style={s.avatarHeader}><Text style={s.avatarHeading}>Or choose a Spotnow avatar</Text><Text style={s.avatarCount}>12 STYLES</Text></View>
      <View style={s.grid}>
       {VIBE_AVATARS.map(a=>{
        const selected=picture.kind==='avatar'&&picture.id===a.id;
        return <Pressable key={a.id} disabled={busy} accessibilityRole="button"
-        accessibilityState={{selected}} accessibilityLabel={'Επιλογή Vibe avatar '+a.label}
+        accessibilityState={{selected}} accessibilityLabel={'Επιλογή Spotnow avatar '+a.label}
         onPress={()=>onSelect(a.id)} style={[s.option,selected&&s.optionSelected]}>
         <VibeAvatar picture={{kind:'avatar',id:a.id}} size={68}/>
         <Text style={[s.optionText,selected&&s.optionTextSelected]}>{a.label}</Text>

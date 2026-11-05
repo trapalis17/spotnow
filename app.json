@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Vibe Frontend Preview",
-    "slug": "vibe-frontend",
-    "scheme": "vibe",
+    "name": "spotnow",
+    "slug": "spotnow",
+    "scheme": "spotnow",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -11,13 +11,13 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Το Vibe ζητά την τοποθεσία σου μόνο για να προτείνει τις 7 κοντινότερες περιοχές κατά την εγγραφή."
+          "locationWhenInUsePermission": "Το spotnow ζητά την τοποθεσία σου μόνο για να προτείνει τις 7 κοντινότερες περιοχές κατά την εγγραφή."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Vibe to choose a photo for your local profile.",
+          "photosPermission": "Allow spotnow to choose a photo for your local profile.",
           "cameraPermission": false,
           "microphonePermission": false
         }

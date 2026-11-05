@@ -101,7 +101,7 @@ export default function SavedScreen(){
  };
 
  return <ScrollView style={s.page} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-  <View style={s.top}><Text style={s.logo}>vibe<Text style={{color:Colors.lavender}}>✳</Text></Text><View style={s.topIcon}><Ionicons name="heart" color={Colors.rose} size={21}/></View></View>
+  <View style={s.top}><Text style={s.logo}>spot<Text style={{color:Colors.lavender}}>now✳</Text></Text><View style={s.topIcon}><Ionicons name="heart" color={Colors.rose} size={21}/></View></View>
   <Text style={s.kicker}>YOUR PERSONAL SHORTLIST</Text>
   <Text style={s.title}>Keep the <Text style={{color:Colors.violet}}>good spots.</Text></Text>
   <Text style={s.subtitle}>Όλα τα μέρη που θέλεις να θυμάσαι, σε ένα σημείο.</Text>

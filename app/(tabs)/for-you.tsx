@@ -65,7 +65,7 @@ export default function ForYouScreen(){
  };
  const render=(item:(typeof picks)[number],variant:'featured'|'portrait'|'row')=><ForYouVenueCard key={item.place.id} match={item} variant={variant} saved={savedIds.includes('google-'+item.place.id)} onPress={()=>openVenue(item.place.id)} onSave={()=>save(item.place.id)}/>;
  return <ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-  <View style={s.top}><Text style={s.brand}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text><Text style={s.topPill}>✳ JUST FOR YOU</Text></View>
+  <View style={s.top}><Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text><Text style={s.topPill}>✳ JUST FOR YOU</Text></View>
   <Text style={s.kicker}>CURATED FOR {name.toUpperCase()}</Text>
   <Text style={s.title}>Your kind of<Text style={{color:Colors.violet}}> places.</Text></Text>
   <Text style={s.sub}>Καλύτερες επιλογές, όσο μαθαίνουμε το vibe σου.</Text>

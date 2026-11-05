@@ -102,7 +102,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
   <View style={s.page}>
    <View style={s.header}>
     <View>
-     <Text style={s.brand}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text>
+     <Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text>
      <Text style={s.headerSub}>A LITTLE MORE YOU, EVERY DAY</Text>
     </View>
     <Pressable style={s.close} onPress={onClose} accessibilityRole="button" accessibilityLabel="Κλείσιμο Vibe Swipe">
@@ -198,7 +198,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
    </ScrollView>:<ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
     <Text style={s.kicker}>YOUR PERSONAL TASTE</Text>
     <Text style={s.title}>Your Vibe <Text style={{color:Colors.violet}}>DNA ✳</Text></Text>
-    <Text style={s.body}>{summary.meaningfulCount} meaningful swipes · Όσα μαθαίνει το Vibe από τις επιλογές σου.</Text>
+    <Text style={s.body}>{summary.meaningfulCount} meaningful swipes · Όσα μαθαίνει το spotnow από τις επιλογές σου.</Text>
     <LinearGradient colors={Gradients.secondary} style={s.summaryCard}>
      <View style={s.dnaIcon}><Ionicons name="finger-print-outline" size={28} color={Colors.violet}/></View>
      <View style={{flex:1}}><Text style={s.summaryTitle}>{summary.likes} likes · {summary.dislikes} passes</Text>

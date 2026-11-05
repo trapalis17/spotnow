@@ -104,7 +104,7 @@ export function getDemoPlaces(area:SearchArea):GooglePlace[]{
    tasteTags:[...venueTasteTags[i%venueTasteTags.length]],
    demoBudget:venueDemoBudgets[i%venueDemoBudgets.length],
    demoPhoto:'https://images.unsplash.com/'+photos[i%photos.length]+'?auto=format&fit=crop&w=900&q=80',
-   editorialSummary:'Αυτό είναι ένα εικονικό κατάστημα για την προεπισκόπηση του Vibe. Όλα τα χαρακτηριστικά είναι ενδεικτικά.'
+   editorialSummary:'Αυτό είναι ένα εικονικό κατάστημα για την προεπισκόπηση του spotnow. Όλα τα χαρακτηριστικά είναι ενδεικτικά.'
  }));
 }
 export function getDemoPlaceById(id:string):GooglePlace|null{

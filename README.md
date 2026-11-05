@@ -1,6 +1,6 @@
-# Vibe ✳ — Frontend UI Preview
+# spotnow ✳ — Frontend UI Preview
 
-**Vibe is an interactive, frontend-only mobile venue-discovery prototype built with Expo / React Native / Web.**
+**spotnow is an interactive, frontend-only mobile venue-discovery prototype built with Expo / React Native / Web.**
 The interface is designed for a light, editorial, Gen Z style: clear typography, restrained violet gradients, short copy and readable cards.
 
 ## Current experience

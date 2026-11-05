@@ -22,7 +22,7 @@ export default function LoginScreen(){
   }catch{setError('Δεν ολοκληρώθηκε η είσοδος. Προσπάθησε ξανά.');}finally{setBusy(false);}
  };
  return <ScrollView style={s.page} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
-  <View style={s.top}><Text style={s.brand}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text></View>
+  <View style={s.top}><Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text></View>
   <Pressable onPress={()=>router.back()} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" color={Colors.violet} size={18}/><Text style={s.backText}>Back</Text></Pressable>
   <View style={s.icon}><Ionicons name="person-outline" size={27} color={Colors.violet}/></View>
   <Text style={s.kicker}>WELCOME BACK</Text>

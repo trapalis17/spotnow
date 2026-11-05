@@ -24,11 +24,11 @@ export default function RegisterScreen(){
   catch{setError('Δεν αποθηκεύτηκε το demo προφίλ. Δοκίμασε ξανά.');}finally{setBusy(false);}
  };
  return <ScrollView style={s.page} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
-  <View style={s.top}><Text style={s.brand}>vibe<Text style={{color:Colors.violet}}>✳</Text></Text></View>
+  <View style={s.top}><Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text></View>
   <Pressable onPress={()=>router.back()} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" color={Colors.violet} size={18}/><Text style={s.backText}>Back</Text></Pressable>
   <View style={s.icon}><Ionicons name="sparkles-outline" size={28} color={Colors.violet}/></View>
-  <Text style={s.kicker}>JOIN THE VIBE</Text>
-  <Text style={s.title}>Join the<Text style={{color:Colors.violet}}> Vibe.</Text></Text>
+  <Text style={s.kicker}>JOIN SPOTNOW</Text>
+  <Text style={s.title}>Join<Text style={{color:Colors.violet}}> spotnow.</Text></Text>
   <Text style={s.sub}>Δημιούργησε πρώτα το demo προφίλ σου και μετά διάλεξε τα vibes σου.</Text>
   <Text style={s.label}>Your name</Text>
   <TextInput style={s.input} value={name} onChangeText={setName} placeholder="How should we call you?" autoCapitalize="words" placeholderTextColor={Colors.subtle}/>
