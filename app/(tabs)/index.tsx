@@ -6,7 +6,7 @@ import {LinearGradient} from 'expo-linear-gradient';
 import {GooglePlacesResults} from '../../components/GooglePlacesResults';
 import {DiscoverAreaPicker} from '../../components/DiscoverAreaPicker';
 import {TasteConceptModal} from '../../components/TasteConceptModal';
-import {getTasteFeedback} from '../../lib/storage';
+import {getDailyVenueSwipeState} from '../../lib/storage';
 import {Colors,Gradients,Spacing,Radius,Type} from '../../constants/theme';
 import {useSearchArea} from '../../hooks/useSearchArea';
 
@@ -24,7 +24,7 @@ export default function DiscoverScreen(){
  const [tasteOpen,setTasteOpen]=useState(false);
  const [tasteView,setTasteView]=useState<'cards'|'dna'>('cards');
  const [tasteCount,setTasteCount]=useState(0);
- const refreshTaste=()=>getTasteFeedback().then(x=>setTasteCount(Object.keys(x).length)).catch(()=>undefined);
+ const refreshTaste=()=>getDailyVenueSwipeState().then(x=>setTasteCount(Object.keys(x.votes).length)).catch(()=>undefined);
  useFocusEffect(useCallback(()=>{refreshTaste();},[]));
  const openTaste=(view:'cards'|'dna')=>{setTasteView(view);setTasteOpen(true);};
  return <ScrollView style={s.page} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -40,7 +40,7 @@ export default function DiscoverScreen(){
        <Text style={s.swipeEyebrow}>VIBE SWIPE</Text><Text style={s.swipeCounter}>{tasteCount} rated</Text>
      </View>
      <Text style={s.swipeTitle}>Κάθε swipe,<Text style={{color:Colors.violet}}> πιο εσύ.</Text></Text>
-     <Text style={s.swipeDescription}>8 πραγματικά μαγαζιά. Πες μας τι σου αρέσει.</Text>
+     <Text style={s.swipeDescription}>8 προτεινόμενα spots για σένα. Τα likes πάνε στα Top Swipes.</Text>
      <View style={s.swipeBottom}>
        <Pressable onPress={()=>openTaste('cards')} accessibilityRole="button" style={s.swipeCTA}><LinearGradient colors={Gradients.primary} start={{x:0,y:0}} end={{x:1,y:1}} style={s.swipeCTAInner}><Text style={s.swipeCTAText}>Start swiping</Text><Ionicons name="arrow-forward" size={17} color="#fff"/></LinearGradient></Pressable>
        <Pressable onPress={()=>openTaste('dna')} accessibilityRole="button" style={s.dnaCTA}><Text style={s.dnaText}>My DNA</Text><Ionicons name="finger-print-outline" size={17} color={Colors.violet}/></Pressable>

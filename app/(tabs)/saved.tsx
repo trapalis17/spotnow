@@ -8,6 +8,7 @@ import {getSavedVenueIds,toggleSavedVenue,getCollections,saveCollections,type Sa
 import {trackDemoEvent} from '../../lib/demo-analytics';
 import {getDemoPlaceById} from '../../lib/demo-places';
 import type {GooglePlace} from '../../lib/google-places';
+import {isTopSwipesCollection} from '../../lib/top-swipes';
 
 const categoryIcon={
  cafe:'cafe-outline' as const,bar:'wine-outline' as const,restaurant:'restaurant-outline' as const
@@ -126,22 +127,25 @@ export default function SavedScreen(){
     <Text style={[s.collectionCount,!active&&s.activeCount]}>{all.length} spots</Text>
    </Pressable>
    {collections.map(c=>{
-    const cover=coverFor(c),selected=active===c.id;
+    const cover=coverFor(c),selected=active===c.id,topSwipes=isTopSwipesCollection(c);
     return <View key={c.id} style={[s.collectionTile,selected&&s.activeCollection]}>
      {cover?<Image source={{uri:cover}} style={StyleSheet.absoluteFill} resizeMode="cover" accessibilityLabel="Ενδεικτική φωτογραφία συλλογής"/>:<LinearGradient colors={selected?Gradients.primary:Gradients.secondary} style={StyleSheet.absoluteFill}/>}
      {cover?<LinearGradient colors={['rgba(37,27,70,.18)','rgba(37,27,70,.78)']} style={StyleSheet.absoluteFill}/>:null}
      <Pressable style={s.collectionTap} onPress={()=>setActive(c.id)} accessibilityRole="button" accessibilityState={{selected}} accessibilityLabel={'Άνοιγμα '+c.name}>
       <View style={[s.collectionIcon,(cover||selected)&&s.activeIcon]}><Ionicons name="albums-outline" size={19} color={cover||selected?'#fff':Colors.violet}/></View>
       <Text numberOfLines={1} style={[s.collectionName,(cover||selected)&&s.activeText]}>{c.name}</Text>
-      <Text style={[s.collectionCount,(cover||selected)&&s.activeCount]}>{c.venueIds.length} spots</Text>
+      <Text style={[s.collectionCount,(cover||selected)&&s.activeCount]}>{c.venueIds.filter(id=>ids.includes(id)).length} spots</Text>
      </Pressable>
      <View style={s.collectionActions}>
-      <Pressable accessibilityRole="button" accessibilityLabel={'Μετονομασία '+c.name} onPress={()=>{setEditing(c.id);setRename(c.name);}}>
-       <Ionicons name="pencil-outline" size={16} color={cover||selected?'#fff':Colors.muted}/>
-      </Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel={'Διαγραφή '+c.name} onPress={()=>removeCollection(c.id,c.name)}>
-       <Ionicons name="trash-outline" size={16} color={cover||selected?'#fff':Colors.muted}/>
-      </Pressable>
+      {topSwipes?<Ionicons name="sparkles-outline" size={17} color={cover||selected?'#fff':Colors.violet}/>:
+      <>
+       <Pressable accessibilityRole="button" accessibilityLabel={'Μετονομασία '+c.name} onPress={()=>{setEditing(c.id);setRename(c.name);}}>
+        <Ionicons name="pencil-outline" size={16} color={cover||selected?'#fff':Colors.muted}/>
+       </Pressable>
+       <Pressable accessibilityRole="button" accessibilityLabel={'Διαγραφή '+c.name} onPress={()=>removeCollection(c.id,c.name)}>
+        <Ionicons name="trash-outline" size={16} color={cover||selected?'#fff':Colors.muted}/>
+       </Pressable>
+      </>}
      </View>
     </View>;
    })}

@@ -9,6 +9,7 @@ import {getDemoEvents,trackDemoEvent,type DemoEvent} from '../../lib/demo-analyt
 import {getDemoPlaces} from '../../lib/demo-places';
 import {getForYouMatches,filterForYouMatches,curateForYouSections,type ForYouCategory} from '../../lib/for-you';
 import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
+import {getDailyVenueDnaSummary} from '../../lib/daily-venue-swipe';
 import {predictNextVenue} from '../../lib/predictive-mood';
 import {DEFAULT_AREA,getSelectedArea,type SearchArea} from '../../lib/places';
 import {defaultPreferences,getTasteFeedback,getPreferences,getSavedVenueIds,getUser,toggleSavedVenue,getVisitFeedback,getDailyVenueSwipeState,type VisitFeedback} from '../../lib/storage';
@@ -49,7 +50,7 @@ export default function ForYouScreen(){
   [localNow,matches,preferences,taste,savedIds,visits,venueVotes,events]);
  const filteredPicks=useMemo(()=>filterForYouMatches(matches,category,budgetOnly,onlyMyAreas),[matches,category,budgetOnly,onlyMyAreas]);
  const picks=filteredPicks;
- const dna=useMemo(()=>getDnaSummary(taste),[taste]);
+ const dna=useMemo(()=>Object.keys(venueVotes).length?getDailyVenueDnaSummary(venueVotes):getDnaSummary(taste),[venueVotes,taste]);
  const sections=useMemo(()=>curateForYouSections(picks),[picks]);
  const {topPick:featured,perfect,hiddenGems,tryDifferent,more}=sections;
  const name=user?.name?.trim().split(' ')[0]||'you';

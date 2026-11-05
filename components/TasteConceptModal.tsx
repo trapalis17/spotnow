@@ -1,85 +1,105 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Animated,Image,Modal,PanResponder,Pressable,ScrollView,StyleSheet,Text,View} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {trackDemoEvent} from '../lib/demo-analytics';
-import {getPendingTasteCards,getDnaSummary,type TasteFeedback,type TasteDecision} from '../lib/vibe-dna';
-import {getTasteFeedback,saveTasteFeedback,clearTasteFeedback} from '../lib/storage';
+import {getDemoPlaces,getDemoPlaceById} from '../lib/demo-places';
+import {getSelectedArea,type SearchArea,DEFAULT_AREA} from '../lib/places';
+import {getPreferences,getDailyVenueSwipeState,saveDailyVenueSwipeState,
+ getTasteFeedback,getSavedVenueIds,getVisitFeedback,saveTopSwipeVenue} from '../lib/storage';
+import {ensureDailyVenueBatch,recordDailyVenueVote,resetDailyVenueDNA,
+ getDailyVenueDnaSummary,remainingDailyMs,DAILY_SWIPE_LIMIT,
+ type DailyVenueSwipeState} from '../lib/daily-venue-swipe';
+import {rankSwipeRecommendations,explainSwipeRecommendation} from '../lib/swipe-recommendations';
+import {defaultPreferences} from '../lib/storage';
+import type {TasteDecision,TasteFeedback} from '../lib/vibe-dna';
+import type {UserPreferences} from '../types';
 import {Colors,Gradients,Radius} from '../constants/theme';
 
-const DAY=86400000;
-const KEY='vibe:concept-session:v1';
-type Session={startedAt:number;count:number};
-
 /**
- * Editorial photo-led taste discovery. All stock photos are illustrative only:
- * the names belong to existing venues, but the media is not a verified venue photo.
- * This remains a frontend-only, locally persisted prototype.
+ * The Discover swipe deck now shares its fictional demo venues with For You and Saved.
+ * Every daily batch is ranked locally by onboarding, taste and prior venue votes.
  */
 export function TasteConceptModal({visible,onClose,initialView='cards'}:{
  visible:boolean;onClose:()=>void;initialView?:'cards'|'dna';
 }){
- const [feedback,setFeedback]=useState<TasteFeedback>({});
- const [session,setSession]=useState<Session>({startedAt:0,count:0});
+ const [deck,setDeck]=useState<DailyVenueSwipeState|null>(null);
+ const [preferences,setPreferences]=useState<UserPreferences>(defaultPreferences);
+ const [area,setArea]=useState<SearchArea>(DEFAULT_AREA);
+ const [taste,setTaste]=useState<TasteFeedback>({});
  const [view,setView]=useState<'cards'|'dna'>('cards');
  const [ready,setReady]=useState(false);
+ const [error,setError]=useState('');
  const [photoFailed,setPhotoFailed]=useState(false);
+ const [clock,setClock]=useState(Date.now());
  const drag=useRef(new Animated.ValueXY()).current;
  const animating=useRef(false);
 
  useEffect(()=>{
   if(!visible)return;
-  let active=true;setView(initialView);setReady(false);setPhotoFailed(false);
-  drag.setValue({x:0,y:0});
-  animating.current=false;
-  Promise.all([getTasteFeedback(),AsyncStorage.getItem(KEY)])
-   .then(([votes,raw])=>{
-    if(!active)return;
-    let prev:Session={startedAt:0,count:0};
-    try{
-     if(raw){
-      const parsed=JSON.parse(raw) as Session;
-      if(Number.isFinite(parsed.startedAt)&&Number.isFinite(parsed.count))prev=parsed;
-     }
-    }catch{}
-    setSession(prev.startedAt>0&&Date.now()-prev.startedAt<DAY?prev:{startedAt:0,count:0});
-    setFeedback(votes);setReady(true);
-   }).catch(()=>{if(active)setReady(true);});
-  return ()=>{active=false;};
+  let alive=true;setView(initialView);setReady(false);setPhotoFailed(false);setError('');
+  drag.setValue({x:0,y:0});animating.current=false;setClock(Date.now());
+  const timer=setInterval(()=>setClock(Date.now()),30000);
+  void Promise.all([getDailyVenueSwipeState(),getPreferences(),getSelectedArea(),
+   getTasteFeedback(),getSavedVenueIds(),getVisitFeedback()])
+   .then(async ([existing,prefs,currentArea,tasteVotes,saved,visits])=>{
+    const ranked=rankSwipeRecommendations(getDemoPlaces(currentArea),prefs,currentArea,
+      tasteVotes,existing.votes,saved,visits);
+    const next=ensureDailyVenueBatch(existing,currentArea,Date.now(),ranked.map(item=>item.place.id));
+    if(JSON.stringify(existing)!==JSON.stringify(next))await saveDailyVenueSwipeState(next);
+    if(!alive)return;
+    setDeck(next);setPreferences(prefs);setArea(currentArea);setTaste(tasteVotes);setReady(true);
+   }).catch(()=>{if(alive){setError('Δεν φορτώθηκαν οι προτάσεις. Δοκίμασε ξανά.');setReady(true);}});
+  return ()=>{alive=false;clearInterval(timer);};
  },[visible,initialView,drag]);
 
- const pending=useMemo(()=>getPendingTasteCards(feedback),[feedback]);
- const summary=useMemo(()=>getDnaSummary(feedback),[feedback]);
- const inWindow=session.startedAt>0&&Date.now()-session.startedAt<DAY;
- const remaining=inWindow?Math.max(0,8-session.count):8;
- const current=remaining>0?pending[0]:undefined;
- const locationParts=current?.subtitle.split('·').map(x=>x.trim())??[];
- const location=locationParts[0]||'Αθήνα';
- const venueKind=locationParts.slice(1).join(' · ')||'Athens spot';
+ const summary=useMemo(()=>getDailyVenueDnaSummary(deck?.votes??{}),[deck?.votes]);
+ const reviewed=Object.keys(deck?.batchVotes??{}).length;
+ const remaining=Math.max(0,DAILY_SWIPE_LIMIT-reviewed);
+ const activeId=deck?.batchIds.find(id=>!(id in deck.batchVotes));
+ const place=activeId?getDemoPlaceById(activeId):null;
+ const current=place?{
+  id:place.id,title:place.name,
+  subtitle:place.address??'Εικονικό κατάστημα',image:place.demoPhoto??'',
+  tags:place.tasteTags??[],
+  colors:(place.category==='cafe'?['#A06D56','#D6B4A3']:
+    place.category==='bar'?['#78564A','#AC7564']:['#88A8A0','#D0A99A']) as readonly [string,string],
+  reason:explainSwipeRecommendation(place,preferences,area,taste,deck?.votes??{}),
+  category:place.category==='cafe'?'Coffee':place.category==='bar'?'Drinks':'Food'
+ }:null;
+ const location=current?.subtitle.split('·').pop()?.trim()??area.label;
+ const hoursLeft=deck?remainingDailyMs(deck,clock):0;
+ const nextHours=hoursLeft>0?Math.ceil(hoursLeft/3600000)+' ώρες':'λίγο';
+ const deckRef=useRef(deck);deckRef.current=deck;
+ const activeRef=useRef(current);activeRef.current=current;
 
  useEffect(()=>setPhotoFailed(false),[current?.id]);
 
- const vote=(decision:TasteDecision)=>{
-  if(!current)return;
-  const next={...feedback,[current.id]:decision};
-  const nextSession:Session=inWindow?{...session,count:session.count+1}:{startedAt:Date.now(),count:1};
-  setFeedback(next);setSession(nextSession);
-  saveTasteFeedback(next).catch(()=>undefined);
-  AsyncStorage.setItem(KEY,JSON.stringify(nextSession)).catch(()=>undefined);
-  trackDemoEvent('vibe_card_'+(decision==='like'?'liked':decision==='dislike'?'disliked':'skipped'),current.id);
+ const vote=async(decision:TasteDecision):Promise<void>=>{
+  const snapshot=deckRef.current;
+  const active=activeRef.current;
+  if(!snapshot||!active||snapshot.batchVotes[active.id])return;
+  const next=recordDailyVenueVote(snapshot,active.id,decision);
+  try{
+   // Do not advance the card until Top Swipes has actually been written.
+   if(decision==='like')await saveTopSwipeVenue('google-'+active.id);
+   await saveDailyVenueSwipeState(next);
+   deckRef.current=next;
+   setDeck(next);setError('');
+   trackDemoEvent('recommended_swipe_'+(decision==='like'?'liked':
+    decision==='dislike'?'disliked':'skipped'),active.id);
+  }catch{setError('Δεν αποθηκεύτηκε το swipe. Έλεγξε τον χώρο αποθήκευσης και δοκίμασε ξανά.');}
  };
  const voteRef=useRef(vote);voteRef.current=vote;
-
  const choose=(decision:TasteDecision)=>{
-  if(!current||animating.current)return;
+  if(!activeRef.current||animating.current)return;
   animating.current=true;
   const x=decision==='like'?430:decision==='dislike'?-430:0;
   Animated.timing(drag,{toValue:{x,y:0},duration:decision==='skip'?130:190,useNativeDriver:false})
-   .start(()=>{
+   .start(({finished})=>{
     drag.setValue({x:0,y:0});
-    voteRef.current(decision);
-    animating.current=false;
+    if(!finished){animating.current=false;return;}
+    void voteRef.current(decision).finally(()=>{animating.current=false;});
    });
  };
  const chooseRef=useRef(choose);chooseRef.current=choose;
@@ -94,16 +114,20 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
   onPanResponderTerminate:()=>Animated.spring(drag,{toValue:{x:0,y:0},friction:7,useNativeDriver:false}).start(),
  }),[drag]);
 
- const reset=()=>{setFeedback({});clearTasteFeedback().catch(()=>undefined);};
+ const reset=async()=>{
+  if(!deck||animating.current)return;
+  try{const next=resetDailyVenueDNA(deck);await saveDailyVenueSwipeState(next);setDeck(next);}
+  catch{setError('Δεν έγινε επαναφορά του Vibe DNA.');}
+ };
  const rotate=drag.x.interpolate({inputRange:[-260,0,260],outputRange:['-9deg','0deg','9deg'],extrapolate:'clamp'});
- const progress=Math.round(100*(8-remaining)/8);
+ const progress=Math.round(100*reviewed/DAILY_SWIPE_LIMIT);
 
  return <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
   <View style={s.page}>
    <View style={s.header}>
     <View>
      <Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text>
-     <Text style={s.headerSub}>A LITTLE MORE YOU, EVERY DAY</Text>
+     <Text style={s.headerSub}>PERSONALIZED SPOTS, JUST FOR YOU</Text>
     </View>
     <Pressable style={s.close} onPress={onClose} accessibilityRole="button" accessibilityLabel="Κλείσιμο Vibe Swipe">
      <Ionicons name="close" size={23} color={Colors.text}/>
@@ -112,7 +136,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
    <View style={s.tabs}>
     <Pressable onPress={()=>setView('cards')} style={[s.tab,view==='cards'&&s.tabOn]}
      accessibilityRole="button" accessibilityState={{selected:view==='cards'}}>
-     <Text style={[s.tabText,view==='cards'&&s.tabTextOn]}>Discover your taste</Text>
+     <Text style={[s.tabText,view==='cards'&&s.tabTextOn]}>For your taste</Text>
     </Pressable>
     <Pressable onPress={()=>setView('dna')} style={[s.tab,view==='dna'&&s.tabOn]}
      accessibilityRole="button" accessibilityState={{selected:view==='dna'}}>
@@ -120,46 +144,54 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
     </Pressable>
    </View>
 
-   {!ready?<View style={s.loading}><Text style={s.body}>Loading your vibe…</Text></View>
+   {!ready?<View style={s.loading}><Text style={s.body}>Finding your spots…</Text></View>
+   :error&&!deck?<View style={s.loading}><Text style={s.body}>{error}</Text></View>
    :view==='cards'?<ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-    <View style={s.topLine}><Text style={s.kicker}>TODAY'S EDITION</Text>
-     <Text style={s.count}>{8-remaining}<Text style={{color:Colors.subtle}}> / 8 spots</Text></Text>
+    <View style={s.topLine}><Text style={s.kicker}>CURATED FOR YOU</Text>
+     <Text style={s.count}>{reviewed}<Text style={{color:Colors.subtle}}> / 8 spots</Text></Text>
     </View>
-    <View style={s.progress}><LinearGradient colors={Gradients.primary} start={{x:0,y:0}} end={{x:1,y:0}} style={[s.progressFill,{width:progress+'%'}]}/></View>
+    <View style={s.progress}><LinearGradient colors={Gradients.primary} start={{x:0,y:0}}
+     end={{x:1,y:0}} style={[s.progressFill,{width:progress+'%'}]}/></View>
     <View style={s.intro}>
-     <Text style={s.title}>Is this <Text style={{color:Colors.violet}}>your vibe?</Text></Text>
-     <Text style={s.body}>Μια ματιά αρκεί. Κράτα ό,τι σου ταιριάζει.</Text>
+     <Text style={s.title}>Spots that <Text style={{color:Colors.violet}}>get you.</Text></Text>
+     <Text style={s.body}>8 προσωπικές προτάσεις. Swipe right για αποθήκευση στα Top Swipes.</Text>
     </View>
+    {error?<Text style={s.errorText}>{error}</Text>:null}
 
     {current?<View>
      <Animated.View style={[s.card,{transform:[{translateX:drag.x},{translateY:drag.y},{rotate}]}]} {...pan.panHandlers}>
       <View style={s.venueImage}>
        <LinearGradient colors={[current.colors[0],current.colors[1]]}
         style={StyleSheet.absoluteFill} start={{x:0,y:0}} end={{x:1,y:1}}/>
-       {!photoFailed?<Image source={{uri:current.image}} style={StyleSheet.absoluteFill}
+       {!photoFailed&&current.image?<Image source={{uri:current.image}} style={StyleSheet.absoluteFill}
         resizeMode="cover" onError={()=>setPhotoFailed(true)}
         accessibilityLabel="Ενδεικτική φωτογραφία ατμόσφαιρας, όχι του συγκεκριμένου καταστήματος"/>:null}
        <LinearGradient colors={['rgba(35,27,79,.22)','rgba(35,27,79,.08)','rgba(27,19,58,.85)']}
         locations={[0,.34,1]} style={StyleSheet.absoluteFill}/>
        <View style={s.imageTop}>
         <View style={s.editionPill}><Ionicons name="sparkles-outline" size={13} color={Colors.text}/>
-         <Text style={s.editionText}>ATHENS EDITION</Text></View>
-        <View style={s.indexPill}><Text style={s.indexText}>{String(9-remaining).padStart(2,'0')}</Text></View>
+         <Text style={s.editionText}>PICKED FOR YOU</Text></View>
+        <View style={s.indexPill}><Text style={s.indexText}>{String(reviewed+1).padStart(2,'0')}</Text></View>
        </View>
        <View style={s.imageBottom}>
-        <View style={s.photoCategory}><Text style={s.photoCategoryText}>{venueKind}</Text></View>
+        <View style={s.photoCategory}><Text style={s.photoCategoryText}>{current.category}</Text></View>
         <Text style={s.venueName} numberOfLines={2}>{current.title}</Text>
         <View style={s.locationRow}><Ionicons name="location-outline" size={14} color="#fff"/>
          <Text style={s.locationText}>{location}</Text></View>
-        <Text style={s.photoCredit}>Ενδεικτική φωτογραφία · Όχι του συγκεκριμένου μαγαζιού</Text>
+        <Text style={s.photoCredit}>Εικονικό demo spot · Ενδεικτική φωτογραφία</Text>
        </View>
       </View>
       <View style={s.cardBody}>
-       <View style={s.cardBodyTop}><Text style={s.cardLabel}>THE VIBE</Text><Text style={s.cardHint}>Swipe left or right</Text></View>
+       <View style={s.cardBodyTop}><Text style={s.cardLabel}>YOUR MATCH</Text><Text style={s.cardHint}>Swipe left or right</Text></View>
        <View style={s.tagRow}>
         {current.tags.slice(0,3).map(tag=><View key={tag} style={s.tagPill}>
          <Text style={s.tagText}>{tag.replace(/-/g,' ')}</Text>
         </View>)}
+       </View>
+       <View style={s.whyBox}>
+        <Ionicons name="sparkles-outline" size={19} color={Colors.violet}/>
+        <View style={{flex:1}}><Text style={s.whyKicker}>WHY THIS SPOT</Text>
+         <Text style={s.whyText}>{current.reason}</Text></View>
        </View>
       </View>
      </Animated.View>
@@ -174,27 +206,27 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
        <View style={[s.decisionCircle,s.skipCircle]}><Ionicons name="play-skip-forward-outline" color={Colors.muted} size={22}/></View>
        <Text style={s.actionText}>Skip</Text>
       </Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel="Μου αρέσει"
+      <Pressable accessibilityRole="button" accessibilityLabel="Μου αρέσει · Αποθήκευση στο Top Swipes"
        onPress={()=>choose('like')} style={s.decision}>
        <LinearGradient colors={Gradients.vibe} style={[s.decisionCircle,s.likeCircle]}>
         <Ionicons name="heart" color="#fff" size={27}/>
        </LinearGradient>
-       <Text style={[s.actionText,s.likeText]}>My vibe</Text>
+       <Text style={[s.actionText,s.likeText]}>Save to Top Swipes</Text>
       </Pressable>
      </View>
-     <Text style={s.hint}><Ionicons name="arrow-back" size={13} color={Colors.muted}/>  Pass  ·  Swipe  ·  Like  <Ionicons name="arrow-forward" size={13} color={Colors.muted}/></Text>
+     <Text style={s.hint}><Ionicons name="arrow-back" size={13} color={Colors.muted}/>  Pass  ·  Swipe  ·  Save  <Ionicons name="arrow-forward" size={13} color={Colors.muted}/></Text>
     </View>:<View style={s.complete}>
      <View style={s.completeIcon}><Ionicons name="sparkles" size={30} color={Colors.violet}/></View>
-     <Text style={s.completeTitle}>Your vibe is evolving.</Text>
+     <Text style={s.completeTitle}>{reviewed>=DAILY_SWIPE_LIMIT?'8/8 for today ✳':'More spots coming soon'}</Text>
      <Text style={[s.body,{textAlign:'center'}]}>
-      {pending.length?'Ολοκλήρωσες τα 8 σημερινά spots. Νέες επιλογές στο επόμενο 24ωρο.':'Έχεις δει όλα τα διαθέσιμα μαγαζιά αυτού του demo.'}
+      {'Νέες προτάσεις σε περίπου '+nextHours+'. Όσα έκανες like βρίσκονται στα Saved → Top Swipes.'}
      </Text>
      <Pressable onPress={()=>setView('dna')} style={s.completeButton} accessibilityRole="button">
       <Text style={s.completeButtonText}>Explore my Vibe DNA</Text>
       <Ionicons name="arrow-forward" color="#fff" size={17}/>
      </Pressable>
     </View>}
-    <Text style={s.disclaimer}>Πραγματικά ονόματα · Ενδεικτικές φωτογραφίες · Δεν υπάρχουν live στοιχεία ή κρατήσεις</Text>
+    <Text style={s.disclaimer}>Εξατομίκευση από προτιμήσεις και swipes · Εικονικά demo spots, όχι πραγματικές καταχωρίσεις</Text>
    </ScrollView>:<ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
     <Text style={s.kicker}>YOUR PERSONAL TASTE</Text>
     <Text style={s.title}>Your Vibe <Text style={{color:Colors.violet}}>DNA ✳</Text></Text>
@@ -214,10 +246,11 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
       <Text style={s.dnaLabel}>{x.label}</Text>
       <Ionicons name="remove-circle-outline" size={17} color={Colors.muted}/>
      </View>):<Text style={s.body}>No dislikes yet.</Text>}
-    <Pressable style={s.reset} onPress={reset} accessibilityRole="button">
+    <Pressable style={s.reset} onPress={()=>{void reset();}} accessibilityRole="button">
      <Text style={s.resetText}>Reset learned preferences</Text>
     </Pressable>
-    <Text style={s.disclaimer}>Taste preferences only · Not a psychological assessment. Reset δεν επαναφέρει τα σημερινά 8 swipes.</Text>
+    {error?<Text style={s.errorText}>{error}</Text>:null}
+    <Text style={s.disclaimer}>Taste preferences only · Όχι ψυχολογική αξιολόγηση. Το reset δεν αλλάζει το όριο των 8 swipes.</Text>
    </ScrollView>}
   </View>
  </Modal>;
@@ -263,6 +296,11 @@ const s=StyleSheet.create({
  locationText:{color:'#fff',fontSize:13,fontWeight:'700'},
  photoCredit:{marginTop:18,color:'rgba(255,255,255,.84)',fontSize:10,fontWeight:'700'},
  cardBody:{paddingHorizontal:16,paddingTop:13,paddingBottom:16},
+ whyBox:{marginTop:14,padding:13,borderRadius:16,backgroundColor:'#F3EEFF',
+  flexDirection:'row',alignItems:'flex-start',gap:10},
+ whyKicker:{fontSize:10,fontWeight:'900',letterSpacing:.8,color:Colors.violet,marginBottom:4},
+ whyText:{fontSize:12,fontWeight:'700',color:Colors.text,lineHeight:18},
+ errorText:{fontSize:12,color:Colors.danger,marginTop:13,lineHeight:18},
  cardBodyTop:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',gap:8},
  cardLabel:{fontSize:10,color:Colors.violet,fontWeight:'900',letterSpacing:1.25},
  cardHint:{fontSize:10,color:Colors.muted,fontWeight:'700'},

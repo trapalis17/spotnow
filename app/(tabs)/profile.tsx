@@ -11,11 +11,12 @@ import {ProfilePictureSheet} from '../../components/ProfilePictureSheet';
 import {defaultProfilePicture,getProfilePicture,saveProfilePicture,resetProfilePicture,photoFromBase64,type ProfilePicture,type VibeAvatarId} from '../../lib/profile-picture';
 import {
  clearUser,getPreferences,getUser,getTasteFeedback,clearTasteFeedback,
- getSavedVenueIds,getCollections,getDailyVenueSwipeState,getVisitFeedback
+ getSavedVenueIds,getCollections,getDailyVenueSwipeState,getVisitFeedback,saveDailyVenueSwipeState
 } from '../../lib/storage';
 import {getDemoPlaceById} from '../../lib/demo-places';
 import {getDnaSummary,type TasteFeedback} from '../../lib/vibe-dna';
 import {getVibeIdentity} from '../../lib/vibe-identity';
+import {getDailyVenueDnaSummary,resetDailyVenueDNA} from '../../lib/daily-venue-swipe';
 import {getDemoEvents,type DemoEvent} from '../../lib/demo-analytics';
 import type {VisitFeedback} from '../../lib/storage';
 import type {UserPreferences,UserProfile} from '../../types';
@@ -61,14 +62,17 @@ export default function ProfileScreen(){
   return ()=>{alive=false;};
  },[]));
 
- const dna=getDnaSummary(taste);
+ const dna=Object.keys(venueVotes).length?getDailyVenueDnaSummary(venueVotes):getDnaSummary(taste);
  const vibeType=getVibeIdentity(prefs,taste,venueVotes,savedIds,visits,events);
  const display=user?.name?.trim()||'Spotnow member';
  const budget=prefs?.budget?prefs.budget>=60?'60€+':prefs.budget+'€':'—';
  const edit=()=>router.push({pathname:'/onboarding',params:{mode:'edit',from:'profile'}});
  const reset=()=>Alert.alert('Reset Vibe DNA?','Θα διαγραφούν οι επιλογές γούστου που έχεις κάνει. Το ημερήσιο όριο των 8 swipes δεν μηδενίζεται.',[
   {text:'Cancel',style:'cancel'},
-  {text:'Reset',style:'destructive',onPress:()=>clearTasteFeedback().then(()=>setTaste({})).catch(()=>setError('Δεν έγινε επαναφορά του Vibe DNA.'))}
+  {text:'Reset',style:'destructive',onPress:()=>Promise.all([
+  clearTasteFeedback(),
+  getDailyVenueSwipeState().then(deck=>saveDailyVenueSwipeState(resetDailyVenueDNA(deck)))
+ ]).then(()=>{setTaste({});setVenueVotes({});}).catch(()=>setError('Δεν έγινε επαναφορά του Vibe DNA.'))}
  ]);
  const chooseAvatar=async(id:VibeAvatarId)=>{
   if(!user||pictureBusy)return;

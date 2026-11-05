@@ -44,26 +44,26 @@ export function remainingDailyMs(state:DailyVenueSwipeState,now:number):number{
  return Math.max(0,state.startedAt+DAILY_SWIPE_INTERVAL_MS-now);
 }
 /** A period starts with the first opened deck, not at midnight. Opening the app does not consume the daily quota. */
-export function ensureDailyVenueBatch(stateInput:DailyVenueSwipeState,area:SearchArea,now:number):DailyVenueSwipeState{
+export function ensureDailyVenueBatch(stateInput:DailyVenueSwipeState,area:SearchArea,now:number,recommendedIds:readonly string[]=[]):DailyVenueSwipeState{
  const state=normalizeDailyVenueSwipeState(stateInput);
  if(state.batchIds.length===DAILY_SWIPE_LIMIT&&remainingDailyMs(state,now)>0)return state;
  // Only rotate at first open or AFTER the last 24-hour period elapsed.
  const places=getDemoPlaces(area);
+ const priorities=new Map(recommendedIds.map((id,i)=>[id,i]));
+ const ranked=[...places].sort((a,b)=>
+  (priorities.get(a.id)??Number.MAX_SAFE_INTEGER)-
+  (priorities.get(b.id)??Number.MAX_SAFE_INTEGER)||
+  a.id.localeCompare(b.id));
  const seen=new Set(state.seenIds);
- let unseen=places.filter(place=>!seen.has(place.id));
+ // Avoid spots already disliked. The finite demo pool is reset only after
+ // eight fresh candidates can no longer be found.
+ const eligible=ranked.filter(place=>state.votes[place.id]!=='dislike');
+ let unseen=eligible.filter(place=>!seen.has(place.id));
  if(unseen.length<DAILY_SWIPE_LIMIT){
-  // The finite 40-shop demo pool is exhausted; restart its presentation cycle.
   seen.clear();
-  unseen=[...places];
+  unseen=eligible.length>=DAILY_SWIPE_LIMIT?eligible:ranked;
  }
- // A deterministic varied order, stable once persisted; no network or daily random request.
- const order=[...unseen].sort((a,b)=>{
-  const ai=Number(a.id.split('_')[1]),bi=Number(b.id.split('_')[1]);
-  const ashift=(ai*17+state.cycle*13)%places.length;
-  const bshift=(bi*17+state.cycle*13)%places.length;
-  return ashift-bshift;
- });
- const picked=order.slice(0,DAILY_SWIPE_LIMIT).map(place=>place.id);
+ const picked=unseen.slice(0,DAILY_SWIPE_LIMIT).map(place=>place.id);
  const nextSeen=[...seen,...picked];
  return {
   ...state,

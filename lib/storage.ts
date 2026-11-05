@@ -6,6 +6,7 @@ import {sanitizeTasteFeedback} from './vibe-dna';
 import type {TasteFeedback} from './vibe-dna';
 import {normalizeDailyVenueSwipeState} from './daily-venue-swipe';
 import type {DailyVenueSwipeState} from './daily-venue-swipe';
+import {mergeTopSwipesCollection} from './top-swipes';
 
 const USER_KEY = 'vibe:user';
 const DEMO_ACCOUNT_KEY = 'vibe:demo-account';
@@ -19,6 +20,7 @@ let venueDeckQueue:Promise<void>=Promise.resolve();
 let tasteWriteQueue:Promise<void>=Promise.resolve();
 let swipeWriteQueue: Promise<void> = Promise.resolve();
 let savedWriteQueue: Promise<void> = Promise.resolve();
+let collectionWriteQueue:Promise<void>=Promise.resolve();
 
 export const defaultPreferences: UserPreferences = {
   moods: ['cozy', 'creative'],
@@ -187,8 +189,31 @@ export async function getCollections():Promise<SavedCollection[]>{
   return Array.isArray(parsed)?parsed.filter((c:any)=>typeof c.id==='string'&&typeof c.name==='string'&&Array.isArray(c.venueIds)):[];
  }catch{return [];}
 }
-export async function saveCollections(collections:SavedCollection[]):Promise<void>{
- await AsyncStorage.setItem(COLLECTIONS_KEY,JSON.stringify(collections));
+export function saveCollections(collections:SavedCollection[]):Promise<void>{
+ const serialized=JSON.stringify(collections);
+ collectionWriteQueue=collectionWriteQueue.catch(()=>undefined).then(()=>
+  AsyncStorage.setItem(COLLECTIONS_KEY,serialized));
+ return collectionWriteQueue;
+}
+
+/**
+ * Atomically enqueues an idempotent right-swipe add. Save the spot first,
+ * then upsert Top Swipes, using the existing local Saved collections.
+ */
+export async function saveTopSwipeVenue(id:string):Promise<void>{
+ if(!id.startsWith('google-')||!isGooglePlaceId(id.slice(7))||!id.slice(7).startsWith('demo_'))
+  throw new Error('Expected a fictional demo venue ID.');
+ const job=savedWriteQueue.catch(()=>undefined).then(async()=>{
+  const saved=await getSavedVenueIds();
+  if(!saved.includes(id))await AsyncStorage.setItem(SAVED_KEY,JSON.stringify([...saved,id]));
+  // Wait for prior manual collection edits to settle before merging.
+  await collectionWriteQueue.catch(()=>undefined);
+  const existing=await getCollections();
+  const merged=mergeTopSwipesCollection(existing,id);
+  await saveCollections(merged);
+ });
+ savedWriteQueue=job;
+ await job;
 }
 export type VisitFeedback='yes'|'kind-of'|'no';
 const VISIT_FEEDBACK_KEY='vibe:visit-feedback:v1';
