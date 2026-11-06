@@ -9,14 +9,13 @@ import type {VisitFeedback} from './storage';
 
 export type RecommendedSwipe={place:GooglePlace;reason:string;score:number};
 
-type PersonalSignal={label:string;tags:readonly TasteTag[];selected:boolean};
+type PersonalSignal={label:string;tags:readonly TasteTag[]};
 /**
  * Only claim that a user has chosen a preference when that explicit option is
  * present in their profile AND it matches an actual venue tag. Never infer
  * a preference just because the venue has that feature.
  */
-const PREFERENCE_SIGNALS:readonly {field:keyof Pick<UserPreferences,
- 'moods'|'outings'|'atmosphere'|'music'|'social'|'timeSlots'>;
+const PREFERENCE_SIGNALS:readonly {field:keyof Pick<UserPreferences,'moods'|'outings'>;
  value:string;label:string;tags:readonly TasteTag[]}[]=[
  {field:'moods',value:'cozy',label:'cozy ατμόσφαιρα',tags:['cozy']},
  {field:'moods',value:'romantic',label:'romantic spots',tags:['romantic','intimate']},
@@ -30,18 +29,7 @@ const PREFERENCE_SIGNALS:readonly {field:keyof Pick<UserPreferences,
  {field:'outings',value:'night out',label:'βραδινές εξόδους',tags:['nightlife','cocktails']},
  {field:'outings',value:'study session',label:'ήρεμα study spots',tags:['quiet']},
  {field:'outings',value:'casual drinks',label:'χαλαρό ποτό',tags:['cocktails','casual']},
- {field:'atmosphere',value:'warm',label:'ζεστούς χώρους',tags:['cozy','intimate']},
- {field:'atmosphere',value:'chill',label:'χαλαρό περιβάλλον',tags:['quiet','casual']},
- {field:'atmosphere',value:'bright',label:'φωτεινούς χώρους',tags:['daytime','minimal']},
- {field:'atmosphere',value:'outdoor',label:'εξωτερικούς χώρους',tags:['outdoor','garden']},
- {field:'atmosphere',value:'garden',label:'χώρους με κήπο',tags:['garden']},
- {field:'atmosphere',value:'modern',label:'minimal design',tags:['minimal','industrial']},
- {field:'music',value:'indie',label:'indie/alternative αισθητική',tags:['indie','alternative']},
- {field:'music',value:'jazz',label:'jazz ατμόσφαιρα',tags:['jazz']},
- {field:'social',value:'small group',label:'μικρές παρέες',tags:['intimate','cozy']},
- {field:'social',value:'social',label:'κοινωνικά spots',tags:['social','groups']},
- {field:'timeSlots',value:'evening',label:'βραδινή ατμόσφαιρα',tags:['nightlife','low-light']},
- {field:'timeSlots',value:'morning',label:'πρωινές εξόδους',tags:['daytime']},
+
 ];
 const EXTRA_FEATURES:readonly {tag:TasteTag;label:string}[]=[
  {tag:'rooftop',label:'rooftop'},{tag:'sunset',label:'θέα στο ηλιοβασίλεμα'},
@@ -81,7 +69,7 @@ export function explainSwipeRecommendation(
  const tags=place.tasteTags??[];
  const selected=uniqueSignals(PREFERENCE_SIGNALS.filter(s=>
   preferences[s.field]?.includes(s.value)&&s.tags.some(tag=>tags.includes(tag)))
-  .map(s=>({...s,selected:true}))).slice(0,3);
+  ).slice(0,3);
 
  const venueLikes=getVenueDnaWeights(venueVotes);
  const conceptLikes=getTasteWeights(taste);

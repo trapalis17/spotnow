@@ -112,3 +112,14 @@ test('Personalized copy changes with a different user profile for the same venue
  assert.match(b,/ήσυχα μέρη/);
  assert.doesNotMatch(b,/καφέ με την παρέα/);
 });
+
+test('Uneditable legacy default fields are not presented as explicit choices',()=>{
+ const prefs:UserPreferences={
+  moods:[],outings:[],budget:0,music:['indie'],neighborhoods:[],
+  atmosphere:['warm','chill'],social:['small group'],timeSlots:['evening']
+ };
+ const place=places[0];
+ const copy=explainSwipeRecommendation(place,prefs,DEFAULT_AREA);
+ assert.match(copy,/Δεν έχουμε ακόμη αρκετά/);
+ assert.doesNotMatch(copy,/Έχεις επιλέξει|likes σου/);
+});
