@@ -28,7 +28,7 @@ test('negative venue feedback excludes those venues and explains preferred tags'
  assert.ok(!ranked.some(x=>x.place.id===first.place.id));
  const coffee=places.find(x=>x.tasteTags?.includes('coffee'))!;
  const reason=explainSwipeRecommendation(coffee,{...defaultPreferences,outings:['coffee with friends']},DEFAULT_AREA);
- assert.match(reason,/επιλέξει|προτιμήσεις/);
+ assert.match(reason,/έχεις επιλέξει|προτιμήσεις/i);
 });
 test('daily batch chooses the strongest eight ranked recommendations and enforces 24h',()=>{
  const recommended=rankSwipeRecommendations(places,defaultPreferences,DEFAULT_AREA).map(x=>x.place.id);
@@ -56,4 +56,59 @@ test('Top Swipes collection is created once and repeated likes are idempotent',(
  assert.deepEqual(added[0].venueIds,[id,other]);
  assert.deepEqual(mergeTopSwipesCollection([{id:'user-made',name:'TOP SWIPES',venueIds:[]}],id),
   [{id:'user-made',name:'Top Swipes',venueIds:[id]}]);
+});
+
+test('Why this spot combines two explicitly selected preferences rather than generic slogans',()=>{
+ const prefs:UserPreferences={
+  moods:['cozy'],outings:['coffee with friends'],budget:10,
+  music:[],neighborhoods:[],atmosphere:[],social:[],timeSlots:[]
+ };
+ const coffee=places[0]; // Mellow Coffee: cozy + coffee + low-light
+ const copy=explainSwipeRecommendation(coffee,prefs,DEFAULT_AREA);
+ assert.match(copy,/cozy ατμόσφαιρα/);
+ assert.match(copy,/καφέ με την παρέα/);
+ assert.ok(!copy.includes('brunch'));
+ assert.equal(copy,explainSwipeRecommendation(coffee,prefs,DEFAULT_AREA));
+});
+
+test('Reason cites previous likes only when a supported positive signal overlaps',()=>{
+ const prefs:UserPreferences={moods:[],outings:['date night'],budget:5,
+  music:[],neighborhoods:[],atmosphere:[],social:[],timeSlots:[]};
+ const rooftop=places[2]; // romantic + sunset + rooftop + cocktails
+ const liked=explainSwipeRecommendation(rooftop,prefs,DEFAULT_AREA,{},{
+  [places[2].id]:'like'
+ });
+ assert.match(liked,/likes/);
+ const disliked=explainSwipeRecommendation(rooftop,prefs,DEFAULT_AREA,{},{
+  [places[2].id]:'dislike'
+ });
+ assert.doesNotMatch(disliked,/likes/);
+ assert.doesNotMatch(disliked,/έχεις επιλέξει brunch/);
+});
+
+test('Only genuinely selected area/budget are mentioned; no invented cozy or cocktail taste',()=>{
+ const area=places[0].address!.split('·').pop()!.trim();
+ const profile:UserPreferences={moods:[],outings:[],budget:10,
+  music:[],neighborhoods:[area],atmosphere:[],social:[],timeSlots:[]};
+ const copy=explainSwipeRecommendation(places[0],profile,DEFAULT_AREA);
+ assert.match(copy,new RegExp(area));
+ assert.match(copy,/budget/);
+ assert.doesNotMatch(copy,/έχεις επιλέξει cozy/i);
+
+ const noEvidence={...profile,neighborhoods:[],budget:0};
+ const unknown=explainSwipeRecommendation(places[0],noEvidence,DEFAULT_AREA);
+ assert.match(unknown,/Δεν έχουμε ακόμη αρκετά/);
+ assert.doesNotMatch(unknown,/cozy|cocktails/);
+});
+
+test('Personalized copy changes with a different user profile for the same venue',()=>{
+ const coffee=places[0];
+ const cozy:UserPreferences={moods:['cozy'],outings:['coffee with friends'],budget:0,
+  music:[],neighborhoods:[],atmosphere:[],social:[],timeSlots:[]};
+ const quiet={...cozy,moods:['quiet'],outings:[]};
+ const a=explainSwipeRecommendation(coffee,cozy,DEFAULT_AREA);
+ const b=explainSwipeRecommendation(coffee,quiet,DEFAULT_AREA);
+ assert.notEqual(a,b);
+ assert.match(b,/ήσυχα μέρη/);
+ assert.doesNotMatch(b,/καφέ με την παρέα/);
 });

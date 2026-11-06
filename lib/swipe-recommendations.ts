@@ -9,28 +9,126 @@ import type {VisitFeedback} from './storage';
 
 export type RecommendedSwipe={place:GooglePlace;reason:string;score:number};
 
-/** A reason is always grounded in user-provided signals or an actual preference constraint. */
+type PersonalSignal={label:string;tags:readonly TasteTag[];selected:boolean};
+/**
+ * Only claim that a user has chosen a preference when that explicit option is
+ * present in their profile AND it matches an actual venue tag. Never infer
+ * a preference just because the venue has that feature.
+ */
+const PREFERENCE_SIGNALS:readonly {field:keyof Pick<UserPreferences,
+ 'moods'|'outings'|'atmosphere'|'music'|'social'|'timeSlots'>;
+ value:string;label:string;tags:readonly TasteTag[]}[]=[
+ {field:'moods',value:'cozy',label:'cozy ατμόσφαιρα',tags:['cozy']},
+ {field:'moods',value:'romantic',label:'romantic spots',tags:['romantic','intimate']},
+ {field:'moods',value:'quiet',label:'ήσυχα μέρη',tags:['quiet']},
+ {field:'moods',value:'lively',label:'ζωντανά μαγαζιά',tags:['lively']},
+ {field:'moods',value:'creative',label:'δημιουργικά spots',tags:['creative','artsy']},
+ {field:'moods',value:'social',label:'μέρη για παρέα',tags:['social','groups']},
+ {field:'outings',value:'coffee with friends',label:'καφέ με την παρέα',tags:['coffee']},
+ {field:'outings',value:'date night',label:'date nights',tags:['romantic','intimate','low-light']},
+ {field:'outings',value:'brunch',label:'brunch',tags:['brunch']},
+ {field:'outings',value:'night out',label:'βραδινές εξόδους',tags:['nightlife','cocktails']},
+ {field:'outings',value:'study session',label:'ήρεμα study spots',tags:['quiet']},
+ {field:'outings',value:'casual drinks',label:'χαλαρό ποτό',tags:['cocktails','casual']},
+ {field:'atmosphere',value:'warm',label:'ζεστούς χώρους',tags:['cozy','intimate']},
+ {field:'atmosphere',value:'chill',label:'χαλαρό περιβάλλον',tags:['quiet','casual']},
+ {field:'atmosphere',value:'bright',label:'φωτεινούς χώρους',tags:['daytime','minimal']},
+ {field:'atmosphere',value:'outdoor',label:'εξωτερικούς χώρους',tags:['outdoor','garden']},
+ {field:'atmosphere',value:'garden',label:'χώρους με κήπο',tags:['garden']},
+ {field:'atmosphere',value:'modern',label:'minimal design',tags:['minimal','industrial']},
+ {field:'music',value:'indie',label:'indie/alternative αισθητική',tags:['indie','alternative']},
+ {field:'music',value:'jazz',label:'jazz ατμόσφαιρα',tags:['jazz']},
+ {field:'social',value:'small group',label:'μικρές παρέες',tags:['intimate','cozy']},
+ {field:'social',value:'social',label:'κοινωνικά spots',tags:['social','groups']},
+ {field:'timeSlots',value:'evening',label:'βραδινή ατμόσφαιρα',tags:['nightlife','low-light']},
+ {field:'timeSlots',value:'morning',label:'πρωινές εξόδους',tags:['daytime']},
+];
+const EXTRA_FEATURES:readonly {tag:TasteTag;label:string}[]=[
+ {tag:'rooftop',label:'rooftop'},{tag:'sunset',label:'θέα στο ηλιοβασίλεμα'},
+ {tag:'garden',label:'κήπο'},{tag:'outdoor',label:'εξωτερικό χώρο'},
+ {tag:'specialty',label:'specialty coffee'},{tag:'low-light',label:'χαμηλό φωτισμό'},
+ {tag:'live-music',label:'live μουσική'},{tag:'minimal',label:'minimal αισθητική'},
+ {tag:'intimate',label:'πιο intimate ατμόσφαιρα'},
+ {tag:'cocktails',label:'cocktails'},{tag:'brunch',label:'brunch'},
+ {tag:'quiet',label:'ήσυχη ατμόσφαιρα'},{tag:'creative',label:'creative αισθητική'},
+ {tag:'lively',label:'ζωντανή ατμόσφαιρα'},{tag:'coffee',label:'καφέ'},
+ {tag:'romantic',label:'romantic ατμόσφαιρα'}
+];
+const numberFor=(id:string)=>[...id].reduce((n,ch)=>(n*31+ch.charCodeAt(0))>>>0,17);
+const endingFor=(id:string)=>[
+ 'Μήπως βρήκαμε το επόμενο στέκι σου; 👀',
+ 'Αυτό εδώ τσεκάρει αρκετά από τα κουτάκια σου.',
+ 'Ε, αυτό αξίζει μια πιο προσεκτική ματιά.',
+ 'Κάτι μας λέει πως είναι αρκετά του γούστου σου.'
+][numberFor(id)%4];
+const uniqueSignals=(signals:readonly PersonalSignal[])=>{
+ const seen=new Set<string>();
+ return signals.filter(s=>{if(seen.has(s.label))return false;seen.add(s.label);return true;});
+};
+
+/**
+ * An explainable, fun sentence built from actual matching signals.
+ * - Explicit onboarding selections are never confused with inferred likes.
+ * - Learned evidence requires a positive net swipe weight for this spot's tags.
+ * - Area/budget appear only when the demo metadata really meets those settings.
+ * - With insufficient evidence, admit uncertainty rather than inventing affinity.
+ * The same user + venue + state returns the same copy (no random flicker).
+ */
 export function explainSwipeRecommendation(
  place:GooglePlace,preferences:UserPreferences,area:SearchArea,
  taste:TasteFeedback={},venueVotes:TasteFeedback={}
 ):string{
  const tags=place.tasteTags??[];
- const wanted=new Set(tastesFromSignup(preferences));
- const signupMatch=tags.find(tag=>wanted.has(tag));
- if(signupMatch)return 'Επειδή έχεις επιλέξει '+TASTE_LABELS[signupMatch]+' στις προτιμήσεις σου.';
- const learned=getVenueDnaWeights(venueVotes);
- const positive=tags.filter(tag=>learned[tag]>.05)
-  .sort((a,b)=>learned[b]-learned[a])[0];
- if(positive)return 'Μοιάζει με μαγαζιά που σου άρεσαν: '+TASTE_LABELS[positive]+'.';
- const oldTaste=getTasteWeights(taste);
- const oldPositive=tags.filter(tag=>oldTaste[tag]>.05).sort((a,b)=>oldTaste[b]-oldTaste[a])[0];
- if(oldPositive)return 'Ταιριάζει με επιλογές σου στο Vibe DNA: '+TASTE_LABELS[oldPositive]+'.';
- if(preferences.neighborhoods.includes(place.address?.split('·').pop()?.trim()??''))
-  return 'Βρίσκεται σε περιοχή που έχεις επιλέξει.';
- if(preferences.budget>0&&place.demoBudget!==undefined&&
-   (preferences.budget>=60||place.demoBudget<=preferences.budget))
-  return 'Είναι εντός του budget που έχεις ορίσει.';
- return 'Πρόταση με βάση την περιοχή αναζήτησής σου: '+area.label+'.';
+ const selected=uniqueSignals(PREFERENCE_SIGNALS.filter(s=>
+  preferences[s.field]?.includes(s.value)&&s.tags.some(tag=>tags.includes(tag)))
+  .map(s=>({...s,selected:true}))).slice(0,3);
+
+ const venueLikes=getVenueDnaWeights(venueVotes);
+ const conceptLikes=getTasteWeights(taste);
+ const learnedTag=tags
+  .map(tag=>({tag,weight:venueLikes[tag]*1.4+conceptLikes[tag]}))
+  .filter(s=>s.weight>.12)
+  .sort((a,b)=>b.weight-a.weight)[0]?.tag;
+ const learned=learnedTag?TASTE_LABELS[learnedTag]:null;
+
+ const placeArea=place.address?.split('·').pop()?.trim()??'';
+ const areaMatch=Boolean(placeArea&&preferences.neighborhoods.includes(placeArea));
+ const priceMatch=typeof place.demoBudget==='number'&&
+  (preferences.budget<60?place.demoBudget<=preferences.budget:
+   place.demoBudget>=60);
+ const budget=priceMatch?(preferences.budget>=60?'60€+':preferences.budget+'€'):null;
+ const extra=EXTRA_FEATURES.find(f=>tags.includes(f.tag)&&
+  !selected.some(s=>s.tags.includes(f.tag)))?.label;
+ const finish=endingFor(place.id);
+
+ if(selected.length>=2){
+  const [first,second]=selected;
+  const intro='Έχεις επιλέξει '+first.label+' και '+second.label+'. ';
+  // Third evidence is included only if it is distinct and independently true.
+  if(learned&&!selected.some(s=>s.tags.includes(learnedTag!)))
+   return intro+'Στα likes σου βλέπουμε και '+learned+' — '+finish;
+  if(areaMatch)return intro+'Και είναι στο '+placeArea+' που έχεις βάλει στις περιοχές σου. '+finish;
+  if(extra)return intro+'Εδώ έχει και '+extra+'. '+finish;
+  return intro+'Αυτό το spot τα συνδυάζει. '+finish;
+ }
+ if(selected.length===1){
+  const first=selected[0];
+  if(learned&&!first.tags.includes(learnedTag!))
+   return 'Έχεις επιλέξει '+first.label+', ενώ τα likes σου δείχνουν '+learned+'. Αυτό εδώ συνδυάζει και τα δύο. '+finish;
+  if(areaMatch)return 'Έχεις επιλέξει '+first.label+' και το spot είναι στο '+placeArea+' που προτιμάς. '+finish;
+  if(extra)return 'Έχεις επιλέξει '+first.label+'. Εδώ βρίσκεις και '+extra+' — '+finish;
+  if(budget)return 'Έχεις επιλέξει '+first.label+' και αυτό το spot ταιριάζει στο budget σου ('+budget+'). '+finish;
+  return 'Έχεις επιλέξει '+first.label+' και αυτό το spot το έχει. '+finish;
+ }
+ if(learned){
+  if(areaMatch)return 'Τα likes σου δείχνουν '+learned+', και αυτό το spot είναι στο '+placeArea+' που διάλεξες. '+finish;
+  if(extra)return 'Από τα likes σου έχουμε μάθει ότι σου ταιριάζει '+learned+'. Εδώ βρίσκεις και '+extra+'. '+finish;
+  return 'Από τα likes σου έχουμε μάθει ότι σου ταιριάζει '+learned+'. '+finish;
+ }
+ if(areaMatch&&budget)return 'Το '+placeArea+' είναι στις περιοχές σου και το spot ταιριάζει στο budget σου ('+budget+'). Μήπως αξίζει μια ματιά;';
+ if(areaMatch)return 'Το '+placeArea+' είναι στις περιοχές που έχεις επιλέξει. Για το vibe του, θα μας πεις εσύ! 😉';
+ if(budget)return 'Αυτό το spot ταιριάζει στο budget σου ('+budget+'). Για το υπόλοιπο vibe, θέλουμε τη γνώμη σου!';
+ return 'Δεν έχουμε ακόμη αρκετά κοινά στοιχεία με τα γούστα σου για σίγουρη πρόταση. Πες μας με ένα swipe αν σε εκφράζει!';
 }
 
 /**
