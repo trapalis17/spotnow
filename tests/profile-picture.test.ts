@@ -2,10 +2,13 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {VIBE_AVATARS,avatarById,defaultAvatarId,isProfilePicture,photoFromBase64} from '../lib/profile-picture';
 
-test('Vibe includes exactly 12 distinct handcrafted avatar presets',()=>{
- assert.equal(VIBE_AVATARS.length,12);
- assert.equal(new Set(VIBE_AVATARS.map(a=>a.id)).size,12);
- assert.ok(VIBE_AVATARS.every(a=>a.icon&&a.colors.length===2));
+test('Spotnow includes exactly eight distinct 3D avatars: four men and four women',()=>{
+ assert.equal(VIBE_AVATARS.length,8);
+ assert.equal(new Set(VIBE_AVATARS.map(a=>a.id)).size,8);
+ assert.equal(new Set(VIBE_AVATARS.map(a=>a.label)).size,8);
+ assert.deepEqual(VIBE_AVATARS.map(a=>[a.row,a.col]),[
+  [0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3]
+ ]);
 });
 test('Default profile avatar is deterministic and account-specific',()=>{
  assert.equal(defaultAvatarId('DEMO@EXAMPLE.COM'),defaultAvatarId('demo@example.com'));

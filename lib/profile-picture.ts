@@ -1,19 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/** Handcrafted gradient avatar presets for the Vibe frontend preview. */
+// Spotnow People: 8 original Gen Z 3D profile avatars.
+/** Spotnow People: 8 original 3D portraits in a local 4x2 offline spritesheet.
+ * The original eight IDs remain stable for previously saved profile pictures.
+ * Coordinates are zero-based columns (0–3) and rows (0–1).
+ */
 export const VIBE_AVATARS=[
- {id:'orbit',label:'Orbit',icon:'planet-outline',colors:['#4F3EB5','#B48AFA']},
- {id:'bloom',label:'Bloom',icon:'flower-outline',colors:['#EE92C7','#F4C4D9']},
- {id:'nova',label:'Nova',icon:'sparkles-outline',colors:['#5B65E9','#A9A5FC']},
- {id:'mellow',label:'Mellow',icon:'cloud-outline',colors:['#8493CC','#CED3F8']},
- {id:'pixel',label:'Pixel',icon:'game-controller-outline',colors:['#6354CE','#B7A1FF']},
- {id:'muse',label:'Muse',icon:'color-palette-outline',colors:['#D97AA9','#F5AFD9']},
- {id:'sol',label:'Sol',icon:'sunny-outline',colors:['#F3A568','#FAD3A2']},
- {id:'sage',label:'Sage',icon:'leaf-outline',colors:['#63A99D','#B1DBBA']},
- {id:'glow',label:'Glow',icon:'flash-outline',colors:['#9E6ADA','#DEB9FF']},
- {id:'echo',label:'Echo',icon:'headset-outline',colors:['#5765C5','#84C6E9']},
- {id:'dusk',label:'Dusk',icon:'moon-outline',colors:['#423C87','#A68BD8']},
- {id:'lucky',label:'Lucky',icon:'heart-outline',colors:['#D77FA1','#F7BBC0']}
+ {id:'orbit',label:'Milo',col:0,row:0},
+ {id:'bloom',label:'Maya',col:1,row:0},
+ {id:'nova',label:'Alex',col:2,row:0},
+ {id:'mellow',label:'Leo',col:3,row:0},
+ {id:'pixel',label:'Noah',col:0,row:1},
+ {id:'muse',label:'Ruby',col:1,row:1},
+ {id:'sol',label:'Iris',col:2,row:1},
+ {id:'sage',label:'Nia',col:3,row:1}
 ] as const;
 export type VibeAvatarId=(typeof VIBE_AVATARS)[number]['id'];
 export type ProfilePicture={kind:'avatar';id:VibeAvatarId}|{kind:'photo';uri:string};

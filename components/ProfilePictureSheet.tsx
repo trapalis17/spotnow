@@ -34,7 +34,7 @@ export function ProfilePictureSheet({visible,picture,busy,error,onClose,onSelect
       <Ionicons name="arrow-forward" size={19} color={Colors.violet}/>
      </Pressable>
      {error?<Text style={s.error}>{error}</Text>:null}
-     <View style={s.avatarHeader}><Text style={s.avatarHeading}>Or choose a Spotnow avatar</Text><Text style={s.avatarCount}>12 STYLES</Text></View>
+     <View style={s.avatarHeader}><Text style={s.avatarHeading}>Meet Spotnow People</Text><Text style={s.avatarCount}>8 PEOPLE</Text></View>
      <View style={s.grid}>
       {VIBE_AVATARS.map(a=>{
        const selected=picture.kind==='avatar'&&picture.id===a.id;
