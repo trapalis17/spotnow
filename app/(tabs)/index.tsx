@@ -36,7 +36,7 @@ export default function DiscoverScreen(){
    <Text style={s.title}>Βρες το επόμενο<Text style={{color:Colors.violet}}> spot σου.</Text></Text>
    <Text style={s.subtitle}>Μέρη που ταιριάζουν στο δικό σου vibe.</Text>
    <LinearGradient colors={Gradients.secondary} start={{x:0,y:0}} end={{x:1,y:1}} style={s.swipeCard}>
-     <View style={s.swipeTop}><View style={s.swipeIcon}><Ionicons name="heart-outline" size={21} color={Colors.violet}/></View>
+     <View style={s.swipeTop}><View style={s.swipeIcon}><Ionicons name="heart-outline" size={21} color={Colors.limeInk}/></View>
        <Text style={s.swipeEyebrow}>VIBE SWIPE</Text><Text style={s.swipeCounter}>{tasteCount} rated</Text>
      </View>
      <Text style={s.swipeTitle}>Κάθε swipe,<Text style={{color:Colors.violet}}> πιο εσύ.</Text></Text>
@@ -80,9 +80,9 @@ const s=StyleSheet.create({
  input:{flex:1,color:Colors.text,fontSize:14,paddingVertical:13},
  swipeCard:{borderRadius:Radius.lg,padding:19,borderWidth:1,borderColor:Colors.border,marginBottom:28},
  swipeTop:{flexDirection:'row',alignItems:'center',gap:9,marginBottom:14},
- swipeIcon:{backgroundColor:'#fff',width:39,height:39,borderRadius:13,alignItems:'center',justifyContent:'center'},
+ swipeIcon:{backgroundColor:Colors.limeAccent,width:39,height:39,borderRadius:13,alignItems:'center',justifyContent:'center'},
  swipeEyebrow:{fontSize:10,fontWeight:'900',letterSpacing:1,color:Colors.violet,flex:1},
- swipeCounter:{color:Colors.muted,fontSize:11,fontWeight:'700'},
+ swipeCounter:{color:Colors.limeInk,fontSize:11,fontWeight:'800',backgroundColor:Colors.limeTint,paddingHorizontal:10,paddingVertical:7,borderRadius:Radius.pill,overflow:'hidden'},
  swipeTitle:{fontSize:25,lineHeight:31,fontWeight:'900',letterSpacing:-.6,color:Colors.text,maxWidth:'95%'},
  swipeDescription:{fontSize:13,color:Colors.muted,lineHeight:19,marginTop:8},
  swipeBottom:{flexDirection:'row',alignItems:'center',gap:9,marginTop:19},

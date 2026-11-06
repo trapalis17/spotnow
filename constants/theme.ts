@@ -1,4 +1,4 @@
-/** Vibe Design System 4.0 — Digital Lavender with selective gradients.
+/** spotnow Design System — Digital Lavender with selective electric-lime accents.
  * Previous violet/purple aliases remain for compatibility with existing screens.
  * Deep violet is used for readable text; light lavender is reserved for visuals.
  */
@@ -8,7 +8,9 @@ export const Colors={
  violet:'#5B47D6',purple:'#5942C1',lavender:'#8B7CFF',lilac:'#EAE2FC',pink:'#F3D6FF',
  // Compatibility tokens used by legacy screens; all now lavender based.
  clay:'#8B7CFF',oat:'#FAF8FF',sand:'#EAE2FC',sage:'#DDF3B2',
- lime:'#506B35',limeSoft:'#DDF3B2',mint:'#44766A',rose:'#C75D93',orange:'#976B40',
+ // Electric lime appears on tiny positive cues only; use dark ink on lime for contrast.
+ lime:'#506B35',limeSoft:'#C9FF62',limeAccent:'#C9FF62',limeTint:'#F3FFDF',limeInk:'#283318',
+ mint:'#44766A',rose:'#C75D93',orange:'#976B40',
  border:'rgba(91,71,214,0.12)',success:'#2C7C5C',warning:'#936A2D',danger:'#C54575',
 };
 export const Spacing={xs:8,sm:12,md:16,lg:20,xl:24,xxl:32,xxxl:40};

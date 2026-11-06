@@ -128,16 +128,19 @@ export default function SavedScreen(){
    </Pressable>
    {collections.map(c=>{
     const cover=coverFor(c),selected=active===c.id,topSwipes=isTopSwipesCollection(c);
-    return <View key={c.id} style={[s.collectionTile,selected&&s.activeCollection]}>
+    return <View key={c.id} style={[s.collectionTile,selected&&s.activeCollection,topSwipes&&s.topSwipesTile]}>
      {cover?<Image source={{uri:cover}} style={StyleSheet.absoluteFill} resizeMode="cover" accessibilityLabel="Ενδεικτική φωτογραφία συλλογής"/>:<LinearGradient colors={selected?Gradients.primary:Gradients.secondary} style={StyleSheet.absoluteFill}/>}
      {cover?<LinearGradient colors={['rgba(37,27,70,.18)','rgba(37,27,70,.78)']} style={StyleSheet.absoluteFill}/>:null}
      <Pressable style={s.collectionTap} onPress={()=>setActive(c.id)} accessibilityRole="button" accessibilityState={{selected}} accessibilityLabel={'Άνοιγμα '+c.name}>
-      <View style={[s.collectionIcon,(cover||selected)&&s.activeIcon]}><Ionicons name="albums-outline" size={19} color={cover||selected?'#fff':Colors.violet}/></View>
+      <View style={[s.collectionIcon,(cover||selected)&&s.activeIcon,topSwipes&&s.topSwipesIcon]}>
+       <Ionicons name={topSwipes?'heart':'albums-outline'} size={19}
+        color={topSwipes?Colors.limeInk:cover||selected?'#fff':Colors.violet}/>
+      </View>
       <Text numberOfLines={1} style={[s.collectionName,(cover||selected)&&s.activeText]}>{c.name}</Text>
       <Text style={[s.collectionCount,(cover||selected)&&s.activeCount]}>{c.venueIds.filter(id=>ids.includes(id)).length} spots</Text>
      </Pressable>
      <View style={s.collectionActions}>
-      {topSwipes?<Ionicons name="sparkles-outline" size={17} color={cover||selected?'#fff':Colors.violet}/>:
+      {topSwipes?<View style={s.topSwipesMarker}><Ionicons name="sparkles" size={15} color={Colors.limeInk}/></View>:
       <>
        <Pressable accessibilityRole="button" accessibilityLabel={'Μετονομασία '+c.name} onPress={()=>{setEditing(c.id);setRename(c.name);}}>
         <Ionicons name="pencil-outline" size={16} color={cover||selected?'#fff':Colors.muted}/>
@@ -195,6 +198,9 @@ const s=StyleSheet.create({
  sectionNote:{color:Colors.muted,fontSize:11,marginTop:4},
  collectionScroll:{gap:10,paddingBottom:6},
  collectionTile:{width:155,minHeight:151,backgroundColor:Colors.cardSoft,borderRadius:20,overflow:'hidden',padding:13,justifyContent:'space-between',borderWidth:1,borderColor:Colors.border},
+ topSwipesTile:{borderColor:Colors.limeAccent,borderWidth:2},
+ topSwipesIcon:{backgroundColor:Colors.limeAccent},
+ topSwipesMarker:{backgroundColor:Colors.limeAccent,borderRadius:9,width:30,height:28,alignItems:'center',justifyContent:'center'},
  activeCollection:{borderColor:Colors.lavender},
  collectionTap:{flex:1,justifyContent:'flex-start'},
  collectionIcon:{width:38,height:38,borderRadius:12,backgroundColor:'rgba(255,255,255,.68)',alignItems:'center',justifyContent:'center',marginBottom:13},

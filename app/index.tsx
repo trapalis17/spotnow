@@ -15,9 +15,9 @@ export default function WelcomeScreen(){
   <View style={s.brandRow}><Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text><Text style={s.demoLabel}>PREVIEW 2.0</Text></View>
   <View style={s.center}>
    <LinearGradient colors={Gradients.hero} start={{x:0,y:0}} end={{x:1,y:1}} style={s.hero}>
-    <View style={s.orb}/><View style={s.heroSymbol}><Ionicons name="sparkles-outline" size={31} color="#fff"/></View>
+    <View style={s.orb}/><View style={s.heroSymbol}><Ionicons name="sparkles-outline" size={31} color={Colors.limeAccent}/></View>
     <Text style={s.heroEyebrow}>NOT JUST ANOTHER PLACES APP</Text>
-    <Text style={s.heroTitle}>Find places that<Text style={{color:'#F2F7D7'}}> feel like you.</Text></Text>
+    <Text style={s.heroTitle}>Find places that<Text style={{color:Colors.limeAccent}}> feel like you.</Text></Text>
     <Text style={s.heroBody}>Discover cafés, bars & restaurants that match your vibe.</Text>
    </LinearGradient>
    <View style={s.benefits}>

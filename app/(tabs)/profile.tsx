@@ -139,7 +139,7 @@ export default function ProfileScreen(){
     </View>
    </View>
    <View style={s.vibeIdentityCard}>
-    <View style={s.vibeIdentityHead}><Ionicons name="sparkles-outline" size={15} color={Colors.violet}/>
+    <View style={s.vibeIdentityHead}><View style={s.vibeIdentitySparkle}><Ionicons name="sparkles" size={13} color={Colors.limeInk}/></View>
      <Text style={s.vibeIdentityEyebrow}>YOUR VIBE TYPE</Text>
     </View>
     <View style={s.vibeIdentityBody}>
@@ -261,6 +261,7 @@ const s=StyleSheet.create({
  vibeIdentityCard:{marginTop:19,backgroundColor:'rgba(255,255,255,.86)',borderRadius:20,
   borderWidth:1,borderColor:'rgba(91,71,214,.10)',paddingHorizontal:17,paddingVertical:16},
  vibeIdentityHead:{flexDirection:'row',alignItems:'center',gap:7},
+ vibeIdentitySparkle:{height:23,width:23,borderRadius:8,backgroundColor:Colors.limeAccent,alignItems:'center',justifyContent:'center'},
  vibeIdentityEyebrow:{color:Colors.violet,fontSize:10,fontWeight:'900',letterSpacing:1.3},
  vibeIdentityBody:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:12,marginTop:9},
  vibeIdentityCopy:{flex:1},

@@ -121,7 +121,7 @@ const styles=StyleSheet.create({
  arrowCircle:{width:41,height:41,borderRadius:14,backgroundColor:Colors.limeSoft,alignItems:'center',justifyContent:'center'},
  portrait:{width:225,backgroundColor:'#fff',borderRadius:22,overflow:'hidden',borderWidth:1,borderColor:Colors.border,marginRight:12,marginBottom:6},
  portraitTop:{flexDirection:'row',justifyContent:'space-between',padding:12},
- portraitMatch:{backgroundColor:'rgba(255,255,255,.96)',borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:4,height:36},
+ portraitMatch:{backgroundColor:Colors.limeTint,borderRadius:Radius.pill,paddingHorizontal:12,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:4,height:36},
  portraitMatchText:{fontWeight:'900',fontSize:12,color:Colors.violet},
  portraitTags:{marginTop:'auto',paddingHorizontal:11,paddingBottom:11,flexDirection:'row',gap:6},
  photoTag:{backgroundColor:'rgba(38,30,87,.54)',borderRadius:20,paddingHorizontal:8,paddingVertical:6},

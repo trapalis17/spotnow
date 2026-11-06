@@ -66,7 +66,7 @@ export default function ForYouScreen(){
  };
  const render=(item:(typeof picks)[number],variant:'featured'|'portrait'|'row')=><ForYouVenueCard key={item.place.id} match={item} variant={variant} saved={savedIds.includes('google-'+item.place.id)} onPress={()=>openVenue(item.place.id)} onSave={()=>save(item.place.id)}/>;
  return <ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-  <View style={s.top}><Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text><Text style={s.topPill}>✳ JUST FOR YOU</Text></View>
+  <View style={s.top}><Text style={s.brand}>spot<Text style={{color:Colors.violet}}>now✳</Text></Text><View style={s.topPill}><View style={s.topPillDot}/><Text style={s.topPillText}>JUST FOR YOU</Text></View></View>
   <Text style={s.kicker}>CURATED FOR {name.toUpperCase()}</Text>
   <Text style={s.title}>Your kind of<Text style={{color:Colors.violet}}> places.</Text></Text>
   <Text style={s.sub}>Καλύτερες επιλογές, όσο μαθαίνουμε το vibe σου.</Text>
@@ -131,7 +131,7 @@ export default function ForYouScreen(){
   {!loading&&featured?<View>
    <View style={s.section}><Text style={s.sectionTitle}>Your top pick</Text><Text style={s.sectionMeta}>HIGHEST MATCH</Text></View>
    {render(featured,'featured')}
-   <View style={s.why}><Ionicons name="sparkles-outline" size={17} color={Colors.violet}/><Text style={s.whyText}>{featured.tasteReasons[0]}</Text></View>
+   <View style={s.why}><View style={s.whySparkle}><Ionicons name="sparkles" size={15} color={Colors.limeInk}/></View><Text style={s.whyText}>{featured.tasteReasons[0]}</Text></View>
   </View>:null}
   {!loading&&perfect.length>0?<View style={s.block}>
    <View style={s.section}><View style={s.sectionHeading}><Text style={s.sectionTitle}>Perfect for you</Text><Text style={s.sectionHint}>Τα πιο κοντινά στο γούστο σου.</Text></View><Text style={s.sectionMeta}>{perfect.length} PICKS</Text></View>
@@ -166,7 +166,9 @@ const s=StyleSheet.create({
  page:{flex:1,backgroundColor:Colors.background},content:{paddingHorizontal:Spacing.lg,paddingTop:24,paddingBottom:98},
  top:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:26},
  brand:{fontSize:31,fontWeight:'900',letterSpacing:-1.7,color:Colors.text},
- topPill:{color:Colors.violet,fontSize:10,fontWeight:'900',letterSpacing:1,backgroundColor:Colors.cardSoft,paddingHorizontal:13,paddingVertical:10,borderRadius:999},
+ topPill:{flexDirection:'row',alignItems:'center',gap:6,backgroundColor:Colors.cardSoft,paddingHorizontal:13,paddingVertical:10,borderRadius:999},
+ topPillDot:{height:8,width:8,borderRadius:4,backgroundColor:Colors.limeAccent,borderWidth:1,borderColor:'#8BBE25'},
+ topPillText:{color:Colors.violet,fontSize:10,fontWeight:'900',letterSpacing:1},
  kicker:{fontSize:10,fontWeight:'900',letterSpacing:1.4,color:Colors.violet,marginBottom:8},
  title:{fontSize:Type.hero,fontWeight:'900',lineHeight:41,letterSpacing:-1.3,color:Colors.text},
  sub:{fontSize:14,color:Colors.muted,lineHeight:21,marginTop:7,marginBottom:17},
@@ -177,7 +179,7 @@ const s=StyleSheet.create({
  moodEyebrow:{fontSize:10,fontWeight:'900',letterSpacing:1,color:Colors.violet},
  moodAccent:{flexDirection:'row',alignItems:'center',gap:5,paddingHorizontal:9,paddingVertical:7,
   backgroundColor:'rgba(255,255,255,.60)',borderRadius:Radius.pill},
- moodAccentDot:{width:6,height:6,borderRadius:3,backgroundColor:Colors.violet},
+ moodAccentDot:{width:8,height:8,borderRadius:4,backgroundColor:Colors.limeAccent,borderWidth:1,borderColor:'#8BBE25'},
  moodAccentText:{fontSize:9,fontWeight:'900',letterSpacing:.7,color:Colors.violet},
  moodTitle:{fontSize:27,fontWeight:'900',letterSpacing:-1.0,lineHeight:33,color:Colors.text,
   marginTop:14,marginBottom:15,marginLeft:5},
@@ -224,7 +226,9 @@ const s=StyleSheet.create({
  sectionHint:{fontSize:12,lineHeight:17,color:Colors.muted},
  horizontalCards:{paddingBottom:7,paddingRight:Spacing.lg},
  sectionMeta:{fontSize:9,color:Colors.violet,letterSpacing:.8,fontWeight:'900'},
- why:{flexDirection:'row',alignItems:'center',gap:9,padding:14,borderRadius:15,backgroundColor:'#F4EFFF',marginTop:9},
+ why:{flexDirection:'row',alignItems:'center',gap:9,padding:14,borderRadius:15,
+  backgroundColor:'#F4EFFF',borderLeftWidth:3,borderLeftColor:Colors.limeAccent,marginTop:9},
+ whySparkle:{width:28,height:28,borderRadius:10,backgroundColor:Colors.limeAccent,alignItems:'center',justifyContent:'center'},
  whyText:{fontSize:12,lineHeight:18,color:Colors.text,flex:1},
  block:{marginTop:25},hint:{fontSize:13,color:Colors.muted,lineHeight:21},
  loading:{paddingVertical:32,alignItems:'center',gap:10},

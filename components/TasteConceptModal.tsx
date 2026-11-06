@@ -189,7 +189,7 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
         </View>)}
        </View>
        <View style={s.whyBox}>
-        <Ionicons name="sparkles-outline" size={19} color={Colors.violet}/>
+        <View style={s.whySparkle}><Ionicons name="sparkles" size={17} color={Colors.limeInk}/></View>
         <View style={{flex:1}}><Text style={s.whyKicker}>WHY THIS SPOT</Text>
          <Text style={s.whyText}>{current.reason}</Text></View>
        </View>
@@ -208,9 +208,9 @@ export function TasteConceptModal({visible,onClose,initialView='cards'}:{
       </Pressable>
       <Pressable accessibilityRole="button" accessibilityLabel="Μου αρέσει · Αποθήκευση στο Top Swipes"
        onPress={()=>choose('like')} style={s.decision}>
-       <LinearGradient colors={Gradients.vibe} style={[s.decisionCircle,s.likeCircle]}>
-        <Ionicons name="heart" color="#fff" size={27}/>
-       </LinearGradient>
+       <View style={[s.decisionCircle,s.likeCircle]}>
+        <Ionicons name="heart" color={Colors.limeInk} size={27}/>
+       </View>
        <Text style={[s.actionText,s.likeText]}>Save to Top Swipes</Text>
       </Pressable>
      </View>
@@ -281,7 +281,7 @@ const s=StyleSheet.create({
   shadowColor:'#35265D',shadowOpacity:.13,shadowOffset:{width:0,height:10},shadowRadius:22,elevation:5},
  venueImage:{height:348,justifyContent:'space-between',overflow:'hidden',backgroundColor:'#A88677'},
  imageTop:{padding:15,flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start'},
- editionPill:{backgroundColor:'rgba(252,249,255,.95)',borderRadius:Radius.pill,flexDirection:'row',
+ editionPill:{backgroundColor:Colors.limeAccent,borderRadius:Radius.pill,flexDirection:'row',
   alignItems:'center',gap:5,paddingVertical:9,paddingHorizontal:12},
  editionText:{fontSize:10,fontWeight:'900',color:Colors.text,letterSpacing:.45},
  indexPill:{backgroundColor:'rgba(246,241,255,.23)',borderColor:'rgba(255,255,255,.55)',borderWidth:1,
@@ -296,8 +296,9 @@ const s=StyleSheet.create({
  locationText:{color:'#fff',fontSize:13,fontWeight:'700'},
  photoCredit:{marginTop:18,color:'rgba(255,255,255,.84)',fontSize:10,fontWeight:'700'},
  cardBody:{paddingHorizontal:16,paddingTop:13,paddingBottom:16},
- whyBox:{marginTop:14,padding:13,borderRadius:16,backgroundColor:'#F3EEFF',
+ whyBox:{marginTop:14,padding:13,borderRadius:16,backgroundColor:'#F3EEFF',borderLeftWidth:3,borderLeftColor:Colors.limeAccent,
   flexDirection:'row',alignItems:'flex-start',gap:10},
+ whySparkle:{width:30,height:30,borderRadius:10,backgroundColor:Colors.limeAccent,alignItems:'center',justifyContent:'center'},
  whyKicker:{fontSize:10,fontWeight:'900',letterSpacing:.8,color:Colors.violet,marginBottom:4},
  whyText:{fontSize:12,fontWeight:'700',color:Colors.text,lineHeight:18},
  errorText:{fontSize:12,color:Colors.danger,marginTop:13,lineHeight:18},
@@ -314,7 +315,8 @@ const s=StyleSheet.create({
  passCircle:{backgroundColor:'#F9F6FF'},
  skipCircle:{backgroundColor:'#F4F2FA'},
  likeCircle:{width:68,height:68,borderRadius:34,borderWidth:0,marginTop:-5,
-  shadowColor:Colors.violet,shadowOpacity:.18,shadowRadius:9,shadowOffset:{width:0,height:5},elevation:3},
+  backgroundColor:Colors.limeAccent,shadowColor:Colors.lime,shadowOpacity:.17,shadowRadius:9,
+  shadowOffset:{width:0,height:5},elevation:3},
  actionText:{fontSize:11,fontWeight:'800',color:Colors.muted},
  likeText:{color:Colors.violet},
  hint:{fontSize:11,color:Colors.muted,textAlign:'center',marginTop:19},
