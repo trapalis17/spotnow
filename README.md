@@ -39,8 +39,6 @@ The feature branch includes a GitHub Actions workflow running these checks on pu
 
 No backend, database, authentication provider or third-party venue API is connected to **this** repository. Demo account, swipes, collections, feedback, and preferences use AsyncStorage on the device. Location is requested only after user action; selected neighborhoods can be entered manually. Network images, where used, are illustrations rather than real venue photos.
 
-The unrelated `vibe-app` and GameNow repositories are not part of this prototype.
-
 ## Production work remaining
 
 - Proper user authentication and server-side persistence
